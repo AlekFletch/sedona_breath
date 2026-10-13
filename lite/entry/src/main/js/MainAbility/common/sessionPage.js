@@ -26,6 +26,8 @@ import { SessionFiles } from './records.js';
 import { pageForStage } from './stages.js';
 import { Strings } from './strings.js';
 import { timers } from './system.js';
+import { textHeight } from './textSize.js';
+import { focusList, isBackSwipe, refocusList, useBackground } from './ui.js';
 
 export var MODAL_NONE = 0;
 var MODAL_PAUSED = 1;
@@ -93,10 +95,13 @@ export function sessionPage(page) {
     freeIn: '',
     freeEx: '',
     notNow: '',
+    bg: '',
     s: {},
     modal: 0,
-    modalTitle: '',
-    modalBody: '',
+    dialogTitle: '',
+    dialogH: 42,
+    dialogR: 54,
+    dialogBody: '',
     remainingText: ''
   };
   var k;
@@ -108,6 +113,7 @@ export function sessionPage(page) {
     data: data,
 
     onInit() {
+      useBackground(this);
       var strings = new Strings(page.keys, (path) => this.$t(path));
       strings.lang = this.lang;
       var files = new SessionFiles(new JsonFiles(file));
@@ -163,6 +169,7 @@ export function sessionPage(page) {
         keepScreenOn(true);
       }
       timer = setInterval(() => this.tick(), TICK_MS);
+      refocusList(this);
     },
 
     /* Named update/paint, not render: the lite loader puts the compiled template into `render`. */
@@ -174,7 +181,9 @@ export function sessionPage(page) {
         this.handoff(pageForStage(v.stage), v.notNowReturn);
         return;
       }
-      page.paint.call(this, v);
+      if (this.modal === MODAL_NONE) {
+        page.paint.call(this, v);
+      }
       this.remainingText = current.strings.fmt('remaining', formatMmSs(current.c.remainingMs()));
     },
 
@@ -249,20 +258,33 @@ export function sessionPage(page) {
       }
     },
 
+    /* Pause / end / interruption dialog (on pages/session it covers the breathing screen). */
     showModal(kind) {
       var strings = current.strings;
-      this.modal = kind;
-      this.modalBody = '';
+      var title;
+      var body = '';
       if (kind === MODAL_PAUSED) {
-        this.modalTitle = strings.t('paused_title');
+        title = strings.t('paused_title');
       } else if (kind === MODAL_END) {
-        this.modalTitle = strings.t('end_title');
+        title = strings.t('end_title');
       } else if (kind === MODAL_LOW_BATTERY) {
-        this.modalTitle = strings.t('low_battery');
+        title = strings.t('low_battery');
       } else {
-        this.modalTitle = strings.t('interrupted_title');
-        this.modalBody = strings.t('interrupted_body');
+        title = strings.t('interrupted_title');
+        body = strings.t('interrupted_body');
       }
+      this.dialogH = textHeight(title, true);
+      this.dialogR = this.dialogH + 12;
+      this.dialogTitle = title;
+      this.dialogBody = body;
+      if (this.modal !== MODAL_NONE) {
+        this.modal = kind;
+        return;
+      }
+      // The breathing / question screen goes away: release the crown first (see ui.focusList).
+      focusList(this, false);
+      this.modal = kind;
+      refocusList(this);
     },
 
     interrupt(kind) {
@@ -282,6 +304,7 @@ export function sessionPage(page) {
     go(target, params) {
       leaving = true;
       this.stopTimer();
+      focusList(this, false);
       var lang = current.strings !== null ? current.strings.lang : 'ru';
       if (current.c !== null) {
         current.c.setObserver(undefined);
@@ -291,9 +314,6 @@ export function sessionPage(page) {
       current.files = null;
       this.modal = 0;
       this.screen = '';
-      if (page.release) {
-        page.release.call(this);
-      }
       var options = { uri: 'pages/' + target + '/' + target, params: params || {} };
       options.params.lang = lang;
       router.replace(options);
@@ -315,12 +335,20 @@ export function sessionPage(page) {
       this.showModal(MODAL_PAUSED);
     },
     resume() {
-      if (current.c === null) {
+      var c = current.c;
+      if (c === null) {
         return;
       }
+      // The dialog list goes away on pages/session: release the crown first (see ui.focusList).
+      focusList(this, false);
       this.modal = MODAL_NONE;
-      current.c.resume();
+      if (c.isPaused()) {
+        c.resume();
+      } else {
+        page.paint.call(this, c.view);
+      }
       keepScreenOn(true);
+      refocusList(this);
     },
     askEnd() {
       if (current.c === null) {
@@ -357,9 +385,9 @@ export function sessionPage(page) {
       });
     },
 
-    /* Swipe right never silently drops a practice: it opens the end dialog. */
+    /* Swipe back never silently drops a practice: it opens the end dialog. */
     onSwipe(e) {
-      if (e.direction !== 'right') {
+      if (!isBackSwipe(e)) {
         return;
       }
       if (this.modal === MODAL_NONE) {

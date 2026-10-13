@@ -1,8 +1,8 @@
-import router from '@system.router';
 import { formatMmSs } from '../../core/Timing.js';
 import { Store } from '../../common/store.js';
 import { loadHistory } from '../../common/history.js';
 import { storeSystem } from '../../common/system.js';
+import { focusList, go, isBackSwipe, useBackground } from '../../common/ui.js';
 import templateKeys from '../../common/keys/history.js';
 
 var LIMIT = 10;
@@ -21,10 +21,12 @@ function dateText(ms) {
 /* Screen 9: date, duration, mode, status Completed / Interrupted, before / after. */
 export default {
   data: {
+    bg: '',
     s: {},
     items: []
   },
   onInit() {
+    useBackground(this);
     store = new Store(storeSystem(), templateKeys, (path) => this.$t(path));
     this.s = store.strings();
     store.loadSettings(() => {
@@ -41,23 +43,25 @@ export default {
           var before = r.emotionBefore ? store.label('emotion_', r.emotionBefore, 'other') : store.t('dash');
           var after = r.ratingAfter > 0 ? store.fmt('fmt_rating', r.ratingAfter) : store.t('dash');
           items.push({
-            id: r.id,
             head: dateText(r.startedAt) + '  ' + formatMmSs(r.durationSec * 1000),
             mode: store.label('mode_', r.mode, 'full'),
             status: status,
-            interrupted: interrupted,
-            beforeAfter: store.fmt('history_before', before) + '  ' + store.fmt('history_after', after)
+            color: interrupted ? '#F2C27E' : '#8FE0B8',
+            ba: store.fmt('history_before', before) + '  ' + store.fmt('history_after', after)
           });
         }
         this.items = items;
       });
     });
   },
+  onShow() {
+    focusList(this, true);
+  },
   back() {
-    router.replace({ uri: 'pages/index/index' });
+    go(this, 'index');
   },
   onSwipe(e) {
-    if (e.direction === 'right') {
+    if (isBackSwipe(e)) {
       this.back();
     }
   }

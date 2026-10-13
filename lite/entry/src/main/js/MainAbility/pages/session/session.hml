@@ -1,47 +1,41 @@
 <!--
-  Screens 3 and 5: intro, breathing, completion breathing, plus the pause / end / interruption
-  dialogs. The questions are on pages/prompt.
+  Screens 3 and 5: intro, breathing, completion breathing, and the pause / end / interruption
+  dialog. The questions are on pages/prompt.
 -->
-<div class="page" onswipe="onSwipe">
-  <!-- Dialogs -->
-  <list class="scroll" if="{{ modal > 0 }}">
-    <list-item class="row-tall">
-      <text class="dialog-title">{{ modalTitle }}</text>
-    </list-item>
-    <list-item class="info" if="{{ modalBody !== '' }}">
-      <text class="small">{{ modalBody }}</text>
-    </list-item>
-    <list-item class="row">
-      <div class="btn-primary" onclick="resume"><text class="btn-text-primary">{{ s.btn_resume }}</text></div>
-    </list-item>
-    <list-item class="row" if="{{ modal !== 2 }}">
-      <div class="btn" onclick="askEnd"><text class="btn-text">{{ s.btn_finish }}</text></div>
-    </list-item>
-    <list-item class="row" if="{{ modal === 2 }}">
-      <div class="btn" onclick="endNow"><text class="btn-text-danger">{{ s.btn_end_now }}</text></div>
-    </list-item>
-    <list-item class="row" if="{{ modal === 2 }}">
-      <div class="btn" onclick="endAndSave"><text class="btn-text">{{ s.btn_end_save }}</text></div>
-    </list-item>
-    <list-item class="row"></list-item>
-  </list>
-
-  <!-- Intro -->
-  <div class="page" if="{{ modal === 0 && screen === 'intro' }}" onclick="finishIntro">
-    <text class="intro">{{ introText }}</text>
+<stack class="root" onswipe="onSwipe">
+  <image class="bg" src="{{ bg }}"></image>
+  <div class="frame" if="{{ modal > 0 }}">
+    <list class="list" ref="list">
+      <list-item class="li-text" style="height: {{ dialogR }}px;">
+        <text class="big" style="height: {{ dialogH }}px;">{{ dialogTitle }}</text>
+      </list-item>
+      <list-item class="li-line" if="{{ dialogBody !== '' }}"><text class="small">{{ dialogBody }}</text></list-item>
+      <list-item class="li">
+        <div class="btn-primary" onclick="resume"><text class="btn-text-primary">{{ s.btn_resume }}</text></div>
+      </list-item>
+      <list-item class="li" if="{{ modal !== 2 }}">
+        <div class="btn" onclick="askEnd"><text class="btn-text">{{ s.btn_finish }}</text></div>
+      </list-item>
+      <list-item class="li" if="{{ modal === 2 }}">
+        <div class="btn" onclick="endNow"><text class="btn-text-danger">{{ s.btn_end_now }}</text></div>
+      </list-item>
+      <list-item class="li" if="{{ modal === 2 }}">
+        <div class="btn" onclick="endAndSave"><text class="btn-text">{{ s.btn_end_save }}</text></div>
+      </list-item>
+      <list-item class="li-gap"></list-item>
+    </list>
+  </div>
+  <div class="frame" if="{{ modal === 0 && screen === 'intro' }}" onclick="finishIntro">
+    <text class="big" style="height: {{ introH }}px;">{{ introText }}</text>
     <text class="small">{{ s.intro_tap }}</text>
   </div>
-
-  <!-- Breathing / completion breathing: animation, phase, remaining time, one button -->
-  <div class="page" if="{{ modal === 0 && screen === 'breath' }}">
-    <text class="caption" show="{{ caption !== '' }}">{{ caption }}</text>
+  <div class="frame" if="{{ modal === 0 && screen === 'breath' }}">
+    <text class="caption">{{ caption }}</text>
     <div class="circle-box">
       <div class="circle" style="width: {{ d }}px; height: {{ d }}px; border-radius: {{ r }}px;"></div>
     </div>
-    <text class="phase-inhale" if="{{ isInhale }}">{{ phaseText }}</text>
-    <text class="phase" else>{{ phaseText }}</text>
+    <text class="phase" style="color: {{ phaseColor }};">{{ phaseText }}</text>
     <text class="small">{{ remainingText }}</text>
     <div class="btn-pause" onclick="pause"><text class="btn-text">{{ s.btn_pause }}</text></div>
   </div>
-
-</div>
+</stack>

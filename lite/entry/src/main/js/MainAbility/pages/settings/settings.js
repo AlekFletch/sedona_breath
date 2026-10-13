@@ -1,10 +1,10 @@
-import router from '@system.router';
 import prompt from '@system.prompt';
 import { ALL_PATTERNS } from '../../core/BreathPattern.js';
 import { DURATIONS_MIN } from '../../core/SessionTypes.js';
 import { LANGUAGES, Store } from '../../common/store.js';
 import { deleteHistory } from '../../common/history.js';
 import { storeSystem } from '../../common/system.js';
+import { focusList, go, isBackSwipe, refocusList, useBackground } from '../../common/ui.js';
 import templateKeys from '../../common/keys/settings.js';
 
 var store = null;
@@ -16,6 +16,7 @@ function next(list, value) {
 /* Screen 10: language, default pattern / duration / mode, vibration, free rhythm, terms, delete history. */
 export default {
   data: {
+    bg: '',
     s: {},
     confirmDelete: false,
     languageText: '',
@@ -27,9 +28,13 @@ export default {
     exhaleText: ''
   },
   onInit() {
+    useBackground(this);
     store = new Store(storeSystem(), templateKeys, (path) => this.$t(path));
     this.s = store.strings();
     store.loadSettings(() => this.paint());
+  },
+  onShow() {
+    focusList(this, true);
   },
   paint() {
     var st = store.settings;
@@ -42,9 +47,9 @@ export default {
     this.inhaleText = store.fmt('fmt_seconds', st.freeInhaleSec);
     this.exhaleText = store.fmt('fmt_seconds', st.freeExhaleSec);
   },
+  /* saveSettings() normalizes (free rhythm: 3-8 s / 4-12 s, at most 6 breaths per minute) and applies
+     the language at once: the lite build uses its own dictionary. */
   commit() {
-    // saveSettings() normalizes (free rhythm: 3-8 s / 4-12 s, at most 6 breaths per minute)
-    // and applies the language at once: the lite build uses its own dictionary.
     store.saveSettings();
     this.paint();
   },
@@ -69,8 +74,8 @@ export default {
     this.commit();
   },
   changeFree(inhaleDelta, exhaleDelta) {
-    store.settings.freeInhaleSec = store.settings.freeInhaleSec + inhaleDelta;
-    store.settings.freeExhaleSec = store.settings.freeExhaleSec + exhaleDelta;
+    store.settings.freeInhaleSec += inhaleDelta;
+    store.settings.freeExhaleSec += exhaleDelta;
     this.commit();
   },
   inhaleMinus() {
@@ -86,29 +91,35 @@ export default {
     this.changeFree(0, 1);
   },
   openTerms() {
-    router.replace({ uri: 'pages/onboarding/onboarding', params: { readOnly: true } });
+    go(this, 'onboarding', { readOnly: true });
+  },
+  /* The two lists swap: release the crown before one goes away (see ui.focusList). */
+  setConfirm(on) {
+    focusList(this, false);
+    this.confirmDelete = on;
+    refocusList(this);
   },
   askDelete() {
-    this.confirmDelete = true;
+    this.setConfirm(true);
   },
   cancelDelete() {
-    this.confirmDelete = false;
+    this.setConfirm(false);
   },
   deleteAll() {
-    this.confirmDelete = false;
+    this.setConfirm(false);
     deleteHistory(store, (ok) => {
       prompt.showToast({ message: store.t(ok ? 'deleted_toast' : 'save_failed'), duration: 2000 });
     });
   },
   back() {
-    router.replace({ uri: 'pages/index/index' });
+    go(this, 'index');
   },
   onSwipe(e) {
-    if (e.direction !== 'right') {
+    if (!isBackSwipe(e)) {
       return;
     }
     if (this.confirmDelete) {
-      this.confirmDelete = false;
+      this.cancelDelete();
     } else {
       this.back();
     }

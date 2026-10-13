@@ -1,103 +1,209 @@
-/* Shared styles. Lite CSS: px units only, no font-weight, no flex-grow. */
-.page {
+/*
+ * Shared styles: emerald background image, gold accents. Lite CSS: px only, no font-weight.
+ * Font sizes 24 / 30 / 38 px and fixed px widths: a % width inside a list item that starts below
+ * the screen came out as 0 on Watch Fit 4 Pro (its text was not drawn).
+ */
+.root {
+  width: 100%;
+  height: 100%;
+  background-color: #04261A;
+}
+.bg {
+  width: 100%;
+  height: 100%;
+}
+.frame {
   width: 100%;
   height: 100%;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #000000;
 }
-.scroll {
-  width: 100%;
+/* 360 px wide: the free strips at the edges keep the swipe-back gesture reaching the page. */
+.list {
+  width: 360px;
   height: 100%;
+  background-color: transparent;
 }
-.row {
-  width: 100%;
-  height: 70px;
+.li {
+  width: 360px;
+  height: 76px;
   justify-content: center;
   align-items: center;
+  background-color: transparent;
+}
+.li-title {
+  width: 360px;
+  height: 64px;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+}
+.li-card {
+  width: 360px;
+  height: 96px;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+}
+.li-line {
+  width: 360px;
+  height: 46px;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+}
+.li-gap {
+  width: 360px;
+  height: 60px;
+  background-color: transparent;
+}
+.title {
+  width: 340px;
+  height: 50px;
+  font-size: 38px;
+  text-align: center;
+  color: #E8D9A0;
 }
 .btn {
-  width: 86%;
+  width: 330px;
   height: 62px;
   border-radius: 31px;
-  background-color: #16264E;
+  border-width: 2px;
+  border-color: #3E8C66;
+  background-color: #0B3826;
   justify-content: center;
   align-items: center;
 }
 .btn-primary {
-  width: 86%;
+  width: 330px;
   height: 62px;
   border-radius: 31px;
-  background-color: #9BF24A;
+  background-color: #D6C27E;
   justify-content: center;
   align-items: center;
 }
 .btn-text {
-  width: 100%;
-  height: 40px;
+  width: 300px;
+  height: 36px;
   font-size: 30px;
   text-align: center;
-  color: #FFFFFF;
+  color: #F2EEDD;
   text-overflow: ellipsis;
 }
 .btn-text-primary {
-  width: 100%;
-  height: 40px;
+  width: 300px;
+  height: 36px;
   font-size: 30px;
   text-align: center;
-  color: #04150A;
+  color: #0F2E1F;
   text-overflow: ellipsis;
 }
 .btn-text-danger {
-  width: 100%;
-  height: 40px;
+  width: 300px;
+  height: 36px;
   font-size: 30px;
   text-align: center;
-  color: #FF7A7A;
+  color: #F2A48C;
   text-overflow: ellipsis;
 }
-.title {
-  width: 90%;
-  height: 50px;
-  font-size: 38px;
-  text-align: center;
-  color: #FFFFFF;
-}
-.label {
-  width: 86%;
-  height: 32px;
-  font-size: 24px;
-  text-align: left;
-  color: #AFBBD6;
-}
-.value {
-  width: 86%;
-  height: 40px;
-  font-size: 30px;
-  text-align: left;
-  color: #FFFFFF;
-}
-.small {
-  width: 90%;
-  height: 34px;
-  font-size: 24px;
-  text-align: center;
-  color: #AFBBD6;
-}
-.body {
-  width: 88%;
-  height: 160px;
-  font-size: 30px;
-  text-align: center;
-  color: #FFFFFF;
-}
 .card {
-  width: 90%;
-  height: 84px;
-  border-radius: 20px;
-  background-color: #0E1A3A;
+  width: 330px;
+  height: 86px;
+  border-radius: 22px;
+  border-width: 2px;
+  border-color: #2C6E50;
+  background-color: #0B3826;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+.label {
+  width: 296px;
+  height: 34px;
+  font-size: 24px;
+  text-align: left;
+  color: #A9C9B6;
+  text-overflow: ellipsis;
+}
+.value {
+  width: 296px;
+  height: 36px;
+  font-size: 30px;
+  text-align: left;
+  color: #F2EEDD;
+  text-overflow: ellipsis;
+}
+.stepper {
+  width: 296px;
+  height: 40px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.step {
+  width: 60px;
+  height: 40px;
+  border-radius: 20px;
+  background-color: #1C5A40;
+  justify-content: center;
+  align-items: center;
+}
+.step-text {
+  width: 60px;
+  height: 36px;
+  font-size: 30px;
+  text-align: center;
+  color: #F2EEDD;
+}
+.step-value {
+  width: 120px;
+  height: 36px;
+  font-size: 30px;
+  text-align: center;
+  color: #E8D9A0;
+}
+.body {
+  width: 340px;
+  height: 32px;
+  font-size: 24px;
+  text-align: center;
+  color: #F2EEDD;
+}
+.big {
+  width: 340px;
+  height: 40px;
+  font-size: 30px;
+  text-align: center;
+  color: #F2EEDD;
+}
+.small {
+  width: 340px;
+  height: 36px;
+  font-size: 24px;
+  text-align: center;
+  color: #A9C9B6;
+  text-overflow: ellipsis;
+}
+.warn {
+  width: 340px;
+  height: 36px;
+  font-size: 24px;
+  text-align: center;
+  color: #F2C27E;
+  text-overflow: ellipsis;
+}
+.accent {
+  width: 340px;
+  height: 36px;
+  font-size: 24px;
+  text-align: center;
+  color: #8FE0B8;
+  text-overflow: ellipsis;
+}
+.li-text {
+  width: 360px;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
 }

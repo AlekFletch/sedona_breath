@@ -1,21 +1,20 @@
 <!-- Screen 8: Summary -->
-<div class="page">
-  <list class="scroll">
-    <list-item class="row">
-      <text class="title">{{ s.summary_title }}</text>
-    </list-item>
-    <list-item class="line" for="{{ lines }}">
-      <div class="line-box">
-        <text class="line-label">{{ $item.label }}</text>
-        <text class="line-value">{{ $item.value }}</text>
-      </div>
-    </list-item>
-    <list-item class="row">
-      <div class="btn-primary" onclick="save"><text class="btn-text-primary">{{ s.btn_save }}</text></div>
-    </list-item>
-    <list-item class="info">
-      <text class="small">{{ status }}</text>
-    </list-item>
-    <list-item class="row"></list-item>
-  </list>
-</div>
+<stack class="root" onswipe="onSwipe">
+  <image class="bg" src="{{ bg }}"></image>
+  <div class="frame">
+    <list class="list" ref="list">
+      <list-item class="li-title"><text class="title">{{ s.summary_title }}</text></list-item>
+      <list-item class="li-card" for="{{ lines }}">
+        <div class="card">
+          <text class="label">{{ $item.label }}</text>
+          <text class="value">{{ $item.value }}</text>
+        </div>
+      </list-item>
+      <list-item class="li">
+        <div class="btn-primary" onclick="save"><text class="btn-text-primary">{{ s.btn_save }}</text></div>
+      </list-item>
+      <list-item class="li-line" if="{{ status !== '' }}"><text class="warn">{{ status }}</text></list-item>
+      <list-item class="li-gap"></list-item>
+    </list>
+  </div>
+</stack>

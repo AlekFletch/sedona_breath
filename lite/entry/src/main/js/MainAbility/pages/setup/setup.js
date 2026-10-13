@@ -1,15 +1,20 @@
-import router from '@system.router';
 import { ALL_PATTERNS } from '../../core/BreathPattern.js';
 import { DURATIONS_MIN } from '../../core/SessionTypes.js';
 import { Store } from '../../common/store.js';
 import { storeSystem } from '../../common/system.js';
+import { focusList, go, isBackSwipe, useBackground } from '../../common/ui.js';
 import templateKeys from '../../common/keys/setup.js';
 
 var store = null;
 
+function next(list, value) {
+  return list[(list.indexOf(value) + 1) % list.length];
+}
+
 /* Screen 2: duration, mode, breathing pattern, vibration. */
 export default {
   data: {
+    bg: '',
     s: {},
     duration: 3,
     mode: 'full',
@@ -21,6 +26,7 @@ export default {
     vibrationText: ''
   },
   onInit() {
+    useBackground(this);
     store = new Store(storeSystem(), templateKeys, (path) => this.$t(path));
     this.s = store.strings();
     store.loadSettings((st) => {
@@ -32,6 +38,9 @@ export default {
       this.paint();
     });
   },
+  onShow() {
+    focusList(this, true);
+  },
   paint() {
     this.durationText = store.fmt('fmt_minutes', this.duration);
     this.modeText = store.label('mode_', this.mode, 'full');
@@ -39,7 +48,7 @@ export default {
     this.vibrationText = store.t(this.vibration ? 'on' : 'off');
   },
   nextDuration() {
-    this.duration = DURATIONS_MIN[(DURATIONS_MIN.indexOf(this.duration) + 1) % DURATIONS_MIN.length];
+    this.duration = next(DURATIONS_MIN, this.duration);
     this.paint();
   },
   toggleMode() {
@@ -47,7 +56,7 @@ export default {
     this.paint();
   },
   nextPattern() {
-    this.pattern = ALL_PATTERNS[(ALL_PATTERNS.indexOf(this.pattern) + 1) % ALL_PATTERNS.length];
+    this.pattern = next(ALL_PATTERNS, this.pattern);
     this.paint();
   },
   toggleVibration() {
@@ -55,16 +64,13 @@ export default {
     this.paint();
   },
   start() {
-    router.replace({
-      uri: 'pages/session/session',
-      params: store.sessionParams(this.duration, this.mode, this.pattern, this.vibration)
-    });
+    go(this, 'session', store.sessionParams(this.duration, this.mode, this.pattern, this.vibration));
   },
   back() {
-    router.replace({ uri: 'pages/index/index' });
+    go(this, 'index');
   },
   onSwipe(e) {
-    if (e.direction === 'right') {
+    if (isBackSwipe(e)) {
       this.back();
     }
   }

@@ -1,8 +1,1 @@
 @import '../../common/style.css';
-
-.row-card {
-  width: 100%;
-  height: 94px;
-  justify-content: center;
-  align-items: center;
-}

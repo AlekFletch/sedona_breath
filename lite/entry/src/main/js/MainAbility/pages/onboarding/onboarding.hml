@@ -1,32 +1,19 @@
-<!-- Screen 11: what the practice is, disclaimer, consent -->
-<div class="page" onswipe="onSwipe">
-  <list class="scroll">
-    <list-item class="row">
-      <text class="title">{{ s.app_name }}</text>
-    </list-item>
-    <list-item class="text-m">
-      <text class="txt">{{ s.onb_1 }}</text>
-    </list-item>
-    <list-item class="text-m">
-      <text class="txt">{{ s.onb_2 }}</text>
-    </list-item>
-    <list-item class="row">
-      <text class="warn">{{ s.onb_disclaimer_title }}</text>
-    </list-item>
-    <list-item class="text-l">
-      <text class="txt-l">{{ s.onb_disclaimer }}</text>
-    </list-item>
-    <list-item class="text-l">
-      <text class="txt-l-dim">{{ s.onb_safety }}</text>
-    </list-item>
-    <list-item class="text-m" if="{{ !readOnly }}">
-      <text class="txt-dim">{{ s.onb_consent }}</text>
-    </list-item>
-    <list-item class="row">
-      <div class="btn-primary" onclick="accept">
-        <text class="btn-text-primary">{{ buttonText }}</text>
-      </div>
-    </list-item>
-    <list-item class="row"></list-item>
-  </list>
-</div>
+<!-- Screen 11 in steps: what the practice is, disclaimer, safety, consent -->
+<stack class="root" onswipe="onSwipe">
+  <image class="bg" src="{{ bg }}"></image>
+  <div class="frame">
+    <list class="list" ref="list">
+      <list-item class="li-title" if="{{ head !== '' }}"><text class="title">{{ head }}</text></list-item>
+      <list-item class="li-text" style="height: {{ r1 }}px;" if="{{ t1 !== '' }}">
+        <text class="body" style="height: {{ h1 }}px;">{{ t1 }}</text>
+      </list-item>
+      <list-item class="li-text" style="height: {{ r2 }}px;" if="{{ t2 !== '' }}">
+        <text class="body" style="height: {{ h2 }}px;">{{ t2 }}</text>
+      </list-item>
+      <list-item class="li">
+        <div class="btn-primary" onclick="next"><text class="btn-text-primary">{{ buttonText }}</text></div>
+      </list-item>
+      <list-item class="li-gap"></list-item>
+    </list>
+  </div>
+</stack>

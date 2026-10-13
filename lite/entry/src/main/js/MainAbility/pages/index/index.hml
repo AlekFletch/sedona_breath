@@ -1,40 +1,25 @@
 <!-- Screen 1: Home -->
-<div class="page">
-  <list class="scroll">
-    <list-item class="row">
-      <text class="title">{{ s.app_name }}</text>
-    </list-item>
-
-    <list-item class="row" if="{{ unfinished }}">
-      <text class="warn">{{ s.home_unfinished }}</text>
-    </list-item>
-    <list-item class="row" if="{{ unfinished }}">
-      <div class="btn-primary" onclick="resume"><text class="btn-text-primary">{{ s.btn_resume }}</text></div>
-    </list-item>
-    <list-item class="row" if="{{ unfinished }}">
-      <div class="btn" onclick="endUnfinished"><text class="btn-text">{{ s.btn_finish }}</text></div>
-    </list-item>
-
-    <list-item class="row" if="{{ !unfinished }}">
-      <div class="btn-primary" onclick="openSetup"><text class="btn-text-primary">{{ s.btn_start_practice }}</text></div>
-    </list-item>
-    <list-item class="row" if="{{ !unfinished }}">
-      <div class="btn" onclick="quickStart"><text class="btn-text">{{ s.home_quick }}</text></div>
-    </list-item>
-
-    <list-item class="info">
-      <text class="small">{{ lastText }}</text>
-    </list-item>
-    <list-item class="info">
-      <text class="accent">{{ todayText }}</text>
-    </list-item>
-
-    <list-item class="row">
-      <div class="btn" onclick="openHistory"><text class="btn-text">{{ s.btn_history }}</text></div>
-    </list-item>
-    <list-item class="row">
-      <div class="btn" onclick="openSettings"><text class="btn-text">{{ s.btn_settings }}</text></div>
-    </list-item>
-    <list-item class="row"></list-item>
-  </list>
-</div>
+<stack class="root" onswipe="onSwipe">
+  <image class="bg" src="{{ bg }}"></image>
+  <div class="frame">
+    <list class="list" ref="list">
+      <list-item class="li-title"><text class="title">{{ s.app_name }}</text></list-item>
+      <list-item class="li-line" if="{{ unfinished }}"><text class="warn">{{ s.home_unfinished }}</text></list-item>
+      <list-item class="li">
+        <div class="btn-primary" onclick="tapMain"><text class="btn-text-primary">{{ mainText }}</text></div>
+      </list-item>
+      <list-item class="li">
+        <div class="btn" onclick="tapSecond"><text class="btn-text">{{ secondText }}</text></div>
+      </list-item>
+      <list-item class="li-line" if="{{ lastText !== '' }}"><text class="small">{{ lastText }}</text></list-item>
+      <list-item class="li-line" if="{{ lastText !== '' }}"><text class="accent">{{ todayText }}</text></list-item>
+      <list-item class="li">
+        <div class="btn" onclick="openHistory"><text class="btn-text">{{ s.btn_history }}</text></div>
+      </list-item>
+      <list-item class="li">
+        <div class="btn" onclick="openSettings"><text class="btn-text">{{ s.btn_settings }}</text></div>
+      </list-item>
+      <list-item class="li-gap"></list-item>
+    </list>
+  </div>
+</stack>
