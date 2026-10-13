@@ -56,7 +56,26 @@ node "C:/Program Files/Huawei/DevEco Studio/tools/hvigor/bin/hvigorw.js" --mode 
 
 ## Установка на часы
 
-Подпись и отладка устроены так же, как в основной версии (см. [../docs/BUILD_AND_RUN.md](../docs/BUILD_AND_RUN.md)): HUAWEI ID в DevEco → *Project Structure → Signing Configs → Automatically generate signature* → часы в режиме разработчика с отладкой по Wi-Fi → *Run*. Пункты меню на lite-часах зависят от прошивки, **проверить**. Для публикации нужен release-сертификат и профиль из AppGallery Connect с устройством «Часы (lite)».
+Lite-часы не подключаются к DevEco напрямую (ни по Wi-Fi, ни через HDC). Подписанный HAP ставится **через телефон** приложением HUAWEI DevEco Assistant. Автоподпись DevEco здесь не подходит: подписывать нужно вручную, сертификатом и профилем из AppGallery Connect, где зарегистрирован UDID часов.
+
+Нужны: Android-телефон или телефон Huawei с Huawei Health, к которому привязаны часы; аккаунт HUAWEI Developer; DevEco Studio.
+
+1. **Телефон.** Обновите Huawei Health и убедитесь, что часы подключены. Установите **HUAWEI DevEco Assistant** из AppGallery.
+2. **UDID часов.** Откройте DevEco Assistant: он покажет подключённые часы и их **UDID**. Скопируйте его.
+3. **AppGallery Connect** → *Certificates, App IDs and Profiles*:
+   - *App IDs*: создайте App ID (платформа HarmonyOS) с bundle name `com.alekfletch.sedonabreath.lite` (или своим, тогда поменяйте `bundleName` в `entry/src/main/config.json`);
+   - *Devices → Add device*: тип «часы», вставьте UDID;
+   - в DevEco: *Build → Generate Key and CSR* → получите `.p12` и `.csr`;
+   - *Certificates → New certificate* (debug): загрузите `.csr`, скачайте `.cer`;
+   - *Profiles → Add* (debug): выберите App ID, сертификат и часы, скачайте `.p7b`.
+4. **Подпись.** DevEco, проект `lite/` → *File → Project Structure → Signing Configs*: снимите *Automatically generate signature* и укажите `.p12`, пароль, alias, `.cer`, `.p7b`.
+5. **Сборка.** *Build → Build Hap(s)* → `entry/build/default/outputs/default/entry-default-signed.hap`.
+6. **Перенос.** Подключите телефон к ПК по USB (передача файлов), создайте в корне памяти папку **`haps`** и скопируйте туда `entry-default-signed.hap`.
+7. **Установка.** DevEco Assistant → *Apps* / *Install watch app* → выберите HAP. Приложение появится в списке приложений на часах.
+
+**Если установка падает с ошибкой «40. Invalid configuration file format»**, значит, прошивка часов не поддерживает API, под который собран пакет. Проект собран с `compatibleSdkVersion 4.0.0(10)`, это минимум, который сейчас поддерживает DevEco. На старых часах вроде GT 3 (API 6) ошибка неустранима. На форуме Huawei её же сообщают для части прошивок GT 5. Какой API у Fit 4 / Fit 4 Pro, официально не опубликовано: **проверить**. Сначала обновите прошивку часов и DevEco Assistant.
+
+Для публикации в AppGallery нужен release-сертификат и release-профиль; соберите `.app` (`assembleApp`, `buildMode=release`) и загрузите в AppGallery Connect.
 
 ## Тесты
 
