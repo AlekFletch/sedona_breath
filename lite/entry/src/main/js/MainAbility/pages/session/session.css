@@ -1,0 +1,161 @@
+@import '../../common/style.css';
+
+.info {
+  width: 100%;
+  height: 44px;
+  justify-content: center;
+  align-items: center;
+}
+.row-tall {
+  width: 100%;
+  height: 110px;
+  justify-content: center;
+  align-items: center;
+}
+.dialog-title {
+  width: 90%;
+  height: 100px;
+  font-size: 30px;
+  text-align: center;
+  color: #FFFFFF;
+}
+.intro {
+  width: 88%;
+  height: 130px;
+  font-size: 38px;
+  text-align: center;
+  color: #FFFFFF;
+}
+.caption {
+  width: 90%;
+  height: 40px;
+  font-size: 24px;
+  text-align: center;
+  color: #AFBBD6;
+}
+.circle-box {
+  width: 220px;
+  height: 220px;
+  justify-content: center;
+  align-items: center;
+}
+.circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 60px;
+  border-width: 5px;
+  border-color: #12E2F0;
+  background-color: #0A1F45;
+}
+.phase {
+  width: 90%;
+  height: 50px;
+  font-size: 38px;
+  text-align: center;
+  color: #FFFFFF;
+}
+.btn-pause {
+  width: 66%;
+  height: 58px;
+  border-radius: 29px;
+  background-color: #16264E;
+  justify-content: center;
+  align-items: center;
+  margin-top: 6px;
+}
+.counter {
+  width: 90%;
+  height: 34px;
+  font-size: 24px;
+  text-align: center;
+  color: #12E2F0;
+}
+.question-item {
+  width: 100%;
+  height: 150px;
+  justify-content: center;
+  align-items: center;
+}
+.question {
+  width: 88%;
+  height: 140px;
+  font-size: 30px;
+  text-align: center;
+  color: #FFFFFF;
+}
+.text-item {
+  width: 100%;
+  height: 200px;
+  justify-content: center;
+  align-items: center;
+}
+.long {
+  width: 88%;
+  height: 190px;
+  font-size: 30px;
+  text-align: center;
+  color: #FFFFFF;
+}
+.long-dim {
+  width: 88%;
+  height: 190px;
+  font-size: 24px;
+  text-align: center;
+  color: #AFBBD6;
+}
+.rating-row {
+  width: 92%;
+  height: 66px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.rate {
+  width: 62px;
+  height: 62px;
+  border-radius: 31px;
+  background-color: #16264E;
+  justify-content: center;
+  align-items: center;
+}
+.rate-text {
+  width: 62px;
+  height: 40px;
+  font-size: 30px;
+  text-align: center;
+  color: #FFFFFF;
+}
+.scale-row {
+  width: 92%;
+  height: 34px;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.scale-low {
+  width: 45%;
+  height: 34px;
+  font-size: 24px;
+  text-align: left;
+  color: #AFBBD6;
+}
+.scale-high {
+  width: 45%;
+  height: 34px;
+  font-size: 24px;
+  text-align: right;
+  color: #AFBBD6;
+}
+.phase-inhale {
+  width: 90%;
+  height: 50px;
+  font-size: 38px;
+  text-align: center;
+  color: #9BF24A;
+}
+.long-warm {
+  width: 88%;
+  height: 190px;
+  font-size: 30px;
+  text-align: center;
+  color: #FFB86B;
+}

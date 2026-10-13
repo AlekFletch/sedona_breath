@@ -1,0 +1,22 @@
+@import '../../common/style.css';
+
+.info {
+  width: 100%;
+  height: 40px;
+  justify-content: center;
+  align-items: center;
+}
+.warn {
+  width: 90%;
+  height: 40px;
+  font-size: 30px;
+  text-align: center;
+  color: #FFB86B;
+}
+.accent {
+  width: 90%;
+  height: 34px;
+  font-size: 24px;
+  text-align: center;
+  color: #12E2F0;
+}

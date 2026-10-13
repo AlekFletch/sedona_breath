@@ -1,0 +1,84 @@
+<!-- Screen 10: Settings -->
+<div class="page" onswipe="onSwipe">
+  <list class="scroll" if="{{ !confirmDelete }}">
+    <list-item class="row">
+      <text class="title">{{ s.settings_title }}</text>
+    </list-item>
+    <list-item class="row-card">
+      <div class="card" onclick="nextLanguage">
+        <text class="label">{{ s.settings_language }}</text>
+        <text class="value">{{ languageText }}</text>
+      </div>
+    </list-item>
+    <list-item class="row-card">
+      <div class="card" onclick="nextPattern">
+        <text class="label">{{ s.settings_default_pattern }}</text>
+        <text class="value">{{ patternText }}</text>
+      </div>
+    </list-item>
+    <list-item class="row-card">
+      <div class="card" onclick="nextDuration">
+        <text class="label">{{ s.settings_default_duration }}</text>
+        <text class="value">{{ durationText }}</text>
+      </div>
+    </list-item>
+    <list-item class="row-card">
+      <div class="card" onclick="toggleMode">
+        <text class="label">{{ s.settings_default_mode }}</text>
+        <text class="value">{{ modeText }}</text>
+      </div>
+    </list-item>
+    <list-item class="row-card">
+      <div class="card" onclick="toggleVibration">
+        <text class="label">{{ s.settings_vibration }}</text>
+        <text class="value">{{ vibrationText }}</text>
+      </div>
+    </list-item>
+    <list-item class="row-card">
+      <div class="card">
+        <text class="label">{{ s.settings_free_inhale }}</text>
+        <div class="stepper">
+          <div class="step" onclick="inhaleMinus"><text class="step-text">-</text></div>
+          <text class="step-value">{{ inhaleText }}</text>
+          <div class="step" onclick="inhalePlus"><text class="step-text">+</text></div>
+        </div>
+      </div>
+    </list-item>
+    <list-item class="row-card">
+      <div class="card">
+        <text class="label">{{ s.settings_free_exhale }}</text>
+        <div class="stepper">
+          <div class="step" onclick="exhaleMinus"><text class="step-text">-</text></div>
+          <text class="step-value">{{ exhaleText }}</text>
+          <div class="step" onclick="exhalePlus"><text class="step-text">+</text></div>
+        </div>
+      </div>
+    </list-item>
+    <list-item class="row">
+      <div class="btn" onclick="openTerms"><text class="btn-text">{{ s.settings_terms }}</text></div>
+    </list-item>
+    <list-item class="row">
+      <div class="btn" onclick="askDelete"><text class="btn-text-danger">{{ s.settings_delete_history }}</text></div>
+    </list-item>
+    <list-item class="row">
+      <div class="btn" onclick="back"><text class="btn-text">{{ s.btn_back }}</text></div>
+    </list-item>
+    <list-item class="row"></list-item>
+  </list>
+
+  <list class="scroll" if="{{ confirmDelete }}">
+    <list-item class="row-tall">
+      <text class="dialog-title">{{ s.delete_confirm_title }}</text>
+    </list-item>
+    <list-item class="info">
+      <text class="small">{{ s.delete_confirm_body }}</text>
+    </list-item>
+    <list-item class="row">
+      <div class="btn" onclick="deleteAll"><text class="btn-text-danger">{{ s.btn_delete }}</text></div>
+    </list-item>
+    <list-item class="row">
+      <div class="btn-primary" onclick="cancelDelete"><text class="btn-text-primary">{{ s.btn_cancel }}</text></div>
+    </list-item>
+    <list-item class="row"></list-item>
+  </list>
+</div>

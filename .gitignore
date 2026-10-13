@@ -16,3 +16,9 @@ oh-package-lock.json5
 *.cer
 *.p7b
 *.csr
+
+# lite (Watch Fit) project
+/lite/.hvigor
+/lite/oh_modules
+/lite/local.properties
+/lite/.idea

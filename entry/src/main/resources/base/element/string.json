@@ -615,6 +615,14 @@
     {
       "name": "onb_consent",
       "value": "Я понимаю и принимаю условия"
+    },
+    {
+      "name": "btn_back",
+      "value": "Назад"
+    },
+    {
+      "name": "home_quick",
+      "value": "Быстро · 3 мин"
     }
   ]
 }

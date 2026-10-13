@@ -615,6 +615,14 @@
     {
       "name": "onb_consent",
       "value": "Entiendo y acepto las condiciones"
+    },
+    {
+      "name": "btn_back",
+      "value": "Atrás"
+    },
+    {
+      "name": "home_quick",
+      "value": "Rápida · 3 min"
     }
   ]
 }

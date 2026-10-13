@@ -1,0 +1,46 @@
+{
+  "app": {
+    "bundleName": "com.alekfletch.sedonabreath.lite",
+    "vendor": "alekfletch",
+    "version": {
+      "code": 1000000,
+      "name": "1.0.0"
+    }
+  },
+  "deviceConfig": {},
+  "module": {
+    "deviceType": [
+      "liteWearable"
+    ],
+    "distro": {
+      "deliveryWithInstall": true,
+      "moduleName": "entry",
+      "moduleType": "entry"
+    },
+    "abilities": [
+      {
+        "name": ".MainAbility",
+        "srcLanguage": "js",
+        "srcPath": "MainAbility",
+        "icon": "$media:icon",
+        "description": "$string:MainAbility_desc",
+        "label": "$string:MainAbility_label",
+        "type": "page"
+      }
+    ],
+    "js": [
+      {
+        "pages": [
+          "pages/index/index",
+          "pages/onboarding/onboarding",
+          "pages/setup/setup",
+          "pages/session/session",
+          "pages/summary/summary",
+          "pages/history/history",
+          "pages/settings/settings"
+        ],
+        "name": ".MainAbility"
+      }
+    ]
+  }
+}

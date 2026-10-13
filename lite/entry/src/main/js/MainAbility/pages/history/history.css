@@ -1,0 +1,48 @@
+@import '../../common/style.css';
+
+.entry {
+  width: 100%;
+  height: 168px;
+  justify-content: center;
+  align-items: center;
+}
+.entry-box {
+  width: 92%;
+  height: 160px;
+  border-radius: 20px;
+  background-color: #0E1A3A;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.entry-head {
+  width: 88%;
+  height: 38px;
+  font-size: 30px;
+  text-align: left;
+  color: #FFFFFF;
+}
+.entry-line {
+  width: 88%;
+  height: 34px;
+  font-size: 24px;
+  text-align: left;
+  color: #AFBBD6;
+  text-overflow: ellipsis;
+}
+.status-ok {
+  width: 88%;
+  height: 34px;
+  font-size: 24px;
+  text-align: left;
+  color: #9BF24A;
+  text-overflow: ellipsis;
+}
+.status-warn {
+  width: 88%;
+  height: 34px;
+  font-size: 24px;
+  text-align: left;
+  color: #FFB86B;
+  text-overflow: ellipsis;
+}

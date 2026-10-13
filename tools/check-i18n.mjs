@@ -82,6 +82,27 @@ for (const file of etsFiles) {
 for (const cfg of ['entry/src/main/module.json5', 'entry/src/main/resources/base/profile/form_config.json']) {
   for (const m of fs.readFileSync(path.join(root, cfg), 'utf8').matchAll(/\$string:([A-Za-z0-9_]+)/g)) used.add(m[1]);
 }
+// Lite (Watch Fit) build: keys come from the generated dictionary; templates must not contain literal text.
+const liteDir = path.join(root, 'lite/entry/src/main/js/MainAbility');
+if (fs.existsSync(liteDir)) {
+  const liteStrings = fs.readFileSync(path.join(liteDir, 'i18n/strings.js'), 'utf8');
+  for (const k of baseKeys) if (liteStrings.includes(`"${k}":`)) used.add(k);
+  const walkLite = (dir) => {
+    for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, f.name);
+      if (f.isDirectory()) walkLite(p);
+      else if (f.name.endsWith('.hml')) {
+        const rel = path.relative(root, p);
+        const html = fs.readFileSync(p, 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+        for (const m of html.matchAll(/>([^<]*)</g)) {
+          const literal = m[1].replace(/\{\{[^}]*\}\}/g, '');
+          if (/[A-Za-zА-Яа-яЁё]/.test(literal)) problems.push(`${rel}: hard-coded UI text "${m[1].trim()}"`);
+        }
+      }
+    }
+  };
+  walkLite(path.join(liteDir, 'pages'));
+}
 for (const k of baseKeys) if (!used.has(k)) warn.push(`unused key ${k}`);
 
 for (const w of warn) console.log(`warn  ${w}`);

@@ -4,12 +4,14 @@
 
 > Это приложение для самопомощи, а не медицинское изделие. Оно не ставит диагнозы и не заменяет психотерапию, врача или экстренную помощь.
 
-## ⚠️ Huawei Watch Fit 4
+## Две сборки
 
-**Fit 4 — это lite wearable на LiteOS**, а не full wearable. На нём запускаются только JS-приложения для lite-устройств (HML/CSS/JS); ArkTS/Stage HAP он не принимает. Поэтому:
+| Часы | Проект | Стек |
+|---|---|---|
+| `wearable`: Huawei Watch 5, Watch Ultimate и другие с HarmonyOS 5+ | корень репозитория | ArkTS / ArkUI, Stage |
+| `liteWearable`: **Huawei Watch Fit 4, Fit 4 Pro** и другие lite-часы | [`lite/`](lite/README.md) | JS / HML / CSS, FA |
 
-- этот проект собирается для устройств типа `wearable` (HarmonyOS 5+, например Huawei Watch 5 и линейка Watch Ultimate) — проверьте свою модель в DevEco Device Manager;
-- вся логика (дыхательный движок, вибрация, план сессии, правила поддержки, модели данных) лежит в `entry/src/main/ets/core/` и **не зависит от ArkUI и Kit-ов**. Её можно один в один перенести в lite-JS сборку для Fit 4. План переноса описан в [docs/LIMITATIONS.md](docs/LIMITATIONS.md#1-huawei-watch-fit-4--lite-wearable).
+Fit 4 и Fit 4 Pro — это lite wearable на LiteOS: ArkTS-пакеты они не принимают. Для них есть отдельная lite-версия в [`lite/`](lite/README.md). Логика сессии (дыхательный движок, вибрация, план, правила поддержки) и все строки у обеих версий общие: lite-файлы `core/*.js` и `i18n/strings.js` генерирует `tools/build-lite.mjs` из ArkTS-исходников.
 
 ## Что реализовано
 
@@ -44,8 +46,17 @@ node tools/node-test/run.mjs
 ```
 
 ```bash
-# статическая проверка локализации: паритет ключей, плейсхолдеры, длины строк, захардкоженный текст
+# статическая проверка локализации: паритет ключей, плейсхолдеры, длины строк, захардкоженный текст (обе версии)
 node tools/check-i18n.mjs
+```
+
+```bash
+# lite-версия: перегенерировать общее ядро и строки, затем прогнать её тесты
+node tools/build-lite.mjs
+```
+
+```bash
+node tools/node-test/lite.mjs
 ```
 
 Подпись, установка на часы и отладка по Wi-Fi описаны в [docs/BUILD_AND_RUN.md](docs/BUILD_AND_RUN.md).
@@ -64,7 +75,7 @@ node tools/check-i18n.mjs
 AppScope/                     app.json5, иконка приложения
 entry/src/main/
   module.json5                wearable, EntryAbility, карточка быстрого старта, VIBRATE
-  ets/core/                   чистая логика (переносится в lite-JS)
+  ets/core/                   чистая логика (общая с lite-версией)
   ets/services/               платформа: вибратор, Preferences, RDB, Health Kit, язык, батарея, окно
   ets/pages/Index.ets         Navigation-хост
   ets/views/                  экраны
@@ -73,6 +84,7 @@ entry/src/main/
   resources/{base,en,es}/     строки (base = русский)
 entry/src/test/               локальные unit-тесты (hypium)
 entry/src/ohosTest/           инструментальные тесты (хранение, локализация)
-tools/                        node-раннер тестов, проверка локализации
+lite/                         lite-версия для Watch Fit 4 / Fit 4 Pro (отдельный проект DevEco)
+tools/                        node-раннеры тестов, проверка локализации, генератор lite-ядра
 docs/
 ```

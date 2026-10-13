@@ -1,0 +1,24 @@
+<!-- Screen 9: last 10 sessions -->
+<div class="page" onswipe="onSwipe">
+  <list class="scroll">
+    <list-item class="row">
+      <text class="title">{{ s.history_title }}</text>
+    </list-item>
+    <list-item class="row" if="{{ items.length === 0 }}">
+      <text class="small">{{ s.history_empty }}</text>
+    </list-item>
+    <list-item class="entry" for="{{ items }}">
+      <div class="entry-box">
+        <text class="entry-head">{{ $item.head }}</text>
+        <text class="entry-line">{{ $item.mode }}</text>
+        <text class="status-warn" if="{{ $item.interrupted }}">{{ $item.status }}</text>
+        <text class="status-ok" else>{{ $item.status }}</text>
+        <text class="entry-line">{{ $item.beforeAfter }}</text>
+      </div>
+    </list-item>
+    <list-item class="row">
+      <div class="btn" onclick="back"><text class="btn-text">{{ s.btn_back }}</text></div>
+    </list-item>
+    <list-item class="row"></list-item>
+  </list>
+</div>

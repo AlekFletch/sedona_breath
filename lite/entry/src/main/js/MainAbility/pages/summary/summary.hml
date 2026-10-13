@@ -1,0 +1,21 @@
+<!-- Screen 8: Summary -->
+<div class="page">
+  <list class="scroll">
+    <list-item class="row">
+      <text class="title">{{ s.summary_title }}</text>
+    </list-item>
+    <list-item class="line" for="{{ lines }}">
+      <div class="line-box">
+        <text class="line-label">{{ $item.label }}</text>
+        <text class="line-value">{{ $item.value }}</text>
+      </div>
+    </list-item>
+    <list-item class="row">
+      <div class="btn-primary" onclick="save"><text class="btn-text-primary">{{ s.btn_save }}</text></div>
+    </list-item>
+    <list-item class="info">
+      <text class="small">{{ status }}</text>
+    </list-item>
+    <list-item class="row"></list-item>
+  </list>
+</div>

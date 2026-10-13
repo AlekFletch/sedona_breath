@@ -1,0 +1,8 @@
+{
+  "modelVersion": "6.0.0",
+  "description": "Sedona Breath for lite wearables (Huawei Watch Fit 4 / Fit 4 Pro).",
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}

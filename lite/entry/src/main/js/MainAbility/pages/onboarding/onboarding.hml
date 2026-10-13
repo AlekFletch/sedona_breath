@@ -1,0 +1,32 @@
+<!-- Screen 11: what the practice is, disclaimer, consent -->
+<div class="page" onswipe="onSwipe">
+  <list class="scroll">
+    <list-item class="row">
+      <text class="title">{{ s.app_name }}</text>
+    </list-item>
+    <list-item class="text-m">
+      <text class="txt">{{ s.onb_1 }}</text>
+    </list-item>
+    <list-item class="text-m">
+      <text class="txt">{{ s.onb_2 }}</text>
+    </list-item>
+    <list-item class="row">
+      <text class="warn">{{ s.onb_disclaimer_title }}</text>
+    </list-item>
+    <list-item class="text-l">
+      <text class="txt-l">{{ s.onb_disclaimer }}</text>
+    </list-item>
+    <list-item class="text-l">
+      <text class="txt-l-dim">{{ s.onb_safety }}</text>
+    </list-item>
+    <list-item class="text-m" if="{{ !readOnly }}">
+      <text class="txt-dim">{{ s.onb_consent }}</text>
+    </list-item>
+    <list-item class="row">
+      <div class="btn-primary" onclick="accept">
+        <text class="btn-text-primary">{{ buttonText }}</text>
+      </div>
+    </list-item>
+    <list-item class="row"></list-item>
+  </list>
+</div>
