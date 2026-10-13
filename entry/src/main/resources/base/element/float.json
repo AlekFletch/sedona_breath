@@ -1,0 +1,15 @@
+{
+  "float": [
+    { "name": "font_xl", "value": "30fp" },
+    { "name": "font_l", "value": "22fp" },
+    { "name": "font_m", "value": "18fp" },
+    { "name": "font_s", "value": "15fp" },
+    { "name": "font_xs", "value": "13fp" },
+    { "name": "button_height", "value": "52vp" },
+    { "name": "button_radius", "value": "26vp" },
+    { "name": "page_padding_h", "value": "18vp" },
+    { "name": "page_padding_top", "value": "22vp" },
+    { "name": "gap", "value": "8vp" },
+    { "name": "circle_size", "value": "170vp" }
+  ]
+}

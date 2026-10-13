@@ -1,0 +1,620 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "Sedona Breath"
+    },
+    {
+      "name": "module_desc",
+      "value": "Respiración y método Sedona"
+    },
+    {
+      "name": "ability_desc",
+      "value": "Respiración y preguntas suaves del método Sedona"
+    },
+    {
+      "name": "ability_label",
+      "value": "Sedona Breath"
+    },
+    {
+      "name": "widget_label",
+      "value": "Práctica rápida"
+    },
+    {
+      "name": "widget_desc",
+      "value": "Inicia una práctica de 3 minutos"
+    },
+    {
+      "name": "widget_quick",
+      "value": "3 min"
+    },
+    {
+      "name": "btn_start_practice",
+      "value": "Empezar"
+    },
+    {
+      "name": "btn_start",
+      "value": "Empezar"
+    },
+    {
+      "name": "btn_next",
+      "value": "Siguiente"
+    },
+    {
+      "name": "btn_skip",
+      "value": "Omitir"
+    },
+    {
+      "name": "btn_pause",
+      "value": "Pausa"
+    },
+    {
+      "name": "btn_resume",
+      "value": "Continuar"
+    },
+    {
+      "name": "btn_finish",
+      "value": "Terminar"
+    },
+    {
+      "name": "btn_end_now",
+      "value": "Terminar ya"
+    },
+    {
+      "name": "btn_end_save",
+      "value": "Terminar y guardar"
+    },
+    {
+      "name": "btn_save",
+      "value": "Guardar"
+    },
+    {
+      "name": "btn_cancel",
+      "value": "Cancelar"
+    },
+    {
+      "name": "btn_ok",
+      "value": "Entendido"
+    },
+    {
+      "name": "btn_accept",
+      "value": "Acepto"
+    },
+    {
+      "name": "btn_delete",
+      "value": "Eliminar"
+    },
+    {
+      "name": "btn_allow",
+      "value": "Permitir"
+    },
+    {
+      "name": "btn_history",
+      "value": "Historial"
+    },
+    {
+      "name": "btn_settings",
+      "value": "Ajustes"
+    },
+    {
+      "name": "on",
+      "value": "Sí"
+    },
+    {
+      "name": "off",
+      "value": "No"
+    },
+    {
+      "name": "home_last",
+      "value": "Última: %s"
+    },
+    {
+      "name": "home_last_none",
+      "value": "Aún no hay prácticas"
+    },
+    {
+      "name": "home_today",
+      "value": "Hoy: %d"
+    },
+    {
+      "name": "home_unfinished",
+      "value": "Práctica sin terminar"
+    },
+    {
+      "name": "setup_title",
+      "value": "Preparación"
+    },
+    {
+      "name": "setup_duration",
+      "value": "Duración"
+    },
+    {
+      "name": "setup_mode",
+      "value": "Modo"
+    },
+    {
+      "name": "setup_pattern",
+      "value": "Respiración"
+    },
+    {
+      "name": "setup_vibration",
+      "value": "Vibración"
+    },
+    {
+      "name": "fmt_minutes",
+      "value": "%d min"
+    },
+    {
+      "name": "fmt_seconds",
+      "value": "%d s"
+    },
+    {
+      "name": "mode_quick",
+      "value": "Alivio rápido"
+    },
+    {
+      "name": "mode_full",
+      "value": "Práctica completa"
+    },
+    {
+      "name": "pattern_relax478",
+      "value": "Respiración 4-7-8"
+    },
+    {
+      "name": "pattern_calm46",
+      "value": "Calma 4-6"
+    },
+    {
+      "name": "pattern_box4444",
+      "value": "Cuadrado 4-4-4-4"
+    },
+    {
+      "name": "pattern_longExhale426",
+      "value": "Exhalación larga 4-2-6"
+    },
+    {
+      "name": "pattern_free",
+      "value": "Ritmo libre"
+    },
+    {
+      "name": "intro_1",
+      "value": "Siéntate cómodamente"
+    },
+    {
+      "name": "intro_2",
+      "value": "No hace falta luchar con la emoción"
+    },
+    {
+      "name": "intro_3",
+      "value": "Solo obsérvala"
+    },
+    {
+      "name": "intro_tap",
+      "value": "Toca para seguir"
+    },
+    {
+      "name": "phase_inhale",
+      "value": "Inhala"
+    },
+    {
+      "name": "phase_holdIn",
+      "value": "Retén"
+    },
+    {
+      "name": "phase_exhale",
+      "value": "Exhala"
+    },
+    {
+      "name": "phase_holdOut",
+      "value": "Pausa"
+    },
+    {
+      "name": "remaining",
+      "value": "Quedan %s"
+    },
+    {
+      "name": "paused_title",
+      "value": "En pausa"
+    },
+    {
+      "name": "end_title",
+      "value": "¿Terminar la práctica?"
+    },
+    {
+      "name": "interrupted_title",
+      "value": "Práctica en pausa"
+    },
+    {
+      "name": "interrupted_body",
+      "value": "El progreso está guardado"
+    },
+    {
+      "name": "low_battery",
+      "value": "Batería baja. Progreso guardado"
+    },
+    {
+      "name": "q_1",
+      "value": "¿Qué siento ahora?"
+    },
+    {
+      "name": "q_2",
+      "value": "¿Podría permitir que este sentimiento esté?"
+    },
+    {
+      "name": "q_3",
+      "value": "¿Podría soltar este sentimiento?"
+    },
+    {
+      "name": "q_4",
+      "value": "¿Querría soltar este sentimiento?"
+    },
+    {
+      "name": "q_5",
+      "value": "¿Cuándo?"
+    },
+    {
+      "name": "question_counter",
+      "value": "Pregunta %d de %d"
+    },
+    {
+      "name": "ans_continue",
+      "value": "Lo noto"
+    },
+    {
+      "name": "ans_yes",
+      "value": "Sí"
+    },
+    {
+      "name": "ans_no",
+      "value": "No"
+    },
+    {
+      "name": "ans_dontKnow",
+      "value": "No sé"
+    },
+    {
+      "name": "ans_skip",
+      "value": "Omitir"
+    },
+    {
+      "name": "ans_now",
+      "value": "Ahora"
+    },
+    {
+      "name": "ans_later",
+      "value": "Más tarde"
+    },
+    {
+      "name": "ans_notNow",
+      "value": "Ahora no"
+    },
+    {
+      "name": "emotion_title",
+      "value": "¿Qué sentimiento es?"
+    },
+    {
+      "name": "emotion_anger",
+      "value": "Enojo"
+    },
+    {
+      "name": "emotion_anxiety",
+      "value": "Ansiedad"
+    },
+    {
+      "name": "emotion_fear",
+      "value": "Miedo"
+    },
+    {
+      "name": "emotion_resentment",
+      "value": "Resentimiento"
+    },
+    {
+      "name": "emotion_shame",
+      "value": "Vergüenza"
+    },
+    {
+      "name": "emotion_guilt",
+      "value": "Culpa"
+    },
+    {
+      "name": "emotion_irritation",
+      "value": "Irritación"
+    },
+    {
+      "name": "emotion_sadness",
+      "value": "Tristeza"
+    },
+    {
+      "name": "emotion_disappointment",
+      "value": "Decepción"
+    },
+    {
+      "name": "emotion_fatigue",
+      "value": "Cansancio"
+    },
+    {
+      "name": "emotion_tension",
+      "value": "Tensión"
+    },
+    {
+      "name": "emotion_other",
+      "value": "Otro"
+    },
+    {
+      "name": "emotion_fear_note",
+      "value": "El miedo es natural. Si es fuerte o no se va, habla con alguien cercano o con un profesional."
+    },
+    {
+      "name": "completion_breath",
+      "value": "Gracias. Volvamos a la respiración"
+    },
+    {
+      "name": "not_now_breath",
+      "value": "Está bien. Volvamos a la respiración"
+    },
+    {
+      "name": "checkin_title",
+      "value": "¿Cómo te sientes ahora?"
+    },
+    {
+      "name": "checkin_low",
+      "value": "difícil"
+    },
+    {
+      "name": "checkin_high",
+      "value": "bien"
+    },
+    {
+      "name": "msg_gentle1",
+      "value": "Gracias por estos minutos para ti"
+    },
+    {
+      "name": "msg_gentle2",
+      "value": "Lo que sientes tiene derecho a estar"
+    },
+    {
+      "name": "msg_gentle3",
+      "value": "Puedes volver a esta práctica cuando quieras"
+    },
+    {
+      "name": "msg_supportive",
+      "value": "Ahora puede ser difícil, y está bien. Trátate con cariño"
+    },
+    {
+      "name": "msg_professional",
+      "value": "Si lleva tiempo siendo difícil, busca a alguien cercano o a un profesional"
+    },
+    {
+      "name": "summary_title",
+      "value": "Resumen"
+    },
+    {
+      "name": "summary_duration",
+      "value": "Duración"
+    },
+    {
+      "name": "summary_cycles",
+      "value": "Ciclos"
+    },
+    {
+      "name": "summary_mode",
+      "value": "Modo"
+    },
+    {
+      "name": "summary_emotion",
+      "value": "Emoción antes"
+    },
+    {
+      "name": "summary_rating",
+      "value": "Valoración después"
+    },
+    {
+      "name": "summary_hr",
+      "value": "Pulso"
+    },
+    {
+      "name": "fmt_bpm",
+      "value": "%d lpm"
+    },
+    {
+      "name": "fmt_rating",
+      "value": "%d de 5"
+    },
+    {
+      "name": "saved_toast",
+      "value": "Práctica guardada"
+    },
+    {
+      "name": "save_failed",
+      "value": "No se pudo guardar"
+    },
+    {
+      "name": "history_title",
+      "value": "Historial"
+    },
+    {
+      "name": "history_empty",
+      "value": "Aquí aparecerán tus prácticas"
+    },
+    {
+      "name": "status_completed",
+      "value": "Completada"
+    },
+    {
+      "name": "status_interrupted",
+      "value": "Interrumpida"
+    },
+    {
+      "name": "history_stopped_at",
+      "value": "Se detuvo en: %s"
+    },
+    {
+      "name": "history_before",
+      "value": "Antes: %s"
+    },
+    {
+      "name": "history_after",
+      "value": "Después: %s"
+    },
+    {
+      "name": "dash",
+      "value": "—"
+    },
+    {
+      "name": "stage_intro",
+      "value": "inicio"
+    },
+    {
+      "name": "stage_breathing",
+      "value": "respiración"
+    },
+    {
+      "name": "stage_question",
+      "value": "preguntas"
+    },
+    {
+      "name": "stage_emotion",
+      "value": "elección del sentimiento"
+    },
+    {
+      "name": "stage_completionBreathing",
+      "value": "respiración final"
+    },
+    {
+      "name": "stage_checkIn",
+      "value": "valoración"
+    },
+    {
+      "name": "stage_message",
+      "value": "cierre"
+    },
+    {
+      "name": "stage_summary",
+      "value": "resumen"
+    },
+    {
+      "name": "settings_title",
+      "value": "Ajustes"
+    },
+    {
+      "name": "settings_language",
+      "value": "Idioma"
+    },
+    {
+      "name": "lang_system",
+      "value": "Del sistema"
+    },
+    {
+      "name": "lang_ru",
+      "value": "Русский"
+    },
+    {
+      "name": "lang_en",
+      "value": "English"
+    },
+    {
+      "name": "lang_es",
+      "value": "Español"
+    },
+    {
+      "name": "lang_restart",
+      "value": "El idioma del sistema se aplica al reiniciar"
+    },
+    {
+      "name": "settings_default_pattern",
+      "value": "Respiración por defecto"
+    },
+    {
+      "name": "settings_default_duration",
+      "value": "Duración por defecto"
+    },
+    {
+      "name": "settings_default_mode",
+      "value": "Modo por defecto"
+    },
+    {
+      "name": "settings_vibration",
+      "value": "Vibración"
+    },
+    {
+      "name": "settings_free_inhale",
+      "value": "Ritmo libre: inhalar"
+    },
+    {
+      "name": "settings_free_exhale",
+      "value": "Ritmo libre: exhalar"
+    },
+    {
+      "name": "settings_health",
+      "value": "Huawei Health"
+    },
+    {
+      "name": "settings_health_hr",
+      "value": "Pulso de Health"
+    },
+    {
+      "name": "settings_terms",
+      "value": "Condiciones de uso"
+    },
+    {
+      "name": "settings_delete_history",
+      "value": "Eliminar historial"
+    },
+    {
+      "name": "delete_confirm_title",
+      "value": "¿Eliminar todo el historial?"
+    },
+    {
+      "name": "delete_confirm_body",
+      "value": "No se puede deshacer"
+    },
+    {
+      "name": "deleted_toast",
+      "value": "Historial eliminado"
+    },
+    {
+      "name": "health_explain",
+      "value": "Puedes conectar la app con Huawei Health. Los datos se quedan en el reloj y no se envían a servidores. Todo funciona sin Health."
+    },
+    {
+      "name": "health_hr_explain",
+      "value": "Con un permiso aparte, la app lee tu pulso durante la práctica y muestra la media en el resumen."
+    },
+    {
+      "name": "health_write_note",
+      "value": "Aún no se pueden guardar prácticas en Health: no existe ese tipo de datos."
+    },
+    {
+      "name": "health_denied",
+      "value": "Acceso no concedido. La app funciona sin Health"
+    },
+    {
+      "name": "health_unavailable",
+      "value": "Health no está disponible en este reloj"
+    },
+    {
+      "name": "onb_1",
+      "value": "Una práctica breve: respiración y unas preguntas sencillas"
+    },
+    {
+      "name": "onb_2",
+      "value": "No luches con la emoción. Déjala estar y solo obsérvala"
+    },
+    {
+      "name": "onb_disclaimer_title",
+      "value": "Importante"
+    },
+    {
+      "name": "onb_disclaimer",
+      "value": "Es una app de autoayuda, no un dispositivo médico. No diagnostica ni trata y no sustituye la terapia, al médico ni la ayuda de emergencia."
+    },
+    {
+      "name": "onb_safety",
+      "value": "La práctica no sirve para ignorar problemas reales. Si no estás a salvo o es muy difícil, busca a alguien cercano o a un profesional."
+    },
+    {
+      "name": "onb_consent",
+      "value": "Entiendo y acepto las condiciones"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+# Obfuscation rules for release builds.
+# Property obfuscation is off: history rows and settings are (de)serialized by property name.
+-enable-toplevel-obfuscation
+-enable-filename-obfuscation
+-remove-log

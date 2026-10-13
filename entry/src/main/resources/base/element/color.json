@@ -1,0 +1,19 @@
+{
+  "color": [
+    { "name": "bg", "value": "#000000" },
+    { "name": "surface", "value": "#0E1A3A" },
+    { "name": "surface_pressed", "value": "#1A2A55" },
+    { "name": "button", "value": "#16264E" },
+    { "name": "primary", "value": "#9BF24A" },
+    { "name": "primary_text", "value": "#04150A" },
+    { "name": "accent", "value": "#12E2F0" },
+    { "name": "accent_dim", "value": "#0B5F7A" },
+    { "name": "text_primary", "value": "#FFFFFF" },
+    { "name": "text_secondary", "value": "#AFBBD6" },
+    { "name": "warning", "value": "#FFB86B" },
+    { "name": "danger", "value": "#FF7A7A" },
+    { "name": "overlay", "value": "#E6000000" },
+    { "name": "circle_inner", "value": "#0A1F45" },
+    { "name": "start_window_background", "value": "#000000" }
+  ]
+}

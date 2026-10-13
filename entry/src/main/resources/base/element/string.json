@@ -1,0 +1,620 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "Sedona Breath"
+    },
+    {
+      "name": "module_desc",
+      "value": "Дыхательная практика и метод Седоны"
+    },
+    {
+      "name": "ability_desc",
+      "value": "Дыхание и мягкие вопросы метода Седоны"
+    },
+    {
+      "name": "ability_label",
+      "value": "Sedona Breath"
+    },
+    {
+      "name": "widget_label",
+      "value": "Быстрая практика"
+    },
+    {
+      "name": "widget_desc",
+      "value": "Запуск практики на 3 минуты"
+    },
+    {
+      "name": "widget_quick",
+      "value": "3 мин"
+    },
+    {
+      "name": "btn_start_practice",
+      "value": "Начать практику"
+    },
+    {
+      "name": "btn_start",
+      "value": "Начать"
+    },
+    {
+      "name": "btn_next",
+      "value": "Далее"
+    },
+    {
+      "name": "btn_skip",
+      "value": "Пропустить"
+    },
+    {
+      "name": "btn_pause",
+      "value": "Пауза"
+    },
+    {
+      "name": "btn_resume",
+      "value": "Продолжить"
+    },
+    {
+      "name": "btn_finish",
+      "value": "Завершить"
+    },
+    {
+      "name": "btn_end_now",
+      "value": "Завершить сейчас"
+    },
+    {
+      "name": "btn_end_save",
+      "value": "Завершить и сохранить"
+    },
+    {
+      "name": "btn_save",
+      "value": "Сохранить"
+    },
+    {
+      "name": "btn_cancel",
+      "value": "Отмена"
+    },
+    {
+      "name": "btn_ok",
+      "value": "Понятно"
+    },
+    {
+      "name": "btn_accept",
+      "value": "Принимаю"
+    },
+    {
+      "name": "btn_delete",
+      "value": "Удалить"
+    },
+    {
+      "name": "btn_allow",
+      "value": "Разрешить"
+    },
+    {
+      "name": "btn_history",
+      "value": "История"
+    },
+    {
+      "name": "btn_settings",
+      "value": "Настройки"
+    },
+    {
+      "name": "on",
+      "value": "Вкл"
+    },
+    {
+      "name": "off",
+      "value": "Выкл"
+    },
+    {
+      "name": "home_last",
+      "value": "Последняя: %s"
+    },
+    {
+      "name": "home_last_none",
+      "value": "Пока нет практик"
+    },
+    {
+      "name": "home_today",
+      "value": "Сегодня: %d"
+    },
+    {
+      "name": "home_unfinished",
+      "value": "Практика не завершена"
+    },
+    {
+      "name": "setup_title",
+      "value": "Настройка"
+    },
+    {
+      "name": "setup_duration",
+      "value": "Длительность"
+    },
+    {
+      "name": "setup_mode",
+      "value": "Режим"
+    },
+    {
+      "name": "setup_pattern",
+      "value": "Дыхание"
+    },
+    {
+      "name": "setup_vibration",
+      "value": "Вибрация"
+    },
+    {
+      "name": "fmt_minutes",
+      "value": "%d мин"
+    },
+    {
+      "name": "fmt_seconds",
+      "value": "%d с"
+    },
+    {
+      "name": "mode_quick",
+      "value": "Быстрое снятие стресса"
+    },
+    {
+      "name": "mode_full",
+      "value": "Полная практика"
+    },
+    {
+      "name": "pattern_relax478",
+      "value": "Дыхание 4-7-8"
+    },
+    {
+      "name": "pattern_calm46",
+      "value": "Успокоение 4-6"
+    },
+    {
+      "name": "pattern_box4444",
+      "value": "Квадрат 4-4-4-4"
+    },
+    {
+      "name": "pattern_longExhale426",
+      "value": "Удлинённый выдох 4-2-6"
+    },
+    {
+      "name": "pattern_free",
+      "value": "Свободный ритм"
+    },
+    {
+      "name": "intro_1",
+      "value": "Сядь удобно"
+    },
+    {
+      "name": "intro_2",
+      "value": "Не нужно бороться с эмоцией"
+    },
+    {
+      "name": "intro_3",
+      "value": "Просто наблюдай её"
+    },
+    {
+      "name": "intro_tap",
+      "value": "Коснись, чтобы продолжить"
+    },
+    {
+      "name": "phase_inhale",
+      "value": "Вдох"
+    },
+    {
+      "name": "phase_holdIn",
+      "value": "Задержка"
+    },
+    {
+      "name": "phase_exhale",
+      "value": "Выдох"
+    },
+    {
+      "name": "phase_holdOut",
+      "value": "Пауза"
+    },
+    {
+      "name": "remaining",
+      "value": "Осталось %s"
+    },
+    {
+      "name": "paused_title",
+      "value": "Пауза"
+    },
+    {
+      "name": "end_title",
+      "value": "Завершить практику?"
+    },
+    {
+      "name": "interrupted_title",
+      "value": "Практика на паузе"
+    },
+    {
+      "name": "interrupted_body",
+      "value": "Прогресс сохранён"
+    },
+    {
+      "name": "low_battery",
+      "value": "Низкий заряд. Прогресс сохранён"
+    },
+    {
+      "name": "q_1",
+      "value": "Что я сейчас чувствую?"
+    },
+    {
+      "name": "q_2",
+      "value": "Смог бы я позволить этому чувству быть?"
+    },
+    {
+      "name": "q_3",
+      "value": "Смог бы я отпустить это чувство?"
+    },
+    {
+      "name": "q_4",
+      "value": "Хотел бы я отпустить это чувство?"
+    },
+    {
+      "name": "q_5",
+      "value": "Когда?"
+    },
+    {
+      "name": "question_counter",
+      "value": "Вопрос %d из %d"
+    },
+    {
+      "name": "ans_continue",
+      "value": "Замечаю"
+    },
+    {
+      "name": "ans_yes",
+      "value": "Да"
+    },
+    {
+      "name": "ans_no",
+      "value": "Нет"
+    },
+    {
+      "name": "ans_dontKnow",
+      "value": "Не знаю"
+    },
+    {
+      "name": "ans_skip",
+      "value": "Пропустить"
+    },
+    {
+      "name": "ans_now",
+      "value": "Сейчас"
+    },
+    {
+      "name": "ans_later",
+      "value": "Позже"
+    },
+    {
+      "name": "ans_notNow",
+      "value": "Не сейчас"
+    },
+    {
+      "name": "emotion_title",
+      "value": "Какое это чувство?"
+    },
+    {
+      "name": "emotion_anger",
+      "value": "Злость"
+    },
+    {
+      "name": "emotion_anxiety",
+      "value": "Тревога"
+    },
+    {
+      "name": "emotion_fear",
+      "value": "Страх"
+    },
+    {
+      "name": "emotion_resentment",
+      "value": "Обида"
+    },
+    {
+      "name": "emotion_shame",
+      "value": "Стыд"
+    },
+    {
+      "name": "emotion_guilt",
+      "value": "Вина"
+    },
+    {
+      "name": "emotion_irritation",
+      "value": "Раздражение"
+    },
+    {
+      "name": "emotion_sadness",
+      "value": "Грусть"
+    },
+    {
+      "name": "emotion_disappointment",
+      "value": "Разочарование"
+    },
+    {
+      "name": "emotion_fatigue",
+      "value": "Усталость"
+    },
+    {
+      "name": "emotion_tension",
+      "value": "Напряжение"
+    },
+    {
+      "name": "emotion_other",
+      "value": "Другое"
+    },
+    {
+      "name": "emotion_fear_note",
+      "value": "Страх — естественное чувство. Если он сильный или долго не уходит, поговори с близким человеком или специалистом."
+    },
+    {
+      "name": "completion_breath",
+      "value": "Спасибо. Вернёмся к дыханию"
+    },
+    {
+      "name": "not_now_breath",
+      "value": "Хорошо. Вернёмся к дыханию"
+    },
+    {
+      "name": "checkin_title",
+      "value": "Как ты себя чувствуешь сейчас?"
+    },
+    {
+      "name": "checkin_low",
+      "value": "тяжело"
+    },
+    {
+      "name": "checkin_high",
+      "value": "хорошо"
+    },
+    {
+      "name": "msg_gentle1",
+      "value": "Спасибо за эти минуты для себя"
+    },
+    {
+      "name": "msg_gentle2",
+      "value": "Всё, что ты чувствуешь, имеет право быть"
+    },
+    {
+      "name": "msg_gentle3",
+      "value": "К практике можно вернуться в любой момент"
+    },
+    {
+      "name": "msg_supportive",
+      "value": "Сейчас может быть непросто, и это нормально. Будь к себе бережнее"
+    },
+    {
+      "name": "msg_professional",
+      "value": "Если тяжело уже давно, обратись к близкому человеку или специалисту"
+    },
+    {
+      "name": "summary_title",
+      "value": "Итог"
+    },
+    {
+      "name": "summary_duration",
+      "value": "Длительность"
+    },
+    {
+      "name": "summary_cycles",
+      "value": "Циклы"
+    },
+    {
+      "name": "summary_mode",
+      "value": "Режим"
+    },
+    {
+      "name": "summary_emotion",
+      "value": "Эмоция до"
+    },
+    {
+      "name": "summary_rating",
+      "value": "Оценка после"
+    },
+    {
+      "name": "summary_hr",
+      "value": "Пульс"
+    },
+    {
+      "name": "fmt_bpm",
+      "value": "%d уд/мин"
+    },
+    {
+      "name": "fmt_rating",
+      "value": "%d из 5"
+    },
+    {
+      "name": "saved_toast",
+      "value": "Практика сохранена"
+    },
+    {
+      "name": "save_failed",
+      "value": "Не удалось сохранить"
+    },
+    {
+      "name": "history_title",
+      "value": "История"
+    },
+    {
+      "name": "history_empty",
+      "value": "Здесь появятся твои практики"
+    },
+    {
+      "name": "status_completed",
+      "value": "Завершена"
+    },
+    {
+      "name": "status_interrupted",
+      "value": "Прервана"
+    },
+    {
+      "name": "history_stopped_at",
+      "value": "Остановка: %s"
+    },
+    {
+      "name": "history_before",
+      "value": "До: %s"
+    },
+    {
+      "name": "history_after",
+      "value": "После: %s"
+    },
+    {
+      "name": "dash",
+      "value": "—"
+    },
+    {
+      "name": "stage_intro",
+      "value": "вступление"
+    },
+    {
+      "name": "stage_breathing",
+      "value": "дыхание"
+    },
+    {
+      "name": "stage_question",
+      "value": "вопросы"
+    },
+    {
+      "name": "stage_emotion",
+      "value": "выбор чувства"
+    },
+    {
+      "name": "stage_completionBreathing",
+      "value": "завершающее дыхание"
+    },
+    {
+      "name": "stage_checkIn",
+      "value": "оценка"
+    },
+    {
+      "name": "stage_message",
+      "value": "завершение"
+    },
+    {
+      "name": "stage_summary",
+      "value": "итог"
+    },
+    {
+      "name": "settings_title",
+      "value": "Настройки"
+    },
+    {
+      "name": "settings_language",
+      "value": "Язык"
+    },
+    {
+      "name": "lang_system",
+      "value": "Системный"
+    },
+    {
+      "name": "lang_ru",
+      "value": "Русский"
+    },
+    {
+      "name": "lang_en",
+      "value": "English"
+    },
+    {
+      "name": "lang_es",
+      "value": "Español"
+    },
+    {
+      "name": "lang_restart",
+      "value": "Язык системы применится после перезапуска"
+    },
+    {
+      "name": "settings_default_pattern",
+      "value": "Дыхание по умолчанию"
+    },
+    {
+      "name": "settings_default_duration",
+      "value": "Длительность по умолчанию"
+    },
+    {
+      "name": "settings_default_mode",
+      "value": "Режим по умолчанию"
+    },
+    {
+      "name": "settings_vibration",
+      "value": "Вибрация"
+    },
+    {
+      "name": "settings_free_inhale",
+      "value": "Свободный ритм: вдох"
+    },
+    {
+      "name": "settings_free_exhale",
+      "value": "Свободный ритм: выдох"
+    },
+    {
+      "name": "settings_health",
+      "value": "Huawei Health"
+    },
+    {
+      "name": "settings_health_hr",
+      "value": "Пульс из Health"
+    },
+    {
+      "name": "settings_terms",
+      "value": "Условия использования"
+    },
+    {
+      "name": "settings_delete_history",
+      "value": "Удалить всю историю"
+    },
+    {
+      "name": "delete_confirm_title",
+      "value": "Удалить всю историю?"
+    },
+    {
+      "name": "delete_confirm_body",
+      "value": "Это нельзя отменить"
+    },
+    {
+      "name": "deleted_toast",
+      "value": "История удалена"
+    },
+    {
+      "name": "health_explain",
+      "value": "Можно связать приложение с Huawei Health. Данные остаются на часах, на серверы ничего не отправляется. Без Health всё работает."
+    },
+    {
+      "name": "health_hr_explain",
+      "value": "С отдельного разрешения приложение прочитает пульс за время практики и покажет средний в итоге."
+    },
+    {
+      "name": "health_write_note",
+      "value": "Запись практик в Health пока недоступна: в Health нет такого типа данных."
+    },
+    {
+      "name": "health_denied",
+      "value": "Доступ не выдан. Приложение работает без Health"
+    },
+    {
+      "name": "health_unavailable",
+      "value": "Health недоступен на этих часах"
+    },
+    {
+      "name": "onb_1",
+      "value": "Короткая практика: дыхание и несколько простых вопросов"
+    },
+    {
+      "name": "onb_2",
+      "value": "Не нужно бороться с эмоцией. Позволь ей быть и просто наблюдай"
+    },
+    {
+      "name": "onb_disclaimer_title",
+      "value": "Важно"
+    },
+    {
+      "name": "onb_disclaimer",
+      "value": "Это приложение для самопомощи, а не медицинское изделие. Оно не ставит диагнозы, не лечит и не заменяет психотерапию, врача или экстренную помощь."
+    },
+    {
+      "name": "onb_safety",
+      "value": "Практика не для того, чтобы не замечать реальные проблемы. Если тебе небезопасно или очень тяжело, обратись к близкому человеку или специалисту."
+    },
+    {
+      "name": "onb_consent",
+      "value": "Я понимаю и принимаю условия"
+    }
+  ]
+}
