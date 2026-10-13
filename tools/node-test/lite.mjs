@@ -163,8 +163,8 @@ test('everyLiteKeyInAllLanguages', () => {
   for (const lang of ['ru', 'en', 'es']) {
     eq(Object.keys(i18n[lang]).length, Object.keys(i18n.ru).length, lang);
   }
-  for (const f of fs.readdirSync(path.join(src, 'i18n')).filter((n) => n.endsWith('.js'))) {
-    const text = fs.readFileSync(path.join(src, 'i18n', f), 'utf8');
+  for (const f of fs.readdirSync(path.join(src, 'common/keys'))) {
+    const text = fs.readFileSync(path.join(src, 'common/keys', f), 'utf8');
     const keys = JSON.parse(text.slice(text.indexOf('['), text.lastIndexOf(']') + 1));
     for (const k of keys) ok(i18n.ru[k] !== undefined, `${f}: ${k} missing in i18n json`);
   }

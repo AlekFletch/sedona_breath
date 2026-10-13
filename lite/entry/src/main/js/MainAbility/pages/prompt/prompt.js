@@ -1,7 +1,7 @@
 import { EMOTIONS, answersFor } from '../../core/SessionTypes.js';
 import { PromptFlow } from '../../common/promptFlow.js';
 import { current, sessionPage } from '../../common/sessionPage.js';
-import templateKeys from '../../i18n/prompt.js';
+import templateKeys from '../../common/keys/prompt.js';
 
 /*
  * Screens 4, 6 and 7 of a running session: Sedona questions, emotion choice (full practice),

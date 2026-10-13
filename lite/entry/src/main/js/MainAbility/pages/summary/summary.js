@@ -5,7 +5,7 @@ import { JsonFiles } from '../../common/adapters.js';
 import { appendRecord } from '../../common/history.js';
 import { SessionFiles } from '../../common/records.js';
 import { Strings } from '../../common/strings.js';
-import templateKeys from '../../i18n/summary.js';
+import templateKeys from '../../common/keys/summary.js';
 
 var strings = null;
 var files = null;

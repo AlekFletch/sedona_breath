@@ -5,7 +5,7 @@ import { DURATIONS_MIN } from '../../core/SessionTypes.js';
 import { LANGUAGES, Store } from '../../common/store.js';
 import { deleteHistory } from '../../common/history.js';
 import { storeSystem } from '../../common/system.js';
-import templateKeys from '../../i18n/settings.js';
+import templateKeys from '../../common/keys/settings.js';
 
 var store = null;
 

@@ -6,7 +6,7 @@
 import { formatString } from './adapters.js';
 
 /**
- * @param templateKeys  string keys the page template shows as s.key (i18n/<page>.js)
+ * @param templateKeys  string keys the page template shows as s.key (common/keys/<page>.js)
  * @param translate     the page's $t: path -> text
  */
 export function Strings(templateKeys, translate) {

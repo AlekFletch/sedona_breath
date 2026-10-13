@@ -12,6 +12,18 @@
     "deviceType": [
       "liteWearable"
     ],
+    "reqPermissions": [
+      {
+        "name": "ohos.permission.VIBRATE",
+        "reason": "Vibration cues for inhale, holds and session end",
+        "usedScene": {
+          "ability": [
+            ".MainAbility"
+          ],
+          "when": "inuse"
+        }
+      }
+    ],
     "distro": {
       "deliveryWithInstall": true,
       "moduleName": "entry",

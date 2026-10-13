@@ -3,7 +3,7 @@ import { ALL_PATTERNS } from '../../core/BreathPattern.js';
 import { DURATIONS_MIN } from '../../core/SessionTypes.js';
 import { Store } from '../../common/store.js';
 import { storeSystem } from '../../common/system.js';
-import templateKeys from '../../i18n/setup.js';
+import templateKeys from '../../common/keys/setup.js';
 
 var store = null;
 

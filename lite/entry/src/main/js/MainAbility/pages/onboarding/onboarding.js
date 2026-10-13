@@ -2,7 +2,7 @@ import router from '@system.router';
 import app from '@system.app';
 import { Store } from '../../common/store.js';
 import { storeSystem } from '../../common/system.js';
-import templateKeys from '../../i18n/onboarding.js';
+import templateKeys from '../../common/keys/onboarding.js';
 
 var store = null;
 

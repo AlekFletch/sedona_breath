@@ -1,6 +1,6 @@
 import { BreathVisual, SessionConfig, SessionController } from '../../core/SessionController.js';
 import { current, sessionPage } from '../../common/sessionPage.js';
-import templateKeys from '../../i18n/session.js';
+import templateKeys from '../../common/keys/session.js';
 
 /*
  * Screens 3 and 5 of a running session: intro, breathing and completion breathing

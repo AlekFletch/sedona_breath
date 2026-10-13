@@ -5,7 +5,7 @@ import { Store } from '../../common/store.js';
 import { appendRecord, lastCompleted, loadHistory, todayCount } from '../../common/history.js';
 import { pageForStage } from '../../common/stages.js';
 import { storeSystem } from '../../common/system.js';
-import templateKeys from '../../i18n/index.js';
+import templateKeys from '../../common/keys/index.js';
 
 var store = null;
 /** 'summary' | 'session' | 'prompt' | '' — the page "Continue" reopens. */

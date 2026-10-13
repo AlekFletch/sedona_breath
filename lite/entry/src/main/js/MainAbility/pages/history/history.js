@@ -3,7 +3,7 @@ import { formatMmSs } from '../../core/Timing.js';
 import { Store } from '../../common/store.js';
 import { loadHistory } from '../../common/history.js';
 import { storeSystem } from '../../common/system.js';
-import templateKeys from '../../i18n/history.js';
+import templateKeys from '../../common/keys/history.js';
 
 var LIMIT = 10;
 var store = null;
