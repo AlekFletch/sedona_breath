@@ -5,7 +5,7 @@ import { SessionConfig, SessionController, SessionObserver, SessionView, Snapsho
 import { SessionSnapshot } from '../main/ets/core/SessionRecord';
 import { Answer, Emotion, RATING_NONE, SessionMode, SessionStatus, Stage } from '../main/ets/core/SessionTypes';
 import { CompletionMessage, SupportRules } from '../main/ets/core/SupportRules';
-import { ManualTime } from '../main/ets/core/Timing';
+import { ManualTime } from '../main/ets/core/ManualTime';
 import { HapticDriver, LONG_PULSE_MS } from '../main/ets/core/Vibration';
 
 class Haptics implements HapticDriver {

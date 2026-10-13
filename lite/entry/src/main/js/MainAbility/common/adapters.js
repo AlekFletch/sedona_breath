@@ -1,5 +1,5 @@
 /*
- * Lite-wearable platform adapters. Every @system.* module is injected (see app.js),
+ * Lite-wearable platform adapters. Every @system.* module is injected (see common/system.js),
  * so this file runs unchanged under Node tests with fakes.
  */
 
@@ -60,25 +60,48 @@ export function JsonFiles(file) {
   this.file = file;
 }
 
+/**
+ * Files are read in 4 KB chunks (the way RepPulse reads them on the same watch). All the JSON
+ * written here is ASCII (ids, enum values, numbers), so characters and bytes match.
+ */
+export var READ_CHUNK = 4096;
+
 JsonFiles.prototype.read = function (name, fallback, cb) {
-  try {
-    this.file.readText({
+  var file = this.file;
+  var text = '';
+  function done(value) {
+    text = '';
+    cb(value);
+  }
+  function readFrom(position) {
+    file.readText({
       uri: FILE_ROOT + name,
+      position: position,
+      length: READ_CHUNK,
       success: function (data) {
+        var chunk = (data && data.text) || '';
+        text += chunk;
+        if (chunk.length === READ_CHUNK) {
+          readFrom(position + READ_CHUNK);
+          return;
+        }
         var value = fallback;
         try {
-          value = JSON.parse(data.text);
+          value = JSON.parse(text);
         } catch (e) {
           value = fallback;
         }
-        cb(value);
+        done(value);
       },
       fail: function () {
-        cb(fallback);
+        done(fallback);
       }
     });
+  }
+  try {
+    readFrom(0);
   } catch (e) {
-    cb(fallback);
+    done(fallback);
   }
 };
 
@@ -118,29 +141,49 @@ export function resolveLanguage(setting, systemLanguage) {
   if (setting === 'ru' || setting === 'en' || setting === 'es') {
     return setting;
   }
-  var l = (systemLanguage || '').toLowerCase().split(/[-_]/)[0];
+  // No RegExp anywhere in watch code: the watch's JS engine is built without it and the
+  // installer rejects the HAP with error 34 when a .js file fails to compile.
+  var l = (systemLanguage || '').toLowerCase().substring(0, 2);
   return l === 'en' || l === 'es' ? l : 'ru';
+}
+
+function isDigit(c) {
+  return c >= '0' && c <= '9';
 }
 
 /** Replaces %d / %s / %1$s placeholders, like resource formatting in the ArkTS app. */
 export function formatString(template, args) {
+  var out = '';
   var next = 0;
-  return template.replace(/%(\d+\$)?[sd]/g, function (m, pos) {
-    var i = pos ? parseInt(pos, 10) - 1 : next++;
-    return i < args.length ? String(args[i]) : m;
-  });
-}
-
-/** Strings of one language with Russian fallback for missing keys. */
-export function buildDictionary(all, lang) {
-  var out = {};
-  var base = all.ru;
-  var cur = all[lang] || base;
-  var k;
-  for (k in base) {
-    if (Object.prototype.hasOwnProperty.call(base, k)) {
-      out[k] = Object.prototype.hasOwnProperty.call(cur, k) ? cur[k] : base[k];
+  var i = 0;
+  while (i < template.length) {
+    var c = template.charAt(i);
+    if (c !== '%') {
+      out += c;
+      i++;
+      continue;
     }
+    // Optional "N$" position, then 's' or 'd'.
+    var j = i + 1;
+    while (j < template.length && isDigit(template.charAt(j))) {
+      j++;
+    }
+    var pos = -1;
+    if (j > i + 1 && template.charAt(j) === '$') {
+      pos = parseInt(template.substring(i + 1, j), 10) - 1;
+      j++;
+    } else {
+      j = i + 1;
+    }
+    var type = template.charAt(j);
+    if (type !== 's' && type !== 'd') {
+      out += c;
+      i++;
+      continue;
+    }
+    var idx = pos >= 0 ? pos : next++;
+    out += idx < args.length ? String(args[idx]) : template.substring(i, j + 1);
+    i = j + 1;
   }
   return out;
 }

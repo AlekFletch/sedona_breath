@@ -1,0 +1,111 @@
+<!--
+  Screens 4, 6, 7: Sedona prompt, emotion, check-in, completion message, plus the pause / end /
+  interruption dialogs. Breathing is on pages/session.
+-->
+<div class="page" onswipe="onSwipe">
+  <!-- Dialogs -->
+  <list class="scroll" if="{{ modal > 0 }}">
+    <list-item class="row-tall">
+      <text class="dialog-title">{{ modalTitle }}</text>
+    </list-item>
+    <list-item class="info" if="{{ modalBody !== '' }}">
+      <text class="small">{{ modalBody }}</text>
+    </list-item>
+    <list-item class="row">
+      <div class="btn-primary" onclick="resume"><text class="btn-text-primary">{{ s.btn_resume }}</text></div>
+    </list-item>
+    <list-item class="row" if="{{ modal !== 2 }}">
+      <div class="btn" onclick="askEnd"><text class="btn-text">{{ s.btn_finish }}</text></div>
+    </list-item>
+    <list-item class="row" if="{{ modal === 2 }}">
+      <div class="btn" onclick="endNow"><text class="btn-text-danger">{{ s.btn_end_now }}</text></div>
+    </list-item>
+    <list-item class="row" if="{{ modal === 2 }}">
+      <div class="btn" onclick="endAndSave"><text class="btn-text">{{ s.btn_end_save }}</text></div>
+    </list-item>
+    <list-item class="row"></list-item>
+  </list>
+
+  <!-- Sedona prompt -->
+  <list class="scroll" if="{{ modal === 0 && screen === 'question' }}">
+    <list-item class="info">
+      <text class="counter">{{ counterText }}</text>
+    </list-item>
+    <list-item class="question-item">
+      <text class="question">{{ questionText }}</text>
+    </list-item>
+    <list-item class="row">
+      <div class="btn-primary" onclick="answerFirst"><text class="btn-text-primary">{{ firstAnswer }}</text></div>
+    </list-item>
+    <list-item class="row" for="{{ answers }}">
+      <div class="btn" onclick="answer($item.id)"><text class="btn-text">{{ $item.label }}</text></div>
+    </list-item>
+    <list-item class="row"></list-item>
+  </list>
+
+  <!-- Emotion choice (full practice, optional) -->
+  <list class="scroll" if="{{ modal === 0 && screen === 'emotion' }}">
+    <list-item class="row">
+      <text class="dialog-title">{{ s.emotion_title }}</text>
+    </list-item>
+    <list-item class="row" for="{{ emotions }}">
+      <div class="btn" onclick="chooseEmotion($item.id)"><text class="btn-text">{{ $item.label }}</text></div>
+    </list-item>
+    <list-item class="row">
+      <div class="btn" onclick="skipEmotion"><text class="btn-text">{{ s.btn_skip }}</text></div>
+    </list-item>
+    <list-item class="row"></list-item>
+  </list>
+
+  <!-- "Fear" note -->
+  <list class="scroll" if="{{ modal === 0 && screen === 'note' }}">
+    <list-item class="text-item">
+      <text class="long">{{ s.emotion_fear_note }}</text>
+    </list-item>
+    <list-item class="row">
+      <div class="btn-primary" onclick="ackNote"><text class="btn-text-primary">{{ s.btn_next }}</text></div>
+    </list-item>
+    <list-item class="row"></list-item>
+  </list>
+
+  <!-- Check-in 1..5 -->
+  <list class="scroll" if="{{ modal === 0 && screen === 'checkIn' }}">
+    <list-item class="row-tall">
+      <text class="dialog-title">{{ s.checkin_title }}</text>
+    </list-item>
+    <list-item class="row">
+      <div class="rating-row">
+        <div class="rate" onclick="rate(1)"><text class="rate-text">1</text></div>
+        <div class="rate" onclick="rate(2)"><text class="rate-text">2</text></div>
+        <div class="rate" onclick="rate(3)"><text class="rate-text">3</text></div>
+        <div class="rate" onclick="rate(4)"><text class="rate-text">4</text></div>
+        <div class="rate" onclick="rate(5)"><text class="rate-text">5</text></div>
+      </div>
+    </list-item>
+    <list-item class="info">
+      <div class="scale-row">
+        <text class="scale-low">{{ s.checkin_low }}</text>
+        <text class="scale-high">{{ s.checkin_high }}</text>
+      </div>
+    </list-item>
+    <list-item class="row">
+      <div class="btn" onclick="skipRating"><text class="btn-text">{{ s.btn_skip }}</text></div>
+    </list-item>
+    <list-item class="row"></list-item>
+  </list>
+
+  <!-- Completion message -->
+  <list class="scroll" if="{{ modal === 0 && screen === 'message' }}">
+    <list-item class="text-item">
+      <text class="long-warm" if="{{ supportive }}">{{ messageText }}</text>
+      <text class="long" else>{{ messageText }}</text>
+    </list-item>
+    <list-item class="text-item" if="{{ showProfessional }}">
+      <text class="long-dim">{{ s.msg_professional }}</text>
+    </list-item>
+    <list-item class="row">
+      <div class="btn-primary" onclick="finishMessage"><text class="btn-text-primary">{{ s.btn_next }}</text></div>
+    </list-item>
+    <list-item class="row"></list-item>
+  </list>
+</div>

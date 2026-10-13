@@ -22,3 +22,5 @@ oh-package-lock.json5
 /lite/oh_modules
 /lite/local.properties
 /lite/.idea
+lite/signing/
+lite/out/

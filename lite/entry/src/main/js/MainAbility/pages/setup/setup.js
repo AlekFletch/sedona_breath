@@ -1,4 +1,11 @@
 import router from '@system.router';
+import { ALL_PATTERNS } from '../../core/BreathPattern.js';
+import { DURATIONS_MIN } from '../../core/SessionTypes.js';
+import { Store } from '../../common/store.js';
+import { storeSystem } from '../../common/system.js';
+import templateKeys from '../../i18n/setup.js';
+
+var store = null;
 
 /* Screen 2: duration, mode, breathing pattern, vibration. */
 export default {
@@ -14,43 +21,44 @@ export default {
     vibrationText: ''
   },
   onInit() {
-    var svc = this.$app.$def.services;
-    this.s = svc.strings();
-    this.duration = svc.settings.defaultDurationMin;
-    this.mode = svc.settings.defaultMode;
-    this.pattern = svc.settings.defaultPattern;
-    this.vibration = svc.settings.vibration;
-    this.render();
+    store = new Store(storeSystem(), templateKeys, (path) => this.$t(path));
+    this.s = store.strings();
+    store.loadSettings((st) => {
+      this.s = store.strings();
+      this.duration = st.defaultDurationMin;
+      this.mode = st.defaultMode;
+      this.pattern = st.defaultPattern;
+      this.vibration = st.vibration;
+      this.paint();
+    });
   },
-  render() {
-    var svc = this.$app.$def.services;
-    this.durationText = svc.fmt('fmt_minutes', this.duration);
-    this.modeText = svc.modeLabel(this.mode);
-    this.patternText = svc.patternLabel(this.pattern);
-    this.vibrationText = svc.onOff(this.vibration);
+  paint() {
+    this.durationText = store.fmt('fmt_minutes', this.duration);
+    this.modeText = store.label('mode_', this.mode, 'full');
+    this.patternText = store.label('pattern_', this.pattern, 'relax478');
+    this.vibrationText = store.t(this.vibration ? 'on' : 'off');
   },
   nextDuration() {
-    var list = this.$app.$def.services.durations();
-    this.duration = list[(list.indexOf(this.duration) + 1) % list.length];
-    this.render();
+    this.duration = DURATIONS_MIN[(DURATIONS_MIN.indexOf(this.duration) + 1) % DURATIONS_MIN.length];
+    this.paint();
   },
   toggleMode() {
     this.mode = this.mode === 'full' ? 'quick' : 'full';
-    this.render();
+    this.paint();
   },
   nextPattern() {
-    var list = this.$app.$def.services.patterns();
-    this.pattern = list[(list.indexOf(this.pattern) + 1) % list.length];
-    this.render();
+    this.pattern = ALL_PATTERNS[(ALL_PATTERNS.indexOf(this.pattern) + 1) % ALL_PATTERNS.length];
+    this.paint();
   },
   toggleVibration() {
     this.vibration = !this.vibration;
-    this.render();
+    this.paint();
   },
   start() {
-    var svc = this.$app.$def.services;
-    svc.startSession(svc.config(this.duration, this.mode, this.pattern, this.vibration));
-    router.replace({ uri: 'pages/session/session' });
+    router.replace({
+      uri: 'pages/session/session',
+      params: store.sessionParams(this.duration, this.mode, this.pattern, this.vibration)
+    });
   },
   back() {
     router.replace({ uri: 'pages/index/index' });

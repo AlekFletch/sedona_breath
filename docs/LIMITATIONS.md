@@ -4,7 +4,7 @@
 
 ## 1. Huawei Watch Fit 4: lite wearable
 
-**Главное ограничение.** По данным форума разработчиков Huawei и сообщества, линейка Watch Fit (как и Watch GT) относится к **lite wearable** на LiteOS. Такие часы запускают только JS-приложения для lite-устройств (HML/CSS/JS, FA-модель, `config.json`) и **не принимают ArkTS/Stage HAP**. Полный ArkTS/ArkUI доступен на устройствах типа `wearable` (Watch 5, линейка Watch Ultimate). Официального списка «Fit 4 → тип устройства» найти не удалось, поэтому **проверить**: подключите часы к DevEco и посмотрите тип устройства в Device Manager, или попробуйте установить HAP (`hdc install`); lite-часы отклонят пакет.
+**Главное ограничение.** По данным форума разработчиков Huawei и сообщества, линейка Watch Fit (как и Watch GT) относится к **lite wearable** на LiteOS. Такие часы запускают только JS-приложения для lite-устройств (HML/CSS/JS, FA-модель, `config.json`) и **не принимают ArkTS/Stage HAP**. Полный ArkTS/ArkUI доступен на устройствах типа `wearable` (Watch 5, линейка Watch Ultimate). Официального списка «Fit 4 → тип устройства» нет. На Watch Fit 4 Pro (прошивка 6.1.0.117, API 6.1.0(23)) это подтверждено: туда ставятся lite-JS пакеты через DevEco Assistant, HDC-отладки нет.
 
 Что это значит для проекта:
 
@@ -16,7 +16,7 @@
 | Health | Health Service Kit | только `HealthStore.Lite` |
 | Карточка на циферблате | FormExtensionAbility | нет |
 
-**Решение: отдельная lite-версия в [`lite/`](../lite/README.md)** (JS/HML/CSS, FA-модель, шаблон DevEco `[Lite]Empty Ability`). Она собирается установленным DevEco 6.1.1. Ядро сессии и строки генерируются из ArkTS-версии (`tools/build-lite.mjs`), поэтому логика и тексты у обеих версий совпадают. Ограничения lite (вибрация `short`/`long` без `stop()`, нет монотонных часов, нет Health Kit и карточек, шрифты в px) описаны в [lite/README.md](../lite/README.md#ограничения-lite-проверить-на-часах). Watch Fit 4 Pro относится к той же линейке и, по всей видимости, к тому же типу устройства (**проверить**).
+**Решение: отдельная lite-версия в [`lite/`](../lite/README.md)** (JS/HML/CSS, FA-модель, шаблон DevEco `[Lite]Empty Ability`). Она собирается установленным DevEco 6.1.1. Ядро сессии и строки генерируются из ArkTS-версии (`tools/build-lite.mjs`), поэтому логика и тексты у обеих версий совпадают. Из-за ~100 КБ JS-кучи сессия на lite разделена на две страницы, а строки вынесены в `i18n/*.json` ([lite/README.md](../lite/README.md#как-устроено-память-часов)). Ограничения lite (вибрация `short`/`long` без `stop()`, нет монотонных часов, нет Health Kit и карточек, шрифты в px) описаны в [lite/README.md](../lite/README.md#ограничения-lite-проверить-на-часах).
 
 ## 2. Фоновая работа
 

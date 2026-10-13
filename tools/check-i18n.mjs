@@ -85,8 +85,10 @@ for (const cfg of ['entry/src/main/module.json5', 'entry/src/main/resources/base
 // Lite (Watch Fit) build: keys come from the generated dictionary; templates must not contain literal text.
 const liteDir = path.join(root, 'lite/entry/src/main/js/MainAbility');
 if (fs.existsSync(liteDir)) {
-  const liteStrings = fs.readFileSync(path.join(liteDir, 'i18n/strings.js'), 'utf8');
-  for (const k of baseKeys) if (liteStrings.includes(`"${k}":`)) used.add(k);
+  for (const f of fs.readdirSync(path.join(liteDir, 'i18n')).filter((n) => n.endsWith('.json'))) {
+    const liteStrings = fs.readFileSync(path.join(liteDir, 'i18n', f), 'utf8');
+    for (const k of baseKeys) if (liteStrings.includes(`"${k}":`)) used.add(k);
+  }
   const walkLite = (dir) => {
     for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
       const p = path.join(dir, f.name);

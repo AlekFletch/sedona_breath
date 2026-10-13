@@ -11,7 +11,7 @@
 | `wearable`: Huawei Watch 5, Watch Ultimate и другие с HarmonyOS 5+ | корень репозитория | ArkTS / ArkUI, Stage |
 | `liteWearable`: **Huawei Watch Fit 4, Fit 4 Pro** и другие lite-часы | [`lite/`](lite/README.md) | JS / HML / CSS, FA |
 
-Fit 4 и Fit 4 Pro — это lite wearable на LiteOS: ArkTS-пакеты они не принимают. Для них есть отдельная lite-версия в [`lite/`](lite/README.md). Логика сессии (дыхательный движок, вибрация, план, правила поддержки) и все строки у обеих версий общие: lite-файлы `core/*.js` и `i18n/strings.js` генерирует `tools/build-lite.mjs` из ArkTS-исходников.
+Fit 4 и Fit 4 Pro — это lite wearable на LiteOS: ArkTS-пакеты они не принимают. Для них есть отдельная lite-версия в [`lite/`](lite/README.md). Логика сессии (дыхательный движок, вибрация, план, правила поддержки) и все строки у обеих версий общие: lite-файлы `core/*.js` и `i18n/*` генерирует `tools/build-lite.mjs` из ArkTS-исходников. Подписанный lite-пакет и установка на часы описаны в [lite/README.md](lite/README.md#установка-на-часы).
 
 ## Что реализовано
 

@@ -1,6 +1,12 @@
 import router from '@system.router';
+import { formatMmSs } from '../../core/Timing.js';
+import { Store } from '../../common/store.js';
+import { loadHistory } from '../../common/history.js';
+import { storeSystem } from '../../common/system.js';
+import templateKeys from '../../i18n/history.js';
 
 var LIMIT = 10;
+var store = null;
 
 function pad(n) {
   return n < 10 ? '0' + n : String(n);
@@ -19,29 +25,33 @@ export default {
     items: []
   },
   onInit() {
-    var svc = this.$app.$def.services;
-    this.s = svc.strings();
-    var rows = svc.latest(LIMIT);
-    var items = [];
-    for (var i = 0; i < rows.length; i++) {
-      var r = rows[i];
-      var interrupted = r.status === 'interrupted';
-      var status = svc.t(interrupted ? 'status_interrupted' : 'status_completed');
-      if (interrupted && r.stoppedAt) {
-        status = status + ' · ' + svc.fmt('history_stopped_at', svc.stageLabel(r.stoppedAt));
-      }
-      var before = r.emotionBefore ? svc.emotionLabel(r.emotionBefore) : svc.t('dash');
-      var after = r.ratingAfter > 0 ? svc.fmt('fmt_rating', r.ratingAfter) : svc.t('dash');
-      items.push({
-        id: r.id,
-        head: dateText(r.startedAt) + '  ' + svc.mmss(r.durationSec * 1000),
-        mode: svc.modeLabel(r.mode),
-        status: status,
-        interrupted: interrupted,
-        beforeAfter: svc.fmt('history_before', before) + '  ' + svc.fmt('history_after', after)
+    store = new Store(storeSystem(), templateKeys, (path) => this.$t(path));
+    this.s = store.strings();
+    store.loadSettings(() => {
+      this.s = store.strings();
+      loadHistory(store, (history) => {
+        var items = [];
+        for (var i = 0; i < history.length && i < LIMIT; i++) {
+          var r = history[i];
+          var interrupted = r.status === 'interrupted';
+          var status = store.t(interrupted ? 'status_interrupted' : 'status_completed');
+          if (interrupted && r.stoppedAt) {
+            status = status + ' · ' + store.fmt('history_stopped_at', store.label('stage_', r.stoppedAt, 'breathing'));
+          }
+          var before = r.emotionBefore ? store.label('emotion_', r.emotionBefore, 'other') : store.t('dash');
+          var after = r.ratingAfter > 0 ? store.fmt('fmt_rating', r.ratingAfter) : store.t('dash');
+          items.push({
+            id: r.id,
+            head: dateText(r.startedAt) + '  ' + formatMmSs(r.durationSec * 1000),
+            mode: store.label('mode_', r.mode, 'full'),
+            status: status,
+            interrupted: interrupted,
+            beforeAfter: store.fmt('history_before', before) + '  ' + store.fmt('history_after', after)
+          });
+        }
+        this.items = items;
       });
-    }
-    this.items = items;
+    });
   },
   back() {
     router.replace({ uri: 'pages/index/index' });

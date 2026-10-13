@@ -1,6 +1,6 @@
 import { describe, it, expect } from '@ohos/hypium';
 import { BreathPhase, PhaseType } from '../main/ets/core/BreathPattern';
-import { ManualTime } from '../main/ets/core/Timing';
+import { ManualTime } from '../main/ets/core/ManualTime';
 import {
   CueKind, DOUBLE_GAP_MS, HapticDriver, LONG_PULSE_MS, SHORT_PULSE_MS, VibrationCue, VibrationPlanner,
   VibrationScheduler

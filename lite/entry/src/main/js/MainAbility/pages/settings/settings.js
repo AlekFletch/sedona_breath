@@ -1,6 +1,17 @@
 import router from '@system.router';
 import prompt from '@system.prompt';
-import { LANGUAGES } from '../../common/services.js';
+import { ALL_PATTERNS } from '../../core/BreathPattern.js';
+import { DURATIONS_MIN } from '../../core/SessionTypes.js';
+import { LANGUAGES, Store } from '../../common/store.js';
+import { deleteHistory } from '../../common/history.js';
+import { storeSystem } from '../../common/system.js';
+import templateKeys from '../../i18n/settings.js';
+
+var store = null;
+
+function next(list, value) {
+  return list[(list.indexOf(value) + 1) % list.length];
+}
 
 /* Screen 10: language, default pattern / duration / mode, vibration, free rhythm, terms, delete history. */
 export default {
@@ -16,56 +27,51 @@ export default {
     exhaleText: ''
   },
   onInit() {
-    this.render();
+    store = new Store(storeSystem(), templateKeys, (path) => this.$t(path));
+    this.s = store.strings();
+    store.loadSettings(() => this.paint());
   },
-  render() {
-    var svc = this.$app.$def.services;
-    var st = svc.settings;
-    this.s = svc.strings();
-    this.languageText = svc.languageLabel(st.language);
-    this.patternText = svc.patternLabel(st.defaultPattern);
-    this.durationText = svc.fmt('fmt_minutes', st.defaultDurationMin);
-    this.modeText = svc.modeLabel(st.defaultMode);
-    this.vibrationText = svc.onOff(st.vibration);
-    this.inhaleText = svc.fmt('fmt_seconds', st.freeInhaleSec);
-    this.exhaleText = svc.fmt('fmt_seconds', st.freeExhaleSec);
+  paint() {
+    var st = store.settings;
+    this.s = store.strings();
+    this.languageText = store.label('lang_', st.language, 'system');
+    this.patternText = store.label('pattern_', st.defaultPattern, 'relax478');
+    this.durationText = store.fmt('fmt_minutes', st.defaultDurationMin);
+    this.modeText = store.label('mode_', st.defaultMode, 'full');
+    this.vibrationText = store.t(st.vibration ? 'on' : 'off');
+    this.inhaleText = store.fmt('fmt_seconds', st.freeInhaleSec);
+    this.exhaleText = store.fmt('fmt_seconds', st.freeExhaleSec);
   },
   commit() {
-    this.$app.$def.services.saveSettings();
-    this.render();
+    // saveSettings() normalizes (free rhythm: 3-8 s / 4-12 s, at most 6 breaths per minute)
+    // and applies the language at once: the lite build uses its own dictionary.
+    store.saveSettings();
+    this.paint();
   },
   nextLanguage() {
-    var st = this.$app.$def.services.settings;
-    st.language = LANGUAGES[(LANGUAGES.indexOf(st.language) + 1) % LANGUAGES.length];
-    this.commit(); // applies immediately: the lite build uses its own dictionary
+    store.settings.language = next(LANGUAGES, store.settings.language);
+    this.commit();
   },
   nextPattern() {
-    var svc = this.$app.$def.services;
-    var list = svc.patterns();
-    svc.settings.defaultPattern = list[(list.indexOf(svc.settings.defaultPattern) + 1) % list.length];
+    store.settings.defaultPattern = next(ALL_PATTERNS, store.settings.defaultPattern);
     this.commit();
   },
   nextDuration() {
-    var svc = this.$app.$def.services;
-    var list = svc.durations();
-    svc.settings.defaultDurationMin = list[(list.indexOf(svc.settings.defaultDurationMin) + 1) % list.length];
+    store.settings.defaultDurationMin = next(DURATIONS_MIN, store.settings.defaultDurationMin);
     this.commit();
   },
   toggleMode() {
-    var st = this.$app.$def.services.settings;
-    st.defaultMode = st.defaultMode === 'full' ? 'quick' : 'full';
+    store.settings.defaultMode = store.settings.defaultMode === 'full' ? 'quick' : 'full';
     this.commit();
   },
   toggleVibration() {
-    var st = this.$app.$def.services.settings;
-    st.vibration = !st.vibration;
+    store.settings.vibration = !store.settings.vibration;
     this.commit();
   },
   changeFree(inhaleDelta, exhaleDelta) {
-    var st = this.$app.$def.services.settings;
-    st.freeInhaleSec = st.freeInhaleSec + inhaleDelta;
-    st.freeExhaleSec = st.freeExhaleSec + exhaleDelta;
-    this.commit(); // saveSettings() normalizes: 3-8 s / 4-12 s, at most 6 breaths per minute
+    store.settings.freeInhaleSec = store.settings.freeInhaleSec + inhaleDelta;
+    store.settings.freeExhaleSec = store.settings.freeExhaleSec + exhaleDelta;
+    this.commit();
   },
   inhaleMinus() {
     this.changeFree(-1, 0);
@@ -89,10 +95,9 @@ export default {
     this.confirmDelete = false;
   },
   deleteAll() {
-    var svc = this.$app.$def.services;
     this.confirmDelete = false;
-    svc.deleteHistory((ok) => {
-      prompt.showToast({ message: svc.t(ok ? 'deleted_toast' : 'save_failed'), duration: 2000 });
+    deleteHistory(store, (ok) => {
+      prompt.showToast({ message: store.t(ok ? 'deleted_toast' : 'save_failed'), duration: 2000 });
     });
   },
   back() {

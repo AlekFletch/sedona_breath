@@ -1,6 +1,6 @@
 <!--
-  Screens 3-7: intro, breathing, Sedona prompt, emotion, completion breathing,
-  check-in, completion message, plus the pause / end / interruption dialogs.
+  Screens 3 and 5: intro, breathing, completion breathing, plus the pause / end / interruption
+  dialogs. The questions are on pages/prompt.
 -->
 <div class="page" onswipe="onSwipe">
   <!-- Dialogs -->
@@ -27,13 +27,13 @@
   </list>
 
   <!-- Intro -->
-  <div class="page" elif="{{ isIntro }}" onclick="finishIntro">
+  <div class="page" if="{{ modal === 0 && screen === 'intro' }}" onclick="finishIntro">
     <text class="intro">{{ introText }}</text>
     <text class="small">{{ s.intro_tap }}</text>
   </div>
 
   <!-- Breathing / completion breathing: animation, phase, remaining time, one button -->
-  <div class="page" elif="{{ isBreathing }}">
+  <div class="page" if="{{ modal === 0 && screen === 'breath' }}">
     <text class="caption" show="{{ caption !== '' }}">{{ caption }}</text>
     <div class="circle-box">
       <div class="circle" style="width: {{ d }}px; height: {{ d }}px; border-radius: {{ r }}px;"></div>
@@ -44,82 +44,4 @@
     <div class="btn-pause" onclick="pause"><text class="btn-text">{{ s.btn_pause }}</text></div>
   </div>
 
-  <!-- Sedona prompt -->
-  <list class="scroll" elif="{{ isQuestion }}">
-    <list-item class="info">
-      <text class="counter">{{ counterText }}</text>
-    </list-item>
-    <list-item class="question-item">
-      <text class="question">{{ questionText }}</text>
-    </list-item>
-    <list-item class="row">
-      <div class="btn-primary" onclick="answerFirst"><text class="btn-text-primary">{{ firstAnswer }}</text></div>
-    </list-item>
-    <list-item class="row" for="{{ answers }}">
-      <div class="btn" onclick="answer($item.id)"><text class="btn-text">{{ $item.label }}</text></div>
-    </list-item>
-    <list-item class="row"></list-item>
-  </list>
-
-  <!-- Emotion choice (full practice, optional) -->
-  <list class="scroll" elif="{{ isEmotion && !emotionNote }}">
-    <list-item class="row">
-      <text class="dialog-title">{{ s.emotion_title }}</text>
-    </list-item>
-    <list-item class="row" for="{{ emotions }}">
-      <div class="btn" onclick="chooseEmotion($item.id)"><text class="btn-text">{{ $item.label }}</text></div>
-    </list-item>
-    <list-item class="row">
-      <div class="btn" onclick="skipEmotion"><text class="btn-text">{{ s.btn_skip }}</text></div>
-    </list-item>
-    <list-item class="row"></list-item>
-  </list>
-
-  <!-- "Fear" note -->
-  <list class="scroll" elif="{{ isEmotion && emotionNote }}">
-    <list-item class="text-item">
-      <text class="long">{{ s.emotion_fear_note }}</text>
-    </list-item>
-    <list-item class="row">
-      <div class="btn-primary" onclick="ackNote"><text class="btn-text-primary">{{ s.btn_next }}</text></div>
-    </list-item>
-    <list-item class="row"></list-item>
-  </list>
-
-  <!-- Check-in 1..5 -->
-  <list class="scroll" elif="{{ isCheckIn }}">
-    <list-item class="row-tall">
-      <text class="dialog-title">{{ s.checkin_title }}</text>
-    </list-item>
-    <list-item class="row">
-      <div class="rating-row">
-        <div class="rate" for="{{ ratings }}" onclick="rate($item)"><text class="rate-text">{{ $item }}</text></div>
-      </div>
-    </list-item>
-    <list-item class="info">
-      <div class="scale-row">
-        <text class="scale-low">{{ s.checkin_low }}</text>
-        <text class="scale-high">{{ s.checkin_high }}</text>
-      </div>
-    </list-item>
-    <list-item class="row">
-      <div class="btn" onclick="skipRating"><text class="btn-text">{{ s.btn_skip }}</text></div>
-    </list-item>
-    <list-item class="row"></list-item>
-  </list>
-
-  <!-- Completion message -->
-  <list class="scroll" elif="{{ isMessage }}">
-    <list-item class="text-item">
-      <text class="long-warm" if="{{ supportive }}">{{ messageText }}</text>
-      <text class="long" else>{{ messageText }}</text>
-    </list-item>
-    <list-item class="text-item" if="{{ showProfessional }}">
-      <text class="long-dim">{{ s.msg_professional }}</text>
-    </list-item>
-    <list-item class="row">
-      <div class="btn-primary" onclick="finishMessage"><text class="btn-text-primary">{{ s.btn_next }}</text></div>
-    </list-item>
-    <list-item class="row"></list-item>
-  </list>
 </div>

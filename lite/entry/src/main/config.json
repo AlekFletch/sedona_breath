@@ -35,6 +35,7 @@
           "pages/onboarding/onboarding",
           "pages/setup/setup",
           "pages/session/session",
+          "pages/prompt/prompt",
           "pages/summary/summary",
           "pages/history/history",
           "pages/settings/settings"

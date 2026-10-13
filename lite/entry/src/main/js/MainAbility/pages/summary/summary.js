@@ -1,48 +1,70 @@
 import router from '@system.router';
-import prompt from '@system.prompt';
+import file from '@system.file';
+import { formatMmSs } from '../../core/Timing.js';
+import { JsonFiles } from '../../common/adapters.js';
+import { appendRecord } from '../../common/history.js';
+import { SessionFiles } from '../../common/records.js';
+import { Strings } from '../../common/strings.js';
+import templateKeys from '../../i18n/summary.js';
 
-/* Screen 8: duration, cycles, mode, emotion before (if chosen), rating after (if given), "Save". */
+var strings = null;
+var files = null;
+var record = null;
+var saving = false;
+
+/*
+ * Screen 8: duration, cycles, mode, emotion before (if chosen), rating after (if given), "Save".
+ * The record comes from the session page through pending.json, so it survives an app restart.
+ * Router param: lang. The page does not read settings.json: it opens while the session page is
+ * still being freed, so it is kept small.
+ */
 export default {
   data: {
+    lang: 'ru',
     s: {},
     lines: [],
     status: ''
   },
   onInit() {
-    var svc = this.$app.$def.services;
-    this.s = svc.strings();
-    this.saving = false;
-    var r = svc.prepareSummary();
-    if (r === null) {
-      setTimeout(() => router.replace({ uri: 'pages/index/index' }), 0);
-      return;
-    }
-    var lines = [
-      { label: svc.t('summary_duration'), value: svc.mmss(r.durationSec * 1000) },
-      { label: svc.t('summary_cycles'), value: String(r.cycles) },
-      { label: svc.t('summary_mode'), value: svc.modeLabel(r.mode) }
-    ];
-    if (r.emotionBefore !== '') {
-      lines.push({ label: svc.t('summary_emotion'), value: svc.emotionLabel(r.emotionBefore) });
-    }
-    if (r.ratingAfter > 0) {
-      lines.push({ label: svc.t('summary_rating'), value: svc.fmt('fmt_rating', r.ratingAfter) });
-    }
-    this.lines = lines;
+    strings = new Strings(templateKeys, (path) => this.$t(path));
+    strings.lang = this.lang;
+    files = new SessionFiles(new JsonFiles(file));
+    record = null;
+    saving = false;
+    this.s = strings.strings();
+    files.readPending((r) => {
+      if (r === null) {
+        router.replace({ uri: 'pages/index/index' });
+        return;
+      }
+      record = r;
+      var lines = [
+        { label: strings.t('summary_duration'), value: formatMmSs(r.durationSec * 1000) },
+        { label: strings.t('summary_cycles'), value: String(r.cycles) },
+        { label: strings.t('summary_mode'), value: strings.label('mode_', r.mode, 'full') }
+      ];
+      if (r.emotionBefore) {
+        lines.push({ label: strings.t('summary_emotion'), value: strings.label('emotion_', r.emotionBefore, 'other') });
+      }
+      if (r.ratingAfter > 0) {
+        lines.push({ label: strings.t('summary_rating'), value: strings.fmt('fmt_rating', r.ratingAfter) });
+      }
+      this.lines = lines;
+    });
   },
   save() {
-    if (this.saving) {
+    if (saving || record === null) {
       return;
     }
-    this.saving = true;
-    var svc = this.$app.$def.services;
-    svc.saveCompleted((ok) => {
-      this.saving = false;
+    saving = true;
+    appendRecord(files, record, (ok) => {
+      saving = false;
       if (ok) {
-        prompt.showToast({ message: svc.t('saved_toast'), duration: 2000 });
+        files.discardAll();
+        // No toast here: showToast right before router.replace keeps the page from leaving on lite.
         router.replace({ uri: 'pages/index/index' });
       } else {
-        this.status = svc.t('save_failed');
+        this.status = strings.t('save_failed');
       }
     });
   }

@@ -1,7 +1,7 @@
 import { describe, it, expect } from '@ohos/hypium';
 import { FreeRhythm, PatternCatalog, PatternId, PhaseType } from '../main/ets/core/BreathPattern';
 import { BreathEngine, BreathListener, BreathPosition, EngineState } from '../main/ets/core/BreathEngine';
-import { ManualTime } from '../main/ets/core/Timing';
+import { ManualTime } from '../main/ets/core/ManualTime';
 
 class Recorder implements BreathListener {
   phases: string[] = [];
