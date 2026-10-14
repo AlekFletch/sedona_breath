@@ -136,17 +136,6 @@ JsonFiles.prototype.remove = function (name) {
   }
 };
 
-/** 'system' -> system language if supported, otherwise Russian. */
-export function resolveLanguage(setting, systemLanguage) {
-  if (setting === 'ru' || setting === 'en' || setting === 'es') {
-    return setting;
-  }
-  // No RegExp anywhere in watch code: the watch's JS engine is built without it and the
-  // installer rejects the HAP with error 34 when a .js file fails to compile.
-  var l = (systemLanguage || '').toLowerCase().substring(0, 2);
-  return l === 'en' || l === 'es' ? l : 'ru';
-}
-
 function isDigit(c) {
   return c >= '0' && c <= '9';
 }
@@ -186,10 +175,4 @@ export function formatString(template, args) {
     i = j + 1;
   }
   return out;
-}
-
-export function startOfToday(now) {
-  var d = new Date(now);
-  d.setHours(0, 0, 0, 0);
-  return d.getTime();
 }

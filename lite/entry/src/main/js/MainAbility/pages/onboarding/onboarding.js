@@ -1,7 +1,7 @@
 import app from '@system.app';
 import { Store } from '../../common/store.js';
 import { storeSystem } from '../../common/system.js';
-import { textHeight } from '../../common/textSize.js';
+import { textHeight, wrap } from '../../common/textSize.js';
 import { focusList, go, isBackSwipe, useBackground } from '../../common/ui.js';
 import templateKeys from '../../common/keys/onboarding.js';
 
@@ -52,6 +52,8 @@ export default {
       t1 = store.t('onb_consent');
     }
     this.head = head;
+    t1 = wrap(t1, false);
+    t2 = wrap(t2, false);
     this.h1 = textHeight(t1, false);
     this.r1 = this.h1 + 10;
     this.t1 = t1;

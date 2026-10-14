@@ -2,7 +2,6 @@
  * Session history in internal://app/history.json, newest first. Separate from store.js so the
  * session pages, which never read the history, do not bundle it.
  */
-import { startOfToday } from './adapters.js';
 import { plainRecord } from './records.js';
 
 var HISTORY_FILE = 'history.json';
@@ -51,4 +50,10 @@ export function lastCompleted(history) {
     }
   }
   return null;
+}
+
+function startOfToday(now) {
+  var d = new Date(now);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
 }

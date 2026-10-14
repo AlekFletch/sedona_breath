@@ -1,0 +1,4 @@
+<!-- Blank step between the two session pages (see hop.js): the background only. -->
+<stack class="root">
+  <image class="bg" src="/common/bg_rect.jpg"></image>
+</stack>

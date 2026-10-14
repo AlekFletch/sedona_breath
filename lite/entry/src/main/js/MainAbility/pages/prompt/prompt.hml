@@ -4,15 +4,7 @@
 -->
 <stack class="root" onswipe="onSwipe">
   <image class="bg" src="{{ bg }}"></image>
-  <div class="frame" if="{{ modal > 0 }}">
-    <text class="big" style="height: {{ dialogH }}px;">{{ dialogTitle }}</text>
-    <text class="small" if="{{ dialogBody !== '' }}">{{ dialogBody }}</text>
-    <div class="btn-primary dlg-gap" onclick="resume"><text class="btn-text-primary">{{ s.btn_resume }}</text></div>
-    <div class="btn dlg-gap" if="{{ modal !== 2 }}" onclick="askEnd"><text class="btn-text">{{ s.btn_finish }}</text></div>
-    <div class="btn dlg-gap" if="{{ modal === 2 }}" onclick="endNow"><text class="btn-text-danger">{{ s.btn_end_now }}</text></div>
-    <div class="btn dlg-gap" if="{{ modal === 2 }}" onclick="endAndSave"><text class="btn-text">{{ s.btn_end_save }}</text></div>
-  </div>
-  <div class="frame" if="{{ modal === 0 }}">
+  <div class="frame" if="{{ modal === 0 && screen !== '' }}">
     <list class="list" ref="list">
       <list-item class="li-line" if="{{ counterText !== '' }}"><text class="accent">{{ counterText }}</text></list-item>
       <list-item class="li-text" style="height: {{ headR }}px;" if="{{ headText !== '' }}">
@@ -25,7 +17,7 @@
         <div class="btn-primary" onclick="tapFirst"><text class="btn-text-primary">{{ firstText }}</text></div>
       </list-item>
       <list-item class="li" for="{{ options }}">
-        <div class="btn" onclick="choose($item.id)"><text class="btn-text">{{ $item.label }}</text></div>
+        <text class="opt" onclick="choose($item.id)">{{ $item.label }}</text>
       </list-item>
       <list-item class="li" if="{{ screen === 'checkIn' }}">
         <div class="rate-row">
@@ -47,5 +39,15 @@
       </list-item>
       <list-item class="li-gap"></list-item>
     </list>
+  </div>
+  <!-- Dialog last: when `modal` changes, the screen above is removed before the dialog is built,
+       so the two never share the heap. -->
+  <div class="frame" if="{{ modal > 0 }}">
+    <text class="big" style="height: {{ dialogH }}px;">{{ dialogTitle }}</text>
+    <text class="small" if="{{ dialogBody !== '' }}">{{ dialogBody }}</text>
+    <div class="btn-primary dlg-gap" onclick="resume"><text class="btn-text-primary">{{ s.btn_resume }}</text></div>
+    <div class="btn dlg-gap" if="{{ modal !== 2 }}" onclick="askEnd"><text class="btn-text">{{ s.btn_finish }}</text></div>
+    <div class="btn dlg-gap" if="{{ modal === 2 }}" onclick="endNow"><text class="btn-text-danger">{{ s.btn_end_now }}</text></div>
+    <div class="btn dlg-gap" if="{{ modal === 2 }}" onclick="endAndSave"><text class="btn-text-sm">{{ s.btn_end_save }}</text></div>
   </div>
 </stack>

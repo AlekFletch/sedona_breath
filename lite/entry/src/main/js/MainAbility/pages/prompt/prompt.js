@@ -1,7 +1,7 @@
 import { EMOTIONS, answersFor } from '../../core/SessionTypes.js';
 import { PromptFlow } from '../../common/promptFlow.js';
 import { current, sessionPage } from '../../common/sessionPage.js';
-import { textHeight } from '../../common/textSize.js';
+import { textHeight, wrap } from '../../common/textSize.js';
 import templateKeys from '../../common/keys/prompt.js';
 
 /*
@@ -22,11 +22,11 @@ export default sessionPage({
     screen: '',
     counterText: '',
     headText: '',
-    headH: 42,
-    headR: 54,
+    headH: 46,
+    headR: 58,
     bodyText: '',
-    bodyH: 34,
-    bodyR: 44,
+    bodyH: 38,
+    bodyR: 48,
     firstText: '',
     options: [],
     lastText: ''
@@ -76,6 +76,8 @@ export default sessionPage({
     }
     this.screen = v.stage;
     this.counterText = counter;
+    head = wrap(head, true);
+    body = wrap(body, false);
     this.headH = textHeight(head, true);
     this.headR = this.headH + 12;
     this.headText = head;

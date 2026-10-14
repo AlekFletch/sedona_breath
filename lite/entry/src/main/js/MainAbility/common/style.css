@@ -107,6 +107,15 @@
   color: #F2A48C;
   text-overflow: ellipsis;
 }
+/* Long button labels ("End and save"): 30 px does not fit 300 px in Russian. */
+.btn-text-sm {
+  width: 300px;
+  height: 32px;
+  font-size: 24px;
+  text-align: center;
+  color: #F2EEDD;
+  text-overflow: ellipsis;
+}
 .card {
   width: 330px;
   height: 86px;
@@ -170,8 +179,9 @@
   text-align: center;
   color: #F2EEDD;
 }
+/* 356 px: "Что я сейчас чувствую?" needs ~342 px at 30 px, and the watch then wraps the "?" alone. */
 .big {
-  width: 340px;
+  width: 356px;
   height: 40px;
   font-size: 30px;
   text-align: center;

@@ -9,8 +9,11 @@ const src = 'C:/Claude/Sedona breath/lite/entry/src/main/js/MainAbility/core';
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'seed-'));
 fs.writeFileSync(path.join(tmp, 'package.json'), '{ "type": "module" }');
 fs.cpSync(src, path.join(tmp, 'core'), { recursive: true });
+fs.mkdirSync(path.join(tmp, 'common'));
+fs.copyFileSync(path.join(src, '../common/plan.js'), path.join(tmp, 'common/plan.js'));
 const P = await import(pathToFileURL(path.join(tmp, 'core/BreathPattern.js')).href);
 const S = await import(pathToFileURL(path.join(tmp, 'core/SessionPlan.js')).href);
+const { planOf } = await import(pathToFileURL(path.join(tmp, 'common/plan.js')).href);
 const pattern = P.PatternCatalog.build('relax478', new P.FreeRhythm(4, 6));
 const steps = S.SessionPlanner.build(3, mode, pattern);
 const index = steps.findIndex((s) => s.stage() === stage);
@@ -19,6 +22,8 @@ fs.writeFileSync(path.join(outDir, 'settings.json'), JSON.stringify({ onboarding
 fs.writeFileSync(path.join(outDir, 'snapshot.json'), JSON.stringify({
   version: 1, savedAt: Date.now(), startedAt: Date.now() - 150000, durationMin: 3, mode, patternId: 'relax478',
   freeInhaleSec: 4, freeExhaleSec: 6, vibration: true, stepIndex: index, stepElapsedMs: 0, activeMs: 150000,
-  cyclesDone: 6, emotion: mode === 'full' ? 'tension' : '', rating: 0, stage
+  cyclesDone: 6, emotion: mode === 'full' ? 'tension' : '', rating: 0, stage,
+  // pages/prompt reads the plan pages/session writes on handoff (common/plan.js).
+  plan: planOf({ steps, pattern })
 }));
 console.log(stage, 'index', index, 'of', steps.length);

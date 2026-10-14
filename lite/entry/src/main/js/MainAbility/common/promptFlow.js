@@ -3,18 +3,46 @@
  * message, restored from the SessionController snapshot (common/sessionPage.js).
  *
  * The full SessionController with its breath engine does not fit in the watch's JS heap next to
- * this page, so the prompt steps are walked here with the core's own plan and rules
- * (SessionPlanner, SupportRules). It mirrors SessionController step by step:
+ * this page, so the prompt steps are walked here with the core's rules (SupportRules) and the plan
+ * pages/session puts into the snapshot (common/plan.js): the planner and the breath patterns are
+ * not bundled either. It mirrors SessionController step by step:
  * tools/node-test/lite.mjs drives both through the same sessions and compares every snapshot and
  * record. As soon as the next step is breathing, the stage changes and the page hands the session
  * back to pages/session.
  */
-import { FreeRhythm, PatternCatalog } from '../core/BreathPattern.js';
-import { SessionPlanner, StepKind } from '../core/SessionPlan.js';
 import {
   Answer, Emotion, QuestionId, RATING_NONE, SessionStatus, Stage, parseDuration, parseEmotion, parseMode
 } from '../core/SessionTypes.js';
 import { CompletionMessage, SupportRules } from '../core/SupportRules.js';
+
+// Fields of a plan step, read from the snapshot's plan string (common/plan.js).
+var STAGE = 0;
+var QUESTION = 1;
+var QUESTION_INDEX = 2;
+var QUESTION_TOTAL = 3;
+var ESTIMATED_MS = 4;
+
+/** 'stage:question:estimatedMs,...' -> [stage, question, questionIndex, questionTotal, estimatedMs] per step. */
+function readPlan(text) {
+  var parts = text.split(',');
+  var steps = [];
+  var total = 0;
+  var i;
+  for (i = 0; i < parts.length; i++) {
+    var f = parts[i].split(':');
+    var question = f[0] === Stage.QUESTION;
+    if (question) {
+      total++;
+    }
+    steps.push([f[0], Number(f[1]), question ? total : 0, 0, Number(f[2])]);
+  }
+  for (i = 0; i < steps.length; i++) {
+    if (steps[i][STAGE] === Stage.QUESTION) {
+      steps[i][QUESTION_TOTAL] = total;
+    }
+  }
+  return steps;
+}
 
 export function PromptFlow(s, clock, sink, wallClock) {
   this.clock = clock;
@@ -22,11 +50,13 @@ export function PromptFlow(s, clock, sink, wallClock) {
   this.wallClock = wallClock;
   this.durationMin = parseDuration(s.durationMin);
   this.mode = parseMode(s.mode);
-  this.patternId = PatternCatalog.parseId(s.patternId);
-  this.free = new FreeRhythm(s.freeInhaleSec, s.freeExhaleSec);
+  // Passed on as they are: they came from SessionController, which has checked them.
+  this.patternId = s.patternId;
+  this.freeInhaleSec = s.freeInhaleSec;
+  this.freeExhaleSec = s.freeExhaleSec;
   this.vibration = s.vibration;
-  this.pattern = PatternCatalog.build(this.patternId, this.free);
-  this.steps = SessionPlanner.build(this.durationMin, this.mode, this.pattern);
+  this.plan = s.plan;
+  this.steps = readPlan(s.plan);
   this.startedAt = s.startedAt;
   this.activeAccumMs = Math.max(0, s.activeMs);
   this.activeSince = -1;
@@ -42,8 +72,14 @@ export function PromptFlow(s, clock, sink, wallClock) {
   this.enterStep(Math.max(0, Math.min(s.stepIndex, this.steps.length)), true);
 }
 
-/** Same signature as SessionController.fromSnapshot; starts PAUSED at the saved step. */
+/**
+ * Same signature as SessionController.fromSnapshot; starts PAUSED at the saved step. null for a
+ * snapshot without the plan (saved by the controller itself): pages/session has to restore it.
+ */
 PromptFlow.fromSnapshot = function (s, clock, scheduler, haptics, sink, wallClock) {
+  if (typeof s.plan !== 'string' || s.plan === '') {
+    return null;
+  }
   return new PromptFlow(s, clock, sink, wallClock);
 };
 
@@ -67,13 +103,13 @@ PromptFlow.prototype.currentStep = function () {
 
 PromptFlow.prototype.answer = function (a) {
   var step = this.currentStep();
-  if (step === undefined || step.kind !== StepKind.QUESTION || this.view.paused) {
+  if (step === undefined || step[STAGE] !== Stage.QUESTION || this.view.paused) {
     return;
   }
-  if (step.question === QuestionId.WHEN && a === Answer.NOT_NOW) {
+  if (step[QUESTION] === QuestionId.WHEN && a === Answer.NOT_NOW) {
     // Gentle return to breathing, no pressure.
     this.view.notNowReturn = true;
-    this.enterStep(SessionPlanner.completionIndex(this.steps), false);
+    this.enterStep(this.completionIndex(), false);
     return;
   }
   this.next();
@@ -170,7 +206,7 @@ PromptFlow.prototype.activeMs = function () {
 PromptFlow.prototype.buildRecord = function (status) {
   return {
     id: 0, startedAt: this.startedAt, endedAt: this.wallClock(), durationSec: Math.round(this.activeMs() / 1000),
-    plannedMin: this.durationMin, mode: this.mode, patternId: this.pattern.id, cycles: this.cyclesBefore,
+    plannedMin: this.durationMin, mode: this.mode, patternId: this.patternId, cycles: this.cyclesBefore,
     status: status, stoppedAt: status === SessionStatus.INTERRUPTED ? this.view.stage : '',
     emotionBefore: this.view.emotion, ratingAfter: this.view.rating, heartRateAvg: 0
   };
@@ -179,21 +215,30 @@ PromptFlow.prototype.buildRecord = function (status) {
 PromptFlow.prototype.snapshot = function () {
   return {
     version: 1, savedAt: this.wallClock(), startedAt: this.startedAt, durationMin: this.durationMin,
-    mode: this.mode, patternId: this.patternId, freeInhaleSec: this.free.inhaleSec,
-    freeExhaleSec: this.free.exhaleSec, vibration: this.vibration, stepIndex: this.view.stepIndex,
+    mode: this.mode, patternId: this.patternId, freeInhaleSec: this.freeInhaleSec,
+    freeExhaleSec: this.freeExhaleSec, vibration: this.vibration, stepIndex: this.view.stepIndex,
     stepElapsedMs: 0, activeMs: this.activeMs(), cyclesDone: this.cyclesBefore, emotion: this.view.emotion,
-    rating: this.view.rating, stage: this.view.stage
+    rating: this.view.rating, stage: this.view.stage, plan: this.plan
   };
 };
 
 /** Estimated time left for the whole session (orientation only). */
 PromptFlow.prototype.remainingMs = function () {
-  var i = this.view.stepIndex;
-  if (i >= this.steps.length) {
-    return 0;
+  var sum = 0;
+  for (var i = this.view.stepIndex; i < this.steps.length; i++) {
+    sum += this.steps[i][ESTIMATED_MS];
   }
-  return SessionPlanner.estimateRemainingMs(this.steps, i + 1, this.pattern) +
-    SessionPlanner.estimateMs(this.steps[i], this.pattern);
+  return sum;
+};
+
+/** Same as SessionPlanner.completionIndex: the completion breathing step. */
+PromptFlow.prototype.completionIndex = function () {
+  for (var i = 0; i < this.steps.length; i++) {
+    if (this.steps[i][STAGE] === Stage.COMPLETION_BREATHING) {
+      return i;
+    }
+  }
+  return this.steps.length - 1;
 };
 
 // ---------------------------------------------------------------- steps
@@ -217,11 +262,11 @@ PromptFlow.prototype.enterStep = function (index, restoredPaused) {
     return;
   }
   var step = this.steps[index];
-  this.view.stage = step.stage();
-  this.view.question = step.question;
-  this.view.questionIndex = step.questionIndex;
-  this.view.questionTotal = step.questionTotal;
-  if (step.kind !== StepKind.COMPLETION_BREATH) {
+  this.view.stage = step[STAGE];
+  this.view.question = step[QUESTION];
+  this.view.questionIndex = step[QUESTION_INDEX];
+  this.view.questionTotal = step[QUESTION_TOTAL];
+  if (step[STAGE] !== Stage.COMPLETION_BREATHING) {
     this.view.notNowReturn = false;
   }
   if (restoredPaused) {

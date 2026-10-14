@@ -28,11 +28,13 @@ for (const dir of ['core', 'common', 'i18n']) fs.cpSync(path.join(src, dir), pat
 const load = async (rel) => import(pathToFileURL(path.join(out, rel)).href);
 const A = await load('common/adapters.js');
 const { Strings } = await load('common/strings.js');
-const { Store, mergeSettings } = await load('common/store.js');
+const { Store, mergeSettings, resolveLanguage } = await load('common/store.js');
 const { SessionFiles } = await load('common/records.js');
 const H = await load('common/history.js');
 const { PromptFlow } = await load('common/promptFlow.js');
+const { planOf } = await load('common/plan.js');
 const { pageForStage } = await load('common/stages.js');
+const { wrap, textHeight } = await load('common/textSize.js');
 const { ManualTime } = await load('core/ManualTime.js');
 const { SessionConfig, SessionController } = await load('core/SessionController.js');
 const { FreeRhythm } = await load('core/BreathPattern.js');
@@ -113,11 +115,11 @@ function breatheThrough(time, c) {
 
 console.log('lite adapters');
 test('languageResolution', () => {
-  eq(A.resolveLanguage('system', 'en'), 'en');
-  eq(A.resolveLanguage('system', 'es-ES'), 'es');
-  eq(A.resolveLanguage('system', 'de'), 'ru');
-  eq(A.resolveLanguage('system', ''), 'ru');
-  eq(A.resolveLanguage('en', 'ru'), 'en');
+  eq(resolveLanguage('system', 'en'), 'en');
+  eq(resolveLanguage('system', 'es-ES'), 'es');
+  eq(resolveLanguage('system', 'de'), 'ru');
+  eq(resolveLanguage('system', ''), 'ru');
+  eq(resolveLanguage('en', 'ru'), 'en');
 });
 test('formatString', () => {
   eq(A.formatString('Вопрос %d из %d', [2, 5]), 'Вопрос 2 из 5');
@@ -205,6 +207,23 @@ test('corruptFilesFallBack', () => {
   H.loadHistory(st, (v) => { h = v; });
   eq(h.length, 0);
   eq(mergeSettings({ defaultDurationMin: 99, defaultMode: 'x' }).defaultDurationMin, 3);
+});
+
+test('wrapBreaksBetweenWordsOnly', () => {
+  for (const big of [true, false]) {
+    for (const lang of Object.keys(i18n)) {
+      for (const text of Object.values(i18n[lang])) {
+        const w = wrap(text, big);
+        eq(w.split('\n').join(' '), text, 'only spaces become line breaks');
+        for (const line of w.split('\n')) {
+          ok(line.length <= (big ? 19 : 24) || !line.includes(' '), `line too long: ${line}`);
+        }
+        eq(textHeight(w, big), w.split('\n').length * (big ? 46 : 38));
+      }
+    }
+  }
+  eq(wrap('Смог бы я позволить этому чувству быть?', true), 'Смог бы я позволить\nэтому чувству быть?');
+  eq(textHeight('', false), 38, 'an empty text keeps one line');
 });
 
 console.log('lite history');
@@ -306,8 +325,11 @@ console.log('PromptFlow mirrors SessionController');
 const strip = (s) => {
   const o = JSON.parse(JSON.stringify(s));
   delete o.savedAt;
+  delete o.plan;
   return JSON.stringify(o);
 };
+/** The snapshot pages/session hands over to pages/prompt: with the plan, through JSON like the file. */
+const handoff = (c) => JSON.parse(JSON.stringify(Object.assign(c.snapshot(), { plan: planOf(c) })));
 
 /**
  * Runs a session with the controller and, at every prompt stage, also with a PromptFlow restored
@@ -325,7 +347,7 @@ function parity(mode, durationMin, act) {
       breatheThrough(time, ref);
       continue;
     }
-    const flow = PromptFlow.fromSnapshot(ref.snapshot(), time, time, null, sessionFiles().sf,
+    const flow = PromptFlow.fromSnapshot(handoff(ref), time, time, null, sessionFiles().sf,
       () => 1_700_000_000_000 + time.now());
     flow.setMessageSeed(7);
     flow.resume();
@@ -336,6 +358,8 @@ function parity(mode, durationMin, act) {
       act(flow);
       eq(flow.view.stage, ref.view.stage, 'stage');
       eq(flow.view.notNowReturn, ref.view.notNowReturn, 'notNowReturn');
+      eq(`${flow.view.question} ${flow.view.questionIndex}/${flow.view.questionTotal}`,
+        `${ref.view.question} ${ref.view.questionIndex}/${ref.view.questionTotal}`, 'question');
       eq(flow.view.emotionNote, ref.view.emotionNote, 'emotionNote');
       eq(flow.view.message, ref.view.message, 'message');
       eq(flow.view.professionalHint, ref.view.professionalHint, 'professionalHint');
@@ -378,7 +402,8 @@ test('promptFlowPauseAndDiscard', () => {
   ref.start();
   ref.finishIntro();
   breatheThrough(time, ref);
-  const restoredFrom = ref.snapshot();
+  eq(PromptFlow.fromSnapshot(ref.snapshot(), time, time, null, sf, () => 0), null, 'no plan: pages/session restores it');
+  const restoredFrom = handoff(ref);
   const flow = PromptFlow.fromSnapshot(restoredFrom, time, time, null, sf, () => 0);
   ok(flow.isPaused(), 'restored paused');
   flow.answer('yes');
@@ -388,6 +413,7 @@ test('promptFlowPauseAndDiscard', () => {
   flow.interrupt();
   ok(flow.isPaused());
   eq(flow.snapshot().activeMs, restoredFrom.activeMs + 2000, 'active time counts only while resumed');
+  eq(JSON.stringify(flow.snapshot().plan), JSON.stringify(restoredFrom.plan), 'the plan travels on with the snapshot');
   flow.discard();
   ok(flow.isEnded());
   ok(!('internal://app/snapshot.json' in files), 'discard drops the snapshot');

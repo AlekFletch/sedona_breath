@@ -10,7 +10,7 @@
  */
 import { DEFAULT_PATTERN, FreeRhythm, PatternCatalog } from '../core/BreathPattern.js';
 import { DEFAULT_DURATION_MIN, SessionMode, parseDuration, parseMode } from '../core/SessionTypes.js';
-import { JsonFiles, resolveLanguage } from './adapters.js';
+import { JsonFiles } from './adapters.js';
 import { SessionFiles } from './records.js';
 import { Strings } from './strings.js';
 
@@ -111,3 +111,14 @@ Store.prototype.sessionParams = function (durationMin, mode, patternId, vibratio
     freeEx: String(st.freeExhaleSec)
   };
 };
+
+/** 'system' -> system language if supported, otherwise Russian. */
+export function resolveLanguage(setting, systemLanguage) {
+  if (setting === 'ru' || setting === 'en' || setting === 'es') {
+    return setting;
+  }
+  // No RegExp anywhere in watch code: the watch's JS engine is built without it and the
+  // installer rejects the HAP with error 34 when a .js file fails to compile.
+  var l = (systemLanguage || '').toLowerCase().substring(0, 2);
+  return l === 'en' || l === 'es' ? l : 'ru';
+}

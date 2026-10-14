@@ -4,25 +4,27 @@
 -->
 <stack class="root" onswipe="onSwipe">
   <image class="bg" src="{{ bg }}"></image>
-  <div class="frame" if="{{ modal > 0 }}">
-    <text class="big" style="height: {{ dialogH }}px;">{{ dialogTitle }}</text>
-    <text class="small" if="{{ dialogBody !== '' }}">{{ dialogBody }}</text>
-    <div class="btn-primary dlg-gap" onclick="resume"><text class="btn-text-primary">{{ s.btn_resume }}</text></div>
-    <div class="btn dlg-gap" if="{{ modal !== 2 }}" onclick="askEnd"><text class="btn-text">{{ s.btn_finish }}</text></div>
-    <div class="btn dlg-gap" if="{{ modal === 2 }}" onclick="endNow"><text class="btn-text-danger">{{ s.btn_end_now }}</text></div>
-    <div class="btn dlg-gap" if="{{ modal === 2 }}" onclick="endAndSave"><text class="btn-text">{{ s.btn_end_save }}</text></div>
-  </div>
   <div class="frame" if="{{ modal === 0 && screen === 'intro' }}" onclick="finishIntro">
     <text class="big" style="height: {{ introH }}px;">{{ introText }}</text>
     <text class="small">{{ s.intro_tap }}</text>
   </div>
   <div class="frame" if="{{ modal === 0 && screen === 'breath' }}">
-    <text class="caption">{{ caption }}</text>
+    <text class="caption" style="height: {{ captionH }}px;">{{ caption }}</text>
     <div class="circle-box">
       <div class="circle" style="width: {{ d }}px; height: {{ d }}px; border-radius: {{ r }}px;"></div>
     </div>
     <text class="phase" style="color: {{ phaseColor }};">{{ phaseText }}</text>
     <text class="small">{{ remainingText }}</text>
     <div class="btn-pause" onclick="pause"><text class="btn-text">{{ s.btn_pause }}</text></div>
+  </div>
+  <!-- Dialog last: when `modal` changes, the screen above is removed before the dialog is built,
+       so the two never share the heap. -->
+  <div class="frame" if="{{ modal > 0 }}">
+    <text class="big" style="height: {{ dialogH }}px;">{{ dialogTitle }}</text>
+    <text class="small" if="{{ dialogBody !== '' }}">{{ dialogBody }}</text>
+    <div class="btn-primary dlg-gap" onclick="resume"><text class="btn-text-primary">{{ s.btn_resume }}</text></div>
+    <div class="btn dlg-gap" if="{{ modal !== 2 }}" onclick="askEnd"><text class="btn-text">{{ s.btn_finish }}</text></div>
+    <div class="btn dlg-gap" if="{{ modal === 2 }}" onclick="endNow"><text class="btn-text-danger">{{ s.btn_end_now }}</text></div>
+    <div class="btn dlg-gap" if="{{ modal === 2 }}" onclick="endAndSave"><text class="btn-text-sm">{{ s.btn_end_save }}</text></div>
   </div>
 </stack>

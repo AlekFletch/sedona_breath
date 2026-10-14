@@ -1,6 +1,9 @@
+import { FreeRhythm, PatternCatalog } from '../../core/BreathPattern.js';
 import { BreathVisual, SessionConfig, SessionController } from '../../core/SessionController.js';
+import { parseDuration, parseMode } from '../../core/SessionTypes.js';
+import { planOf } from '../../common/plan.js';
 import { current, sessionPage } from '../../common/sessionPage.js';
-import { textHeight } from '../../common/textSize.js';
+import { textHeight, wrap } from '../../common/textSize.js';
 import templateKeys from '../../common/keys/session.js';
 
 /*
@@ -11,15 +14,28 @@ var CIRCLE_MAX = 200;           // px, diameter at full inhale
 var INHALE_COLOR = '#8FE0B8';
 var PHASE_COLOR = '#F2EEDD';
 
+/** A new session from the router params (Store.sessionParams); only this page starts one. */
+function create(p, time, haptics, files, wallClock) {
+  var config = new SessionConfig();
+  config.durationMin = parseDuration(Number(p.durationMin));
+  config.mode = parseMode(p.mode);
+  config.patternId = PatternCatalog.parseId(p.patternId);
+  config.vibration = p.vibration !== '0';
+  config.free = new FreeRhythm(Number(p.freeIn), Number(p.freeEx)).normalized();
+  return new SessionController(config, time, time, haptics, files, wallClock);
+}
+
 export default sessionPage({
   name: 'session',
   keys: templateKeys,
-  core: { SessionController: SessionController, SessionConfig: SessionConfig },
+  // plan: written into the snapshot on handoff for pages/prompt (common/plan.js).
+  core: { SessionController: SessionController, create: create, plan: planOf },
   data: {
     screen: '',
     introText: '',
-    introH: 84,
+    introH: 92,
     caption: '',
+    captionH: 38,
     d: 110,
     r: 55,
     phaseText: '',
@@ -29,13 +45,15 @@ export default sessionPage({
     var strings = current.strings;
     this.screen = v.stage === 'intro' ? 'intro' : 'breath';
     if (v.stage === 'intro') {
-      var text = strings.t(v.introIndex === 0 ? 'intro_1' : (v.introIndex === 1 ? 'intro_2' : 'intro_3'));
+      var text = wrap(strings.t(v.introIndex === 0 ? 'intro_1' : (v.introIndex === 1 ? 'intro_2' : 'intro_3')), true);
       this.introH = textHeight(text, true);
       this.introText = text;
       return;
     }
-    this.caption = v.stage === 'completionBreathing'
-      ? strings.t(v.notNowReturn ? 'not_now_breath' : 'completion_breath') : '';
+    var caption = v.stage === 'completionBreathing'
+      ? wrap(strings.t(v.notNowReturn ? 'not_now_breath' : 'completion_breath'), false) : '';
+    this.captionH = textHeight(caption, false);
+    this.caption = caption;
     this.phaseText = strings.label('phase_', v.phase, 'inhale');
     this.phaseColor = v.phase === 'inhale' ? INHALE_COLOR : PHASE_COLOR;
     this.updateCircle();

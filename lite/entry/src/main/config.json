@@ -48,6 +48,7 @@
           "pages/setup/setup",
           "pages/session/session",
           "pages/prompt/prompt",
+          "pages/hop/hop",
           "pages/summary/summary",
           "pages/history/history",
           "pages/settings/settings"

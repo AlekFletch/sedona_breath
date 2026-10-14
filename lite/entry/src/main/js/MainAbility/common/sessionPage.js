@@ -12,21 +12,20 @@
  * for 'new' also durationMin, mode, patternId, vibration ('1' / '0'), freeIn, freeEx (Store.sessionParams);
  * notNow = '1' when the user answered "Not now". These pages do not read settings.json.
  * The controller lives in module variables, not in page data, so the framework does not observe it.
+ * Handoffs go through pages/hop: the bytecode of both pages does not fit the heap together.
  */
 import router from '@system.router';
 import vibrator from '@system.vibrator';
 import battery from '@system.battery';
 import brightness from '@system.brightness';
 import file from '@system.file';
-import { FreeRhythm, PatternCatalog } from '../core/BreathPattern.js';
-import { SessionStatus, parseDuration, parseMode } from '../core/SessionTypes.js';
+import { SessionStatus } from '../core/SessionTypes.js';
 import { formatMmSs } from '../core/Timing.js';
 import { JsonFiles, LiteHaptics, LiteTime } from './adapters.js';
 import { SessionFiles } from './records.js';
 import { pageForStage } from './stages.js';
 import { Strings } from './strings.js';
-import { timers } from './system.js';
-import { textHeight } from './textSize.js';
+import { textHeight, wrap } from './textSize.js';
 import { focusList, isBackSwipe, refocusList, useBackground } from './ui.js';
 
 export var MODAL_NONE = 0;
@@ -41,6 +40,16 @@ var BATTERY_EVERY = 300;        // battery check: every 30 s
 var SNAPSHOT_EVERY = 50;        // periodic snapshot while running: every 5 s
 var LOW_BATTERY = 0.10;
 
+/* The runtime's timers for LiteTime (here, not in common/system.js: this page does not need the rest of it). */
+var timers = {
+  setTimeout: function (cb, ms) {
+    return setTimeout(cb, ms);
+  },
+  clearTimeout: function (h) {
+    clearTimeout(h);
+  }
+};
+
 /** Shared state of the current page (one page is alive at a time): texts, session files, controller. */
 export var current = {
   strings: null,
@@ -50,6 +59,8 @@ export var current = {
 var timer = null;
 var ticks = 0;
 var leaving = false;
+/* pages/session: the plan for pages/prompt (common/plan.js), made on attach, not on handoff, where the heap is fullest. */
+var plan = '';
 
 function keepScreenOn(on) {
   try {
@@ -81,8 +92,9 @@ function wallClock() {
 
 /**
  * Builds a session page. `page` gives its name ('session' | 'prompt'), template keys, the
- * controller module ({ SessionController, SessionConfig }: the core one, or PromptFlow for
- * pages/prompt), own data fields, paint(view) and its own tap handlers.
+ * controller (`core`: SessionController with fromSnapshot; pages/session adds create(params, ...)
+ * for a new session and plan(controller) for the handoff, pages/prompt passes PromptFlow), own
+ * data fields, paint(view) and its own tap handlers.
  */
 export function sessionPage(page) {
   var data = {
@@ -99,7 +111,7 @@ export function sessionPage(page) {
     s: {},
     modal: 0,
     dialogTitle: '',
-    dialogH: 42,
+    dialogH: 46,
     dialogBody: '',
     remainingText: ''
   };
@@ -132,6 +144,11 @@ export function sessionPage(page) {
             return;
           }
           var restored = page.core.SessionController.fromSnapshot(snap, time, time, haptics, files, wallClock);
+          if (restored === null) {
+            // pages/prompt and a snapshot without the plan: pages/session restores it and hands it back.
+            this.go('hop', { to: 'session', launch: 'resume' });
+            return;
+          }
           restored.setMessageSeed(snap.savedAt);
           if (this.notNow === '1') {
             restored.view.notNowReturn = true;
@@ -140,13 +157,7 @@ export function sessionPage(page) {
         });
         return;
       }
-      var config = new page.core.SessionConfig();
-      config.durationMin = parseDuration(Number(this.durationMin));
-      config.mode = parseMode(this.mode);
-      config.patternId = PatternCatalog.parseId(this.patternId);
-      config.vibration = this.vibration !== '0';
-      config.free = new FreeRhythm(Number(this.freeIn), Number(this.freeEx)).normalized();
-      var c = new page.core.SessionController(config, time, time, haptics, files, wallClock);
+      var c = page.core.create(this, time, haptics, files, wallClock);
       c.setMessageSeed(Math.floor(Date.now() / 1000));
       this.attach(c, false);
       c.start();
@@ -154,6 +165,7 @@ export function sessionPage(page) {
 
     attach(c, resumeNow) {
       current.c = c;
+      plan = page.core.plan ? page.core.plan(c) : '';
       c.setObserver({
         onUpdate: (v) => this.update(v),
         onSummary: () => this.toSummary()
@@ -190,10 +202,17 @@ export function sessionPage(page) {
     handoff(target, notNow) {
       var c = current.c;
       leaving = true;
+      // Free the screen before the snapshot is serialized: next to the 13 buttons of the emotion
+      // screen there is no room for it.
+      focusList(this, false);
+      this.screen = '';
       var snap = c.snapshot();
+      if (plan !== '') {
+        snap.plan = plan;
+      }
       c.shutdown();
       current.files.save(snap, () => {
-        this.go(target, { launch: 'handoff', notNow: notNow ? '1' : '' });
+        this.go('hop', { to: target, launch: 'handoff', notNow: notNow ? '1' : '' });
       });
     },
 
@@ -272,6 +291,7 @@ export function sessionPage(page) {
         title = strings.t('interrupted_title');
         body = strings.t('interrupted_body');
       }
+      title = wrap(title, true);
       this.dialogH = textHeight(title, true);
       this.dialogTitle = title;
       this.dialogBody = body;
@@ -310,8 +330,9 @@ export function sessionPage(page) {
       current.c = null;
       current.strings = null;
       current.files = null;
-      this.modal = 0;
+      // Screen first: with modal = 0 first, the screen behind the dialog would be rebuilt.
       this.screen = '';
+      this.modal = 0;
       var options = { uri: 'pages/' + target + '/' + target, params: params || {} };
       options.params.lang = lang;
       router.replace(options);
