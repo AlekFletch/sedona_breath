@@ -207,3 +207,7 @@
   align-items: center;
   background-color: transparent;
 }
+/* Pause / end dialog: a plain column, it fits the screen without a list. */
+.dlg-gap {
+  margin-top: 12px;
+}

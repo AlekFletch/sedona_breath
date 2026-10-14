@@ -5,25 +5,12 @@
 <stack class="root" onswipe="onSwipe">
   <image class="bg" src="{{ bg }}"></image>
   <div class="frame" if="{{ modal > 0 }}">
-    <list class="list" ref="list">
-      <list-item class="li-text" style="height: {{ dialogR }}px;">
-        <text class="big" style="height: {{ dialogH }}px;">{{ dialogTitle }}</text>
-      </list-item>
-      <list-item class="li-line" if="{{ dialogBody !== '' }}"><text class="small">{{ dialogBody }}</text></list-item>
-      <list-item class="li">
-        <div class="btn-primary" onclick="resume"><text class="btn-text-primary">{{ s.btn_resume }}</text></div>
-      </list-item>
-      <list-item class="li" if="{{ modal !== 2 }}">
-        <div class="btn" onclick="askEnd"><text class="btn-text">{{ s.btn_finish }}</text></div>
-      </list-item>
-      <list-item class="li" if="{{ modal === 2 }}">
-        <div class="btn" onclick="endNow"><text class="btn-text-danger">{{ s.btn_end_now }}</text></div>
-      </list-item>
-      <list-item class="li" if="{{ modal === 2 }}">
-        <div class="btn" onclick="endAndSave"><text class="btn-text">{{ s.btn_end_save }}</text></div>
-      </list-item>
-      <list-item class="li-gap"></list-item>
-    </list>
+    <text class="big" style="height: {{ dialogH }}px;">{{ dialogTitle }}</text>
+    <text class="small" if="{{ dialogBody !== '' }}">{{ dialogBody }}</text>
+    <div class="btn-primary dlg-gap" onclick="resume"><text class="btn-text-primary">{{ s.btn_resume }}</text></div>
+    <div class="btn dlg-gap" if="{{ modal !== 2 }}" onclick="askEnd"><text class="btn-text">{{ s.btn_finish }}</text></div>
+    <div class="btn dlg-gap" if="{{ modal === 2 }}" onclick="endNow"><text class="btn-text-danger">{{ s.btn_end_now }}</text></div>
+    <div class="btn dlg-gap" if="{{ modal === 2 }}" onclick="endAndSave"><text class="btn-text">{{ s.btn_end_save }}</text></div>
   </div>
   <div class="frame" if="{{ modal === 0 }}">
     <list class="list" ref="list">

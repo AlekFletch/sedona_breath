@@ -100,7 +100,6 @@ export function sessionPage(page) {
     modal: 0,
     dialogTitle: '',
     dialogH: 42,
-    dialogR: 54,
     dialogBody: '',
     remainingText: ''
   };
@@ -274,7 +273,6 @@ export function sessionPage(page) {
         body = strings.t('interrupted_body');
       }
       this.dialogH = textHeight(title, true);
-      this.dialogR = this.dialogH + 12;
       this.dialogTitle = title;
       this.dialogBody = body;
       if (this.modal !== MODAL_NONE) {
