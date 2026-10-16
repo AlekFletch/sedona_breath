@@ -1,44 +1,55 @@
 /*
- * The controller of pages/prompt: Sedona questions, emotion choice, check-in and the completion
- * message, restored from the SessionController snapshot (common/sessionPage.js).
+ * The controller of pages/prompt: intensity before, Sedona questions, emotion choice, intensity
+ * after ("Free", or 1..5 and "Once more?") and the completion message, restored from the
+ * SessionController snapshot (common/sessionPage.js).
  *
  * The full SessionController with its breath engine does not fit in the watch's JS heap next to
  * this page, so the prompt steps are walked here with the core's rules (SupportRules) and the plan
- * pages/session puts into the snapshot (common/plan.js): the planner and the breath patterns are
- * not bundled either. It mirrors SessionController step by step:
+ * pages/session writes to plan.json (common/plan.js; passed in as s.plan): the planner and the
+ * breath patterns are not bundled either. It mirrors SessionController step by step:
  * tools/node-test/lite.mjs drives both through the same sessions and compares every snapshot and
  * record. As soon as the next step is breathing, the stage changes and the page hands the session
  * back to pages/session.
  */
 import {
-  Answer, Emotion, QuestionId, RATING_NONE, SessionStatus, Stage, parseDuration, parseEmotion, parseMode
+  Answer, Emotion, INTENSITY_FREE, INTENSITY_MAX, INTENSITY_MIN, INTENSITY_NONE, QuestionId, SessionStatus, Stage,
+  parseDuration, parseEmotion, parseMode
 } from '../core/SessionTypes.js';
 import { CompletionMessage, SupportRules } from '../core/SupportRules.js';
 
-// Fields of a plan step, read from the snapshot's plan string (common/plan.js).
+// Fields of a plan step, read from the plan string (common/plan.js).
 var STAGE = 0;
 var QUESTION = 1;
 var QUESTION_INDEX = 2;
 var QUESTION_TOTAL = 3;
 var ESTIMATED_MS = 4;
 
-/** 'stage:question:estimatedMs,...' -> [stage, question, questionIndex, questionTotal, estimatedMs] per step. */
+/**
+ * 'stage:question:estimatedMs,...' -> [stage, question, questionIndex, questionTotal, estimatedMs] per
+ * step. Questions are numbered within their round (a round ends with the intensity check).
+ */
 function readPlan(text) {
   var parts = text.split(',');
   var steps = [];
-  var total = 0;
+  var roundStart = 0;
+  var n = 0;
   var i;
+  var k;
   for (i = 0; i < parts.length; i++) {
     var f = parts[i].split(':');
     var question = f[0] === Stage.QUESTION;
     if (question) {
-      total++;
+      n++;
     }
-    steps.push([f[0], Number(f[1]), question ? total : 0, 0, Number(f[2])]);
-  }
-  for (i = 0; i < steps.length; i++) {
-    if (steps[i][STAGE] === Stage.QUESTION) {
-      steps[i][QUESTION_TOTAL] = total;
+    steps.push([f[0], Number(f[1]), question ? n : 0, 0, Number(f[2])]);
+    if (f[0] === Stage.CHECK_IN || i === parts.length - 1) {
+      for (k = roundStart; k <= i; k++) {
+        if (steps[k][STAGE] === Stage.QUESTION) {
+          steps[k][QUESTION_TOTAL] = n;
+        }
+      }
+      roundStart = i + 1;
+      n = 0;
     }
   }
   return steps;
@@ -55,7 +66,7 @@ export function PromptFlow(s, clock, sink, wallClock) {
   this.freeInhaleSec = s.freeInhaleSec;
   this.freeExhaleSec = s.freeExhaleSec;
   this.vibration = s.vibration;
-  this.plan = s.plan;
+  this.askEmotion = s.askEmotion !== false;
   this.steps = readPlan(s.plan);
   this.startedAt = s.startedAt;
   this.activeAccumMs = Math.max(0, s.activeMs);
@@ -66,15 +77,16 @@ export function PromptFlow(s, clock, sink, wallClock) {
   this.observer = undefined;
   this.view = {
     stage: Stage.INTRO, stepIndex: 0, paused: true, question: 0, questionIndex: 0, questionTotal: 0,
-    emotion: parseEmotion(s.emotion), emotionNote: false, rating: s.rating, message: CompletionMessage.GENTLE_1,
-    professionalHint: false, notNowReturn: false
+    emotion: parseEmotion(s.emotion), emotionNote: false, intensityBefore: s.intensityBefore,
+    intensityAfter: s.intensityAfter, repeatOffer: false, rounds: s.rounds >= 1 ? Math.floor(s.rounds) : 1,
+    message: CompletionMessage.GENTLE_1, professionalHint: false, notNowReturn: false
   };
   this.enterStep(Math.max(0, Math.min(s.stepIndex, this.steps.length)), true);
 }
 
 /**
  * Same signature as SessionController.fromSnapshot; starts PAUSED at the saved step. null for a
- * snapshot without the plan (saved by the controller itself): pages/session has to restore it.
+ * missing plan (no plan.json): pages/session has to restore the session.
  */
 PromptFlow.fromSnapshot = function (s, clock, scheduler, haptics, sink, wallClock) {
   if (typeof s.plan !== 'string' || s.plan === '') {
@@ -109,7 +121,7 @@ PromptFlow.prototype.answer = function (a) {
   if (step[QUESTION] === QuestionId.WHEN && a === Answer.NOT_NOW) {
     // Gentle return to breathing, no pressure.
     this.view.notNowReturn = true;
-    this.enterStep(this.completionIndex(), false);
+    this.enterStep(this.completionIndex(this.view.stepIndex), false);
     return;
   }
   this.next();
@@ -120,7 +132,7 @@ PromptFlow.prototype.chooseEmotion = function (e) {
     return;
   }
   this.view.emotion = e;
-  if (SupportRules.recommendsProfessional(RATING_NONE, e)) {
+  if (SupportRules.recommendsProfessional(INTENSITY_NONE, e)) {
     this.view.emotionNote = true;
     this.publish();
     return;
@@ -140,14 +152,53 @@ PromptFlow.prototype.skipEmotion = function () {
   this.chooseEmotion(Emotion.NONE);
 };
 
-PromptFlow.prototype.rate = function (rating) {
-  if (this.view.stage !== Stage.CHECK_IN) {
+PromptFlow.prototype.rateBefore = function (intensity) {
+  if (this.view.stage !== Stage.INTENSITY || this.view.paused) {
     return;
   }
-  this.view.rating = rating;
-  this.view.message = SupportRules.completionMessage(rating, this.messageSeed);
-  this.view.professionalHint = SupportRules.recommendsProfessional(rating, this.view.emotion);
+  this.view.intensityBefore = Math.max(INTENSITY_MIN, Math.min(INTENSITY_MAX, Math.round(intensity)));
   this.next();
+};
+
+PromptFlow.prototype.rate = function (intensity) {
+  if (this.view.stage !== Stage.CHECK_IN || this.view.repeatOffer) {
+    return;
+  }
+  this.view.intensityAfter = Math.max(INTENSITY_FREE, Math.min(INTENSITY_MAX, Math.round(intensity)));
+  if (this.view.intensityAfter === INTENSITY_FREE) {
+    this.finishRounds();
+    return;
+  }
+  this.view.repeatOffer = true;
+  this.publish();
+};
+
+/**
+ * "Once more": the next round starts with breathing, so the snapshot points at it and the page
+ * hands over to pages/session, which rebuilds the plan for the new number of rounds.
+ */
+PromptFlow.prototype.repeat = function () {
+  if (this.view.stage !== Stage.CHECK_IN || !this.view.repeatOffer) {
+    return;
+  }
+  this.view.rounds++;
+  this.view.repeatOffer = false;
+  this.view.stepIndex++;
+  this.view.stage = Stage.BREATHING;
+  this.view.notNowReturn = false;
+  this.view.paused = false;
+  this.startActiveClock();
+  this.persist();
+  this.publish();
+};
+
+PromptFlow.prototype.finishRounds = function () {
+  if (this.view.stage !== Stage.CHECK_IN || this.view.intensityAfter === INTENSITY_NONE) {
+    return;
+  }
+  this.view.message = SupportRules.completionMessage(this.view.intensityAfter, this.messageSeed);
+  this.view.professionalHint = SupportRules.recommendsProfessional(this.view.intensityAfter, this.view.emotion);
+  this.enterStep(this.steps.length - 1, false);
 };
 
 PromptFlow.prototype.finishMessage = function () {
@@ -208,7 +259,8 @@ PromptFlow.prototype.buildRecord = function (status) {
     id: 0, startedAt: this.startedAt, endedAt: this.wallClock(), durationSec: Math.round(this.activeMs() / 1000),
     plannedMin: this.durationMin, mode: this.mode, patternId: this.patternId, cycles: this.cyclesBefore,
     status: status, stoppedAt: status === SessionStatus.INTERRUPTED ? this.view.stage : '',
-    emotionBefore: this.view.emotion, ratingAfter: this.view.rating, heartRateAvg: 0
+    emotionBefore: this.view.emotion, intensityBefore: this.view.intensityBefore,
+    intensityAfter: this.view.intensityAfter, rounds: this.view.rounds, heartRateAvg: 0
   };
 };
 
@@ -218,7 +270,8 @@ PromptFlow.prototype.snapshot = function () {
     mode: this.mode, patternId: this.patternId, freeInhaleSec: this.freeInhaleSec,
     freeExhaleSec: this.freeExhaleSec, vibration: this.vibration, stepIndex: this.view.stepIndex,
     stepElapsedMs: 0, activeMs: this.activeMs(), cyclesDone: this.cyclesBefore, emotion: this.view.emotion,
-    rating: this.view.rating, stage: this.view.stage, plan: this.plan
+    intensityBefore: this.view.intensityBefore, intensityAfter: this.view.intensityAfter, rounds: this.view.rounds,
+    askEmotion: this.askEmotion, stage: this.view.stage
   };
 };
 
@@ -231,9 +284,9 @@ PromptFlow.prototype.remainingMs = function () {
   return sum;
 };
 
-/** Same as SessionPlanner.completionIndex: the completion breathing step. */
-PromptFlow.prototype.completionIndex = function () {
-  for (var i = 0; i < this.steps.length; i++) {
+/** Same as SessionPlanner.completionIndex: the next completion breathing step from `from`. */
+PromptFlow.prototype.completionIndex = function (from) {
+  for (var i = from; i < this.steps.length; i++) {
     if (this.steps[i][STAGE] === Stage.COMPLETION_BREATHING) {
       return i;
     }
@@ -250,6 +303,7 @@ PromptFlow.prototype.next = function () {
 PromptFlow.prototype.enterStep = function (index, restoredPaused) {
   this.view.stepIndex = index;
   this.view.emotionNote = false;
+  this.view.repeatOffer = false;
   if (index >= this.steps.length) {
     this.view.stage = Stage.SUMMARY;
     this.stopActiveClock();

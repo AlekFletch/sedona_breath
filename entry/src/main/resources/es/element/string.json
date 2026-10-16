@@ -209,10 +209,6 @@
       "value": "Pausa"
     },
     {
-      "name": "remaining",
-      "value": "Quedan %s"
-    },
-    {
       "name": "paused_title",
       "value": "En pausa"
     },
@@ -290,7 +286,7 @@
     },
     {
       "name": "emotion_title",
-      "value": "¿Qué sentimiento es?"
+      "value": "¿Qué emoción sientes ahora?"
     },
     {
       "name": "emotion_anger",
@@ -354,15 +350,15 @@
     },
     {
       "name": "checkin_title",
-      "value": "¿Cómo te sientes ahora?"
+      "value": "¿Y ahora qué tan intensa es?"
     },
     {
       "name": "checkin_low",
-      "value": "difícil"
+      "value": "débil"
     },
     {
       "name": "checkin_high",
-      "value": "bien"
+      "value": "fuerte"
     },
     {
       "name": "msg_gentle1",
@@ -406,7 +402,7 @@
     },
     {
       "name": "summary_rating",
-      "value": "Valoración después"
+      "value": "Intensidad"
     },
     {
       "name": "summary_hr",
@@ -415,10 +411,6 @@
     {
       "name": "fmt_bpm",
       "value": "%d lpm"
-    },
-    {
-      "name": "fmt_rating",
-      "value": "%d de 5"
     },
     {
       "name": "saved_toast",
@@ -454,7 +446,7 @@
     },
     {
       "name": "history_after",
-      "value": "Después: %s"
+      "value": "Emoción: %s"
     },
     {
       "name": "dash",
@@ -482,7 +474,7 @@
     },
     {
       "name": "stage_checkIn",
-      "value": "valoración"
+      "value": "intensidad después"
     },
     {
       "name": "stage_message",
@@ -522,15 +514,15 @@
     },
     {
       "name": "settings_default_pattern",
-      "value": "Respiración por defecto"
+      "value": "Respiración"
     },
     {
       "name": "settings_default_duration",
-      "value": "Duración por defecto"
+      "value": "Duración"
     },
     {
       "name": "settings_default_mode",
-      "value": "Modo por defecto"
+      "value": "Modo"
     },
     {
       "name": "settings_vibration",
@@ -621,8 +613,40 @@
       "value": "Atrás"
     },
     {
-      "name": "home_quick",
-      "value": "Rápida · 3 min"
+      "name": "intensity_title",
+      "value": "¿Qué tan intensa es la emoción ahora?"
+    },
+    {
+      "name": "btn_free",
+      "value": "Libre"
+    },
+    {
+      "name": "repeat_title",
+      "value": "La emoción sigue aquí. ¿Otra ronda?"
+    },
+    {
+      "name": "btn_repeat",
+      "value": "Otra vez"
+    },
+    {
+      "name": "fmt_intensity",
+      "value": "%1$s → %2$s"
+    },
+    {
+      "name": "intensity_free",
+      "value": "libre"
+    },
+    {
+      "name": "summary_rounds",
+      "value": "Rondas"
+    },
+    {
+      "name": "stage_intensity",
+      "value": "intensidad antes"
+    },
+    {
+      "name": "btn_practice",
+      "value": "Práctica"
     }
   ]
 }

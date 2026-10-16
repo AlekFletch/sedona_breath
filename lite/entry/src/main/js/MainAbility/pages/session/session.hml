@@ -14,7 +14,6 @@
       <div class="circle" style="width: {{ d }}px; height: {{ d }}px; border-radius: {{ r }}px;"></div>
     </div>
     <text class="phase" style="color: {{ phaseColor }};">{{ phaseText }}</text>
-    <text class="small">{{ remainingText }}</text>
     <div class="btn-pause" onclick="pause"><text class="btn-text">{{ s.btn_pause }}</text></div>
   </div>
   <!-- Dialog last: when `modal` changes, the screen above is removed before the dialog is built,

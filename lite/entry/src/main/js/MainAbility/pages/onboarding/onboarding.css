@@ -16,31 +16,6 @@
   justify-content: center;
   align-items: center;
 }
-/* 360 px wide: the free strips at the edges keep the swipe-back gesture reaching the page. */
-.list {
-  width: 360px;
-  height: 100%;
-  background-color: transparent;
-}
-.li {
-  width: 360px;
-  height: 76px;
-  justify-content: center;
-  align-items: center;
-  background-color: transparent;
-}
-.li-title {
-  width: 360px;
-  height: 64px;
-  justify-content: center;
-  align-items: center;
-  background-color: transparent;
-}
-.li-gap {
-  width: 360px;
-  height: 60px;
-  background-color: transparent;
-}
 .title {
   width: 340px;
   height: 50px;
@@ -71,11 +46,9 @@
   text-align: center;
   color: #F2EEDD;
 }
-.li-text {
-  width: 360px;
-  justify-content: center;
-  align-items: center;
-  background-color: transparent;
+/* Pause / end dialog: a plain column, it fits the screen without a list. */
+.dlg-gap {
+  margin-top: 12px;
 }
 
 /* Page styles: edit below this line. */

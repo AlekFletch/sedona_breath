@@ -62,8 +62,10 @@ node tools/build-lite.mjs --check
 - `common/history.js` — история;
 - `common/sessionPage.js` — общая часть двух страниц сессии;
 - `common/promptFlow.js` — шаги вопросов;
-- `common/adapters.js` — вибратор, часы, JSON-файлы с чтением по 4 КБ, формат `%d/%s`;
-- `pages/*` — 8 страниц: index, onboarding, setup, session, prompt, summary, history, settings.
+- `common/breathFlow.js` — шаги вступления и дыхания (страница сессии без полного `SessionController`);
+- `common/plan.js` — план сессии строкой в `plan.json` для страницы вопросов;
+- `common/adapters.js` — вибратор, часы с очередью задач (без `setTimeout` на каждое событие: часы держат лишь несколько таймеров), JSON-файлы с чтением по 4 КБ, формат `%d/%s`;
+- `pages/*` — 8 страниц: index, onboarding, feel (эмоция и её интенсивность до практики), session, prompt, summary, history, settings, плюс пустая `hop` для переходов feel → session и session ↔ prompt. Экрана настройки практики нет: программы на главном экране запускаются сразу с параметрами из настроек.
 
 ## Сборка
 
@@ -125,7 +127,7 @@ Lite-часы не подключаются к DevEco напрямую. Подп
 - **34** — не компилируется JS (например, RegExp);
 - **40 и выше** — разбор `config.json` и иконки.
 
-Для публикации в AppGallery нужны release-сертификат и release-профиль.
+Для публикации в AppGallery есть release-сертификат `SedonaLiteRelease` и профиль `SedonaLiteReleaseProfile` (`lite/signing/sedonalite-release.*`, продукт `release` в `build-profile.json5`). Сборка и чек-лист карточки: [`docs/RELEASE_APPGALLERY.md`](../docs/RELEASE_APPGALLERY.md).
 
 ## Тесты и симулятор
 

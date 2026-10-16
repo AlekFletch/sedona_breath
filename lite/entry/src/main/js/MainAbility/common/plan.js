@@ -1,12 +1,12 @@
 /*
- * The session plan as pages/prompt reads it from the snapshot (field `plan`, see common/promptFlow.js):
- * 'stage:question:estimatedMs' per step, comma-separated. pages/session writes it on handoff, so
- * pages/prompt does not bundle the planner and the breath patterns. A string, not an array: on
- * pages/session the heap has no room to serialize an array of 15 steps.
+ * The session plan for pages/prompt (common/promptFlow.js): 'stage:question:estimatedMs' per step,
+ * comma-separated. pages/session writes it to plan.json when it starts, so pages/prompt does not
+ * bundle the planner and the breath patterns. Not inside the snapshot: on handoff pages/session
+ * had no room left to serialize it.
  */
 import { SessionPlanner } from '../core/SessionPlan.js';
 
-/** @param c SessionController (steps, pattern) */
+/** @param c BreathFlow or SessionController (steps, pattern) */
 export function planOf(c) {
   var plan = '';
   for (var i = 0; i < c.steps.length; i++) {

@@ -1,6 +1,5 @@
-import { FreeRhythm, PatternCatalog } from '../../core/BreathPattern.js';
-import { BreathVisual, SessionConfig, SessionController } from '../../core/SessionController.js';
-import { parseDuration, parseMode } from '../../core/SessionTypes.js';
+import { FreeRhythm } from '../../core/BreathPattern.js';
+import { BreathFlow, circleScale } from '../../common/breathFlow.js';
 import { planOf } from '../../common/plan.js';
 import { current, sessionPage } from '../../common/sessionPage.js';
 import { textHeight, wrap } from '../../common/textSize.js';
@@ -16,20 +15,20 @@ var PHASE_COLOR = '#F2EEDD';
 
 /** A new session from the router params (Store.sessionParams); only this page starts one. */
 function create(p, time, haptics, files, wallClock) {
-  var config = new SessionConfig();
-  config.durationMin = parseDuration(Number(p.durationMin));
-  config.mode = parseMode(p.mode);
-  config.patternId = PatternCatalog.parseId(p.patternId);
-  config.vibration = p.vibration !== '0';
-  config.free = new FreeRhythm(Number(p.freeIn), Number(p.freeEx)).normalized();
-  return new SessionController(config, time, time, haptics, files, wallClock);
+  var free = new FreeRhythm(Number(p.freeIn), Number(p.freeEx)).normalized();
+  return new BreathFlow({
+    durationMin: Number(p.durationMin), mode: p.mode, patternId: p.patternId, freeInhaleSec: free.inhaleSec,
+    freeExhaleSec: free.exhaleSec, vibration: p.vibration !== '0',
+    // Asked on pages/feel before the session.
+    askEmotion: false, emotion: p.emotion, intensityBefore: p.intensity ? Number(p.intensity) : -1
+  }, time, time, haptics, files, wallClock);
 }
 
 export default sessionPage({
   name: 'session',
   keys: templateKeys,
   // plan: written into the snapshot on handoff for pages/prompt (common/plan.js).
-  core: { SessionController: SessionController, create: create, plan: planOf },
+  core: { Flow: BreathFlow, create: create, plan: planOf },
   data: {
     screen: '',
     introText: '',
@@ -67,7 +66,7 @@ export default sessionPage({
   methods: {
     updateCircle() {
       var c = current.c;
-      var d = Math.round(CIRCLE_MAX * BreathVisual.scaleAt(c.currentPhase(), c.phaseProgress()));
+      var d = Math.round(CIRCLE_MAX * circleScale(c.currentPhase(), c.phaseProgress()));
       if (d !== this.d) {
         this.d = d;
         this.r = Math.round(d / 2);

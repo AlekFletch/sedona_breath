@@ -1,6 +1,5 @@
 import prompt from '@system.prompt';
 import { ALL_PATTERNS } from '../../core/BreathPattern.js';
-import { DURATIONS_MIN } from '../../core/SessionTypes.js';
 import { LANGUAGES, Store } from '../../common/store.js';
 import { deleteHistory } from '../../common/history.js';
 import { storeSystem } from '../../common/system.js';
@@ -13,7 +12,10 @@ function next(list, value) {
   return list[(list.indexOf(value) + 1) % list.length];
 }
 
-/* Screen 10: language, default pattern / duration / mode, vibration, free rhythm, terms, delete history. */
+/*
+ * Screen 10: everything "Practice" on the home screen starts with: mode, breathing, vibration, free
+ * rhythm; language, terms, delete history. No duration: the practice has one length (index.js).
+ */
 export default {
   data: {
     bg: '',
@@ -21,7 +23,6 @@ export default {
     confirmDelete: false,
     languageText: '',
     patternText: '',
-    durationText: '',
     modeText: '',
     vibrationText: '',
     inhaleText: '',
@@ -41,7 +42,6 @@ export default {
     this.s = store.strings();
     this.languageText = store.label('lang_', st.language, 'system');
     this.patternText = store.label('pattern_', st.defaultPattern, 'relax478');
-    this.durationText = store.fmt('fmt_minutes', st.defaultDurationMin);
     this.modeText = store.label('mode_', st.defaultMode, 'full');
     this.vibrationText = store.t(st.vibration ? 'on' : 'off');
     this.inhaleText = store.fmt('fmt_seconds', st.freeInhaleSec);
@@ -59,10 +59,6 @@ export default {
   },
   nextPattern() {
     store.settings.defaultPattern = next(ALL_PATTERNS, store.settings.defaultPattern);
-    this.commit();
-  },
-  nextDuration() {
-    store.settings.defaultDurationMin = next(DURATIONS_MIN, store.settings.defaultDurationMin);
     this.commit();
   },
   toggleMode() {

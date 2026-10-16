@@ -1,11 +1,11 @@
 import { SessionRecord } from '../core/SessionRecord';
-import { Emotion, RATING_NONE } from '../core/SessionTypes';
+import { Emotion, INTENSITY_NONE } from '../core/SessionTypes';
 import { formatMmSs } from '../core/Timing';
 import { SessionManager } from '../services/SessionManager';
 import { Res } from '../components/Res';
 import { InfoLine, PageTitle, PrimaryButton, STORAGE_HISTORY_REV } from '../components/Ui';
 
-/** Screen 8: duration, cycles, mode, emotion before, rating after (if given), "Save". */
+/** Screen 8: duration, cycles, mode, emotion before, intensity before -> after, rounds, "Save". */
 @Component
 export struct SummaryPage {
   @Consume('nav') nav: NavPathStack;
@@ -45,9 +45,13 @@ export struct SummaryPage {
               InfoLine({ label: $r('app.string.summary_emotion'),
                 value: Res.emotion((this.record as SessionRecord).emotionBefore) })
             }
-            if ((this.record as SessionRecord).ratingAfter !== RATING_NONE) {
+            if ((this.record as SessionRecord).intensityBefore !== INTENSITY_NONE) {
               InfoLine({ label: $r('app.string.summary_rating'),
-                value: $r('app.string.fmt_rating', (this.record as SessionRecord).ratingAfter) })
+                value: Res.intensityText(this.getUIContext().getHostContext(),
+                  (this.record as SessionRecord).intensityBefore, (this.record as SessionRecord).intensityAfter) })
+            }
+            if ((this.record as SessionRecord).rounds > 1) {
+              InfoLine({ label: $r('app.string.summary_rounds'), value: `${(this.record as SessionRecord).rounds}` })
             }
             if ((this.record as SessionRecord).heartRateAvg > 0) {
               InfoLine({ label: $r('app.string.summary_hr'),

@@ -2,7 +2,7 @@
  * Persisted models. Pure logic, portable to the lite-wearable JS build.
  */
 import { PatternId } from './BreathPattern';
-import { Emotion, RATING_NONE, SessionMode, SessionStatus, Stage } from './SessionTypes';
+import { Emotion, INTENSITY_NONE, SessionMode, SessionStatus, Stage } from './SessionTypes';
 
 /** One row of the history. */
 export class SessionRecord {
@@ -19,7 +19,12 @@ export class SessionRecord {
   /** Stage at which an interrupted session stopped; empty for completed ones. */
   stoppedAt: string = '';
   emotionBefore: Emotion = Emotion.NONE;
-  ratingAfter: number = RATING_NONE;
+  /** Intensity of the emotion before the practice, 1..5 (INTENSITY_NONE if not asked yet). */
+  intensityBefore: number = INTENSITY_NONE;
+  /** After the last round: 1..5, INTENSITY_FREE, or INTENSITY_NONE. */
+  intensityAfter: number = INTENSITY_NONE;
+  /** Rounds of questions done or started (1 + "Once more"). */
+  rounds: number = 1;
   /** Average heart rate from Health Kit (0 = not available / not consented). */
   heartRateAvg: number = 0;
 }
@@ -45,6 +50,10 @@ export class SessionSnapshot {
   activeMs: number = 0;
   cyclesDone: number = 0;
   emotion: string = Emotion.NONE;
-  rating: number = RATING_NONE;
+  intensityBefore: number = INTENSITY_NONE;
+  intensityAfter: number = INTENSITY_NONE;
+  rounds: number = 1;
+  /** false: the emotion and its intensity were asked before the session. */
+  askEmotion: boolean = true;
   stage: string = Stage.INTRO;
 }

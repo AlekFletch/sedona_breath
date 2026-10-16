@@ -10,7 +10,8 @@
           <text class="entry-head">{{ $item.head }}</text>
           <text class="entry-line">{{ $item.mode }}</text>
           <text class="entry-status" style="color: {{ $item.color }};">{{ $item.status }}</text>
-          <text class="entry-line">{{ $item.ba }}</text>
+          <text class="entry-line">{{ $item.before }}</text>
+          <text class="entry-line">{{ $item.after }}</text>
         </div>
       </list-item>
       <list-item class="li">

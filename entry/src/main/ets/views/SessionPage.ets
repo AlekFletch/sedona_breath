@@ -1,8 +1,7 @@
 import { PhaseType } from '../core/BreathPattern';
 import { BreathVisual, SessionController, SessionObserver, SessionView } from '../core/SessionController';
-import { Answer, EMOTIONS, Emotion, RATING_NONE, Stage, answersFor } from '../core/SessionTypes';
+import { Answer, EMOTIONS, Emotion, INTENSITY_FREE, Stage, answersFor } from '../core/SessionTypes';
 import { CompletionMessage } from '../core/SupportRules';
-import { formatMmSs } from '../core/Timing';
 import { AppEvent, AppEvents } from '../services/AppEvents';
 import { BatteryService } from '../services/BatteryService';
 import { SessionManager } from '../services/SessionManager';
@@ -22,8 +21,8 @@ const UI_TICK_MS = 500;
 const BATTERY_CHECK_MS = 30000;
 
 /**
- * Screens 3-7 of a running session: intro, breathing, Sedona prompt, emotion,
- * completion breathing, check-in, completion message. One NavDestination keeps
+ * Screens 3-7 of a running session: intro, intensity before, breathing, Sedona prompt, emotion,
+ * completion breathing, intensity after ("Free", or 1..5 and "Once more?"), completion message. One NavDestination keeps
  * the engine alive across stages; each stage is its own full-screen view.
  */
 @Component
@@ -31,7 +30,6 @@ export struct SessionPage {
   @Consume('nav') nav: NavPathStack;
   @State view: SessionView = new SessionView();
   @State circleScale: number = BreathVisual.MIN_SCALE;
-  @State remaining: string = '';
   @State modal: Overlay = Overlay.NONE;
   private controller: SessionController | undefined = undefined;
   private uiTimer: number = -1;
@@ -93,7 +91,6 @@ export struct SessionPage {
       this.lastPhaseKey = key;
       this.animateCircle(v);
     }
-    this.updateRemaining();
   }
 
   /** Circle: grows on inhale, static on hold, shrinks on exhale. Frozen while paused. */
@@ -119,19 +116,12 @@ export struct SessionPage {
   }
 
   private onUiTick(): void {
-    this.updateRemaining();
     const now = Date.now();
     if (now - this.lastBatteryCheck >= BATTERY_CHECK_MS) {
       this.lastBatteryCheck = now;
       if (this.modal === Overlay.NONE && BatteryService.isLowAndNotCharging()) {
         this.onInterrupted(Overlay.LOW_BATTERY);
       }
-    }
-  }
-
-  private updateRemaining(): void {
-    if (this.controller !== undefined) {
-      this.remaining = formatMmSs(this.controller.remainingMs());
     }
   }
 
@@ -255,10 +245,6 @@ export struct SessionPage {
       .width('100%')
       .layoutWeight(1)
 
-      Text($r('app.string.remaining', this.remaining))
-        .fontSize($r('app.float.font_m'))
-        .fontColor($r('app.color.text_secondary'))
-        .margin({ bottom: 6 })
       Button($r('app.string.btn_pause'))
         .type(ButtonType.Capsule)
         .width('70%')
@@ -343,47 +329,81 @@ export struct SessionPage {
     }
   }
 
+  /** Intensity of the emotion 1 (weak) .. 5 (strong). */
+  @Builder
+  intensityScale(after: boolean) {
+    Row({ space: 4 }) {
+      ForEach([1, 2, 3, 4, 5], (n: number) => {
+        Button(`${n}`)
+          .type(ButtonType.Circle)
+          .width(48)
+          .height(48)
+          .fontSize($r('app.float.font_m'))
+          .fontWeight(FontWeight.Bold)
+          .fontColor($r('app.color.text_primary'))
+          .backgroundColor($r('app.color.button'))
+          .onClick(() => this.act((c: SessionController) => after ? c.rate(n) : c.rateBefore(n)))
+      }, (n: number) => `${after}-${n}`)
+    }
+    .justifyContent(FlexAlign.Center)
+    .width('100%')
+    Row() {
+      Text($r('app.string.checkin_low'))
+        .fontSize($r('app.float.font_xs'))
+        .fontColor($r('app.color.text_secondary'))
+        .layoutWeight(1)
+      Text($r('app.string.checkin_high'))
+        .fontSize($r('app.float.font_xs'))
+        .fontColor($r('app.color.text_secondary'))
+        .layoutWeight(1)
+        .textAlign(TextAlign.End)
+    }
+    .width('100%')
+    .padding({ left: 8, right: 8 })
+  }
+
+  @Builder
+  intensityView() {
+    Column({ space: 12 }) {
+      Text($r('app.string.intensity_title'))
+        .fontSize($r('app.float.font_m'))
+        .fontColor($r('app.color.text_primary'))
+        .textAlign(TextAlign.Center)
+      this.intensityScale(false)
+    }
+    .width('100%')
+    .height('100%')
+    .justifyContent(FlexAlign.Center)
+    .padding({ left: 14, right: 14 })
+  }
+
   @Builder
   checkInView() {
     Scroll() {
-      Column({ space: 10 }) {
-        Text($r('app.string.checkin_title'))
-          .fontSize($r('app.float.font_m'))
-          .fontColor($r('app.color.text_primary'))
-          .textAlign(TextAlign.Center)
-        Row({ space: 4 }) {
-          ForEach([1, 2, 3, 4, 5], (n: number) => {
-            Button(`${n}`)
-              .type(ButtonType.Circle)
-              .width(48)
-              .height(48)
-              .fontSize($r('app.float.font_m'))
-              .fontWeight(FontWeight.Bold)
-              .fontColor($r('app.color.text_primary'))
-              .backgroundColor($r('app.color.button'))
-              .onClick(() => this.act((c: SessionController) => c.rate(n)))
-          }, (n: number) => `${n}`)
+      Column({ space: 12 }) {
+        if (this.view.repeatOffer) {
+          Text($r('app.string.repeat_title'))
+            .fontSize($r('app.float.font_m'))
+            .fontColor($r('app.color.text_primary'))
+            .textAlign(TextAlign.Center)
+          PrimaryButton({ label: $r('app.string.btn_repeat'),
+            onTap: () => this.act((c: SessionController) => c.repeat()) })
+          SecondaryButton({ label: $r('app.string.btn_finish'),
+            onTap: () => this.act((c: SessionController) => c.finishRounds()) })
+        } else {
+          Text($r('app.string.checkin_title'))
+            .fontSize($r('app.float.font_m'))
+            .fontColor($r('app.color.text_primary'))
+            .textAlign(TextAlign.Center)
+          this.intensityScale(true)
+          PrimaryButton({ label: $r('app.string.btn_free'),
+            onTap: () => this.act((c: SessionController) => c.rate(INTENSITY_FREE)) })
         }
-        .justifyContent(FlexAlign.Center)
-        .width('100%')
-        Row() {
-          Text($r('app.string.checkin_low'))
-            .fontSize($r('app.float.font_xs'))
-            .fontColor($r('app.color.text_secondary'))
-            .layoutWeight(1)
-          Text($r('app.string.checkin_high'))
-            .fontSize($r('app.float.font_xs'))
-            .fontColor($r('app.color.text_secondary'))
-            .layoutWeight(1)
-            .textAlign(TextAlign.End)
-        }
-        .width('100%')
-        .padding({ left: 8, right: 8 })
-        SecondaryButton({ label: $r('app.string.btn_skip'),
-          onTap: () => this.act((c: SessionController) => c.rate(RATING_NONE)) })
       }
       .width('100%')
-      .padding({ left: 14, right: 14, top: 36, bottom: 40 })
+      .constraintSize({ minHeight: '100%' })
+      .justifyContent(FlexAlign.Center)
+      .padding({ left: 14, right: 14, top: 24, bottom: 40 })
     }
     .scrollBar(BarState.Off)
     .width('100%')
@@ -481,6 +501,8 @@ export struct SessionPage {
       Stack() {
         if (this.view.stage === Stage.INTRO) {
           this.introView()
+        } else if (this.view.stage === Stage.INTENSITY) {
+          this.intensityView()
         } else if (this.view.stage === Stage.BREATHING) {
           this.breathingView(false)
         } else if (this.view.stage === Stage.COMPLETION_BREATHING) {
@@ -566,7 +588,10 @@ function cloneView(v: SessionView): SessionView {
   c.notNowReturn = v.notNowReturn;
   c.emotionNote = v.emotionNote;
   c.emotion = v.emotion;
-  c.rating = v.rating;
+  c.intensityBefore = v.intensityBefore;
+  c.intensityAfter = v.intensityAfter;
+  c.repeatOffer = v.repeatOffer;
+  c.rounds = v.rounds;
   c.message = v.message;
   c.professionalHint = v.professionalHint;
   c.revision = v.revision;

@@ -11,21 +11,15 @@
         </div>
       </list-item>
       <list-item class="li-card">
-        <div class="card" onclick="nextPattern">
-          <text class="label">{{ s.settings_default_pattern }}</text>
-          <text class="value">{{ patternText }}</text>
-        </div>
-      </list-item>
-      <list-item class="li-card">
-        <div class="card" onclick="nextDuration">
-          <text class="label">{{ s.settings_default_duration }}</text>
-          <text class="value">{{ durationText }}</text>
-        </div>
-      </list-item>
-      <list-item class="li-card">
         <div class="card" onclick="toggleMode">
           <text class="label">{{ s.settings_default_mode }}</text>
           <text class="value">{{ modeText }}</text>
+        </div>
+      </list-item>
+      <list-item class="li-card">
+        <div class="card" onclick="nextPattern">
+          <text class="label">{{ s.settings_default_pattern }}</text>
+          <text class="value">{{ patternText }}</text>
         </div>
       </list-item>
       <list-item class="li-card">

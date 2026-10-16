@@ -1,7 +1,7 @@
 import file from '@system.file';
 import { formatMmSs } from '../../core/Timing.js';
 import { JsonFiles } from '../../common/adapters.js';
-import { appendRecord } from '../../common/history.js';
+import { appendRecord, intensityText } from '../../common/history.js';
 import { SessionFiles } from '../../common/records.js';
 import { Strings } from '../../common/strings.js';
 import { focusList, go, useBackground } from '../../common/ui.js';
@@ -48,8 +48,11 @@ export default {
       if (r.emotionBefore) {
         lines.push({ label: strings.t('summary_emotion'), value: strings.label('emotion_', r.emotionBefore, 'other') });
       }
-      if (r.ratingAfter > 0) {
-        lines.push({ label: strings.t('summary_rating'), value: strings.fmt('fmt_rating', r.ratingAfter) });
+      if (r.intensityBefore > 0) {
+        lines.push({ label: strings.t('summary_rating'), value: intensityText(strings, r) });
+      }
+      if (r.rounds > 1) {
+        lines.push({ label: strings.t('summary_rounds'), value: String(r.rounds) });
       }
       this.lines = lines;
     });

@@ -1,0 +1,39 @@
+<!--
+  Before the practice: "What emotion do you feel?" (with the note for fear), then its intensity 1..5.
+  The intensity starts the session.
+-->
+<stack class="root" onswipe="onSwipe">
+  <image class="bg" src="{{ bg }}"></image>
+  <div class="frame" if="{{ step === 'emotion' }}">
+    <list class="list" ref="list">
+      <list-item class="li-text" style="height: {{ headR }}px;">
+        <text class="big" style="height: {{ headH }}px;">{{ head }}</text>
+      </list-item>
+      <list-item class="li" for="{{ options }}">
+        <text class="opt" onclick="choose($item.id)">{{ $item.label }}</text>
+      </list-item>
+      <list-item class="li">
+        <div class="btn" onclick="skip"><text class="btn-text">{{ s.btn_skip }}</text></div>
+      </list-item>
+      <list-item class="li-gap"></list-item>
+    </list>
+  </div>
+  <div class="frame" if="{{ step === 'note' }}">
+    <text class="body" style="height: {{ noteH }}px;">{{ note }}</text>
+    <div class="btn-primary dlg-gap" onclick="toIntensity"><text class="btn-text-primary">{{ s.btn_next }}</text></div>
+  </div>
+  <div class="frame" if="{{ step === 'intensity' }}">
+    <text class="big" style="height: {{ headH }}px;">{{ head }}</text>
+    <div class="rate-row dlg-gap">
+      <div class="rate" onclick="rate(1)"><text class="rate-text">1</text></div>
+      <div class="rate" onclick="rate(2)"><text class="rate-text">2</text></div>
+      <div class="rate" onclick="rate(3)"><text class="rate-text">3</text></div>
+      <div class="rate" onclick="rate(4)"><text class="rate-text">4</text></div>
+      <div class="rate" onclick="rate(5)"><text class="rate-text">5</text></div>
+    </div>
+    <div class="pair">
+      <text class="scale-low">{{ s.checkin_low }}</text>
+      <text class="scale-high">{{ s.checkin_high }}</text>
+    </div>
+  </div>
+</stack>

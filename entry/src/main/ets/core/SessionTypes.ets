@@ -3,9 +3,12 @@
  */
 
 export enum SessionMode {
-  /** Breathing + questions 1-4. */
+  /** Breathing + questions 2-4. */
   QUICK = 'quick',
-  /** Breathing + questions 1-5, emotion choice after question 1. */
+  /**
+   * Breathing + questions 2-5. Both modes start with the emotion choice and its intensity, which
+   * replaces question 1 ("What do I feel right now?"): asked twice, it read as the same question again.
+   */
   FULL = 'full'
 }
 
@@ -60,10 +63,13 @@ export enum SessionStatus {
 /** Stages of a session; stored with interrupted sessions as "where it stopped". */
 export enum Stage {
   INTRO = 'intro',
+  /** Intensity of the emotion before the practice. */
+  INTENSITY = 'intensity',
   BREATHING = 'breathing',
   QUESTION = 'question',
   EMOTION = 'emotion',
   COMPLETION_BREATHING = 'completionBreathing',
+  /** Intensity after a round: 1..5, or "Free"; 1..5 offers one more round. */
   CHECK_IN = 'checkIn',
   MESSAGE = 'message',
   SUMMARY = 'summary'
@@ -73,10 +79,13 @@ export const DURATIONS_MIN: number[] = [2, 3, 5, 7, 10];
 export const DEFAULT_DURATION_MIN: number = 3;
 export const QUICK_START_DURATION_MIN: number = 3;
 
-/** Rating scale 1..5, 0 = not given / skipped. */
-export const RATING_MIN: number = 1;
-export const RATING_MAX: number = 5;
-export const RATING_NONE: number = 0;
+/** Intensity of the emotion, before and after the practice: 1 (weak) .. 5 (strong). */
+export const INTENSITY_MIN: number = 1;
+export const INTENSITY_MAX: number = 5;
+/** After the practice only: "Free", the emotion has let go. */
+export const INTENSITY_FREE: number = 0;
+/** Not asked yet. */
+export const INTENSITY_NONE: number = -1;
 
 export function parseEmotion(value: string): Emotion {
   for (const e of EMOTIONS) {
@@ -92,7 +101,7 @@ export function parseMode(value: string): SessionMode {
 }
 
 export function parseStage(value: string): Stage {
-  const all: Stage[] = [Stage.INTRO, Stage.BREATHING, Stage.QUESTION, Stage.EMOTION,
+  const all: Stage[] = [Stage.INTRO, Stage.INTENSITY, Stage.BREATHING, Stage.QUESTION, Stage.EMOTION,
     Stage.COMPLETION_BREATHING, Stage.CHECK_IN, Stage.MESSAGE, Stage.SUMMARY];
   for (const s of all) {
     if (s === value) {
@@ -125,6 +134,6 @@ export function answersFor(q: QuestionId): Answer[] {
 
 export function questionsFor(mode: SessionMode): QuestionId[] {
   return mode === SessionMode.QUICK
-    ? [QuestionId.FEEL, QuestionId.ALLOW, QuestionId.COULD_RELEASE, QuestionId.WOULD_RELEASE]
-    : [QuestionId.FEEL, QuestionId.ALLOW, QuestionId.COULD_RELEASE, QuestionId.WOULD_RELEASE, QuestionId.WHEN];
+    ? [QuestionId.ALLOW, QuestionId.COULD_RELEASE, QuestionId.WOULD_RELEASE]
+    : [QuestionId.ALLOW, QuestionId.COULD_RELEASE, QuestionId.WOULD_RELEASE, QuestionId.WHEN];
 }

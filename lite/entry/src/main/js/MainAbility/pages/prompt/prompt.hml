@@ -1,11 +1,13 @@
 <!--
-  Screens 4, 6, 7: Sedona prompt, emotion, check-in, completion message, and the pause / end /
-  interruption dialog. Breathing is on pages/session.
+  Screens 4, 6, 7: intensity before, Sedona prompt, emotion, intensity after ("Free" / "Once more?"),
+  completion message, and the pause / end / interruption dialog. Breathing is on pages/session.
+  The first item centres a short screen vertically (topGap); a long one scrolls from the top.
 -->
 <stack class="root" onswipe="onSwipe">
   <image class="bg" src="{{ bg }}"></image>
   <div class="frame" if="{{ modal === 0 && screen !== '' }}">
     <list class="list" ref="list">
+      <list-item class="li-text" style="height: {{ topGap }}px;" if="{{ topGap > 0 }}"></list-item>
       <list-item class="li-line" if="{{ counterText !== '' }}"><text class="accent">{{ counterText }}</text></list-item>
       <list-item class="li-text" style="height: {{ headR }}px;" if="{{ headText !== '' }}">
         <text class="big" style="height: {{ headH }}px;">{{ headText }}</text>
@@ -19,7 +21,7 @@
       <list-item class="li" for="{{ options }}">
         <text class="opt" onclick="choose($item.id)">{{ $item.label }}</text>
       </list-item>
-      <list-item class="li" if="{{ screen === 'checkIn' }}">
+      <list-item class="li" if="{{ scale }}">
         <div class="rate-row">
           <div class="rate" onclick="rate(1)"><text class="rate-text">1</text></div>
           <div class="rate" onclick="rate(2)"><text class="rate-text">2</text></div>
@@ -28,7 +30,7 @@
           <div class="rate" onclick="rate(5)"><text class="rate-text">5</text></div>
         </div>
       </list-item>
-      <list-item class="li-line" if="{{ screen === 'checkIn' }}">
+      <list-item class="li-line" if="{{ scale }}">
         <div class="pair">
           <text class="scale-low">{{ s.checkin_low }}</text>
           <text class="scale-high">{{ s.checkin_high }}</text>

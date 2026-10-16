@@ -3,11 +3,28 @@
  * No user-visible text lives in code: everything comes from resources/{base,en,es}/element/string.json.
  */
 import { PatternId, PhaseType } from '../core/BreathPattern';
-import { Answer, Emotion, SessionMode, SessionStatus } from '../core/SessionTypes';
+import { Answer, Emotion, INTENSITY_FREE, INTENSITY_NONE, SessionMode, SessionStatus } from '../core/SessionTypes';
 import { CompletionMessage } from '../core/SupportRules';
 import { AppLanguage } from '../services/SettingsStore';
 
 export class Res {
+  /** "4 → free", "5 → 2", "3 → —": intensity of the emotion before and after the practice. */
+  static intensityText(ctx: Context | undefined, before: number, after: number): string {
+    if (ctx === undefined) {
+      return '';
+    }
+    try {
+      const rm = ctx.resourceManager;
+      const dash = rm.getStringSync($r('app.string.dash').id);
+      const b = before === INTENSITY_NONE ? dash : `${before}`;
+      const a = after === INTENSITY_FREE ? rm.getStringSync($r('app.string.intensity_free').id) :
+        (after === INTENSITY_NONE ? dash : `${after}`);
+      return rm.getStringSync($r('app.string.fmt_intensity').id, b, a);
+    } catch (e) {
+      return '';
+    }
+  }
+
   static pattern(id: PatternId): Resource {
     switch (id) {
       case PatternId.CALM_4_6:
@@ -111,6 +128,8 @@ export class Res {
     switch (stage) {
       case 'intro':
         return $r('app.string.stage_intro');
+      case 'intensity':
+        return $r('app.string.stage_intensity');
       case 'question':
         return $r('app.string.stage_question');
       case 'emotion':

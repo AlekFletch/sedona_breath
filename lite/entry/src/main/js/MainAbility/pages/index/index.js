@@ -1,27 +1,31 @@
 import app from '@system.app';
-import { QUICK_START_DURATION_MIN, SessionMode } from '../../core/SessionTypes.js';
-import { formatMmSs } from '../../core/Timing.js';
+import { DEFAULT_DURATION_MIN } from '../../core/SessionTypes.js';
 import { Store } from '../../common/store.js';
-import { appendRecord, lastCompleted, loadHistory, todayCount } from '../../common/history.js';
+import { appendRecord } from '../../common/history.js';
 import { pageForStage } from '../../common/stages.js';
 import { storeSystem } from '../../common/system.js';
-import { focusList, go, isBackSwipe, useBackground } from '../../common/ui.js';
+import { focusList, go, isBackSwipe, refocusList, useBackground } from '../../common/ui.js';
 import templateKeys from '../../common/keys/index.js';
 
 var store = null;
 /** 'summary' | 'session' | 'prompt' | '' — the page "Continue" reopens. */
 var unfinishedKind = '';
 
-/* Screen 1: start, quick 3-min start (no watch-face cards on lite), last session, today count. */
+var SCREEN_H = 480; // Watch Fit screen height, px
+
+/*
+ * Screen 1: "Practice" (the emotion and its intensity on pages/feel, then the session with the mode,
+ * breathing and vibration from Settings), History, Settings; "Continue" / "Finish" for an
+ * unfinished practice. No setup screen on lite.
+ */
 export default {
   data: {
     bg: '',
     s: {},
+    ready: false,
     unfinished: false,
     mainText: '',
-    secondText: '',
-    lastText: '',
-    todayText: ''
+    topGap: 0
   },
   onInit() {
     useBackground(this);
@@ -56,49 +60,46 @@ export default {
     focusList(this, true);
   },
   refresh(pending) {
-    loadHistory(store, (history) => {
-      var last = lastCompleted(history);
-      this.todayText = store.fmt('home_today', todayCount(history, Date.now()));
-      this.lastText = last !== null
-        ? store.fmt('home_last', formatMmSs(last.durationSec * 1000)) + ' · ' +
-          store.label('pattern_', last.patternId, 'relax478')
-        : store.t('home_last_none');
-      if (pending !== null) {
-        unfinishedKind = 'summary';
-        this.paint();
-        return;
-      }
-      store.readSnapshot((snap) => {
-        unfinishedKind = snap !== null ? pageForStage(snap.stage) : '';
-        this.paint();
-      });
+    if (pending !== null) {
+      unfinishedKind = 'summary';
+      this.paint();
+      return;
+    }
+    store.readSnapshot((snap) => {
+      unfinishedKind = snap !== null ? pageForStage(snap.stage) : '';
+      this.paint();
     });
   },
   paint() {
     this.unfinished = unfinishedKind !== '';
-    this.mainText = store.t(this.unfinished ? 'btn_resume' : 'btn_start_practice');
-    this.secondText = store.t(this.unfinished ? 'btn_finish' : 'home_quick');
+    this.mainText = store.t(this.unfinished ? 'btn_resume' : 'btn_practice');
+    // Title (64) and buttons (76 each), plus the warning line (46) and "Finish" when unfinished.
+    var h = 64 + 3 * 76 + (this.unfinished ? 46 + 76 : 0);
+    this.topGap = Math.floor((SCREEN_H - h) / 2);
+    if (!this.ready) {
+      // The list appears now: give it the crown (onShow found no list yet).
+      this.ready = true;
+      refocusList(this);
+    }
   },
-  /* "Start practice", or "Continue" an unfinished one. */
+  /* "Practice", or "Continue" an unfinished one. */
   tapMain() {
     if (unfinishedKind === '') {
-      go(this, 'setup');
+      var st = store.settings;
+      // The emotion and its intensity first (pages/feel), then the session.
+      // One length for every practice: there is no duration in Settings (a saved one is ignored).
+      go(this, 'feel', store.sessionParams(DEFAULT_DURATION_MIN, st.defaultMode, st.defaultPattern, st.vibration));
     } else if (unfinishedKind === 'summary') {
       go(this, 'summary', { lang: store.lang });
     } else {
       go(this, unfinishedKind, { launch: 'resume', lang: store.lang });
     }
   },
-  /* "Quick · 3 min", or "Finish" (drop) an unfinished one. */
-  tapSecond() {
-    if (unfinishedKind === '') {
-      var st = store.settings;
-      go(this, 'session', store.sessionParams(QUICK_START_DURATION_MIN, SessionMode.QUICK, st.defaultPattern, st.vibration));
-    } else {
-      store.discardAll();
-      unfinishedKind = '';
-      this.paint();
-    }
+  /* "Finish": drop the unfinished practice. */
+  dropUnfinished() {
+    store.discardAll();
+    unfinishedKind = '';
+    this.paint();
   },
   openHistory() {
     go(this, 'history');

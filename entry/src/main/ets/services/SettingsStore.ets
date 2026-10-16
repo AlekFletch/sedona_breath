@@ -157,7 +157,10 @@ export class SettingsStore implements SnapshotSink {
       s.activeMs = parsed.activeMs;
       s.cyclesDone = parsed.cyclesDone;
       s.emotion = parsed.emotion;
-      s.rating = parsed.rating;
+      s.intensityBefore = parsed.intensityBefore ?? -1;
+      s.intensityAfter = parsed.intensityAfter ?? -1;
+      s.rounds = parsed.rounds ?? 1;
+      s.askEmotion = parsed.askEmotion !== false;
       s.stage = parsed.stage;
       return s;
     } catch (e) {

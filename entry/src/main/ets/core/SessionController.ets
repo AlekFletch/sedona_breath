@@ -1,6 +1,7 @@
 /*
- * Session orchestration: walks the plan (intro -> breathing / questions ->
- * completion breathing -> check-in -> message -> summary), drives the breath
+ * Session orchestration: walks the plan (intro -> emotion -> intensity -> breathing / questions ->
+ * completion breathing -> intensity check, once more if the emotion is still there ->
+ * message -> summary), drives the breath
  * engine and the vibration scheduler, tracks active time and cycles, and
  * produces snapshots for interruption recovery.
  *
@@ -12,7 +13,8 @@ import { BreathEngine, BreathListener, BreathPosition, EngineState } from './Bre
 import { PlanStep, SessionPlanner, StepKind } from './SessionPlan';
 import { SessionRecord, SessionSnapshot } from './SessionRecord';
 import {
-  Answer, Emotion, QuestionId, RATING_NONE, SessionMode, SessionStatus, Stage, parseDuration, parseEmotion, parseMode
+  Answer, Emotion, INTENSITY_FREE, INTENSITY_MAX, INTENSITY_MIN, INTENSITY_NONE, QuestionId, SessionMode, SessionStatus,
+  Stage, parseDuration, parseEmotion, parseMode
 } from './SessionTypes';
 import { CompletionMessage, SupportRules } from './SupportRules';
 import { Clock, Scheduler } from './Timing';
@@ -24,6 +26,10 @@ export class SessionConfig {
   patternId: PatternId = PatternId.RELAX_478;
   free: FreeRhythm = new FreeRhythm();
   vibration: boolean = true;
+  /** The emotion and its intensity were asked before the session: the plan skips them. */
+  presetEmotion: boolean = false;
+  emotion: Emotion = Emotion.NONE;
+  intensityBefore: number = INTENSITY_NONE;
 }
 
 /** Read-only state for the UI. Plain fields: copy into @State on onUpdate(). */
@@ -47,7 +53,12 @@ export class SessionView {
   /** Shown after choosing "Fear": suggestion to talk to someone. */
   emotionNote: boolean = false;
   emotion: Emotion = Emotion.NONE;
-  rating: number = RATING_NONE;
+  intensityBefore: number = INTENSITY_NONE;
+  intensityAfter: number = INTENSITY_NONE;
+  /** On the intensity check, after 1..5: "Once more?" */
+  repeatOffer: boolean = false;
+  /** Rounds started (1 + "Once more"). */
+  rounds: number = 1;
   message: CompletionMessage = CompletionMessage.GENTLE_1;
   professionalHint: boolean = false;
   /** Increments on each update so observers can cheaply detect changes. */
@@ -73,7 +84,7 @@ export class SessionController implements BreathListener {
 
   readonly config: SessionConfig;
   readonly pattern: BreathPattern;
-  readonly steps: PlanStep[];
+  steps: PlanStep[];
   readonly view: SessionView = new SessionView();
   startedAt: number = 0;
 
@@ -97,7 +108,9 @@ export class SessionController implements BreathListener {
     this.config = config;
     this.config.durationMin = parseDuration(config.durationMin);
     this.pattern = PatternCatalog.build(config.patternId, config.free);
-    this.steps = SessionPlanner.build(this.config.durationMin, config.mode, this.pattern);
+    this.steps = SessionPlanner.build(this.config.durationMin, config.mode, this.pattern, 1, !config.presetEmotion);
+    this.view.emotion = config.emotion;
+    this.view.intensityBefore = config.intensityBefore;
     this.clock = clock;
     this.scheduler = scheduler;
     this.sink = sink;
@@ -115,12 +128,15 @@ export class SessionController implements BreathListener {
     cfg.patternId = PatternCatalog.parseId(s.patternId);
     cfg.free = new FreeRhythm(s.freeInhaleSec, s.freeExhaleSec);
     cfg.vibration = s.vibration;
+    cfg.presetEmotion = s.askEmotion === false;
     const c = new SessionController(cfg, clock, scheduler, haptics, sink, wallClock);
     c.startedAt = s.startedAt;
     c.activeAccumMs = Math.max(0, s.activeMs);
     c.cyclesBefore = Math.max(0, s.cyclesDone);
     c.view.emotion = parseEmotion(s.emotion);
-    c.view.rating = s.rating;
+    c.view.intensityBefore = s.intensityBefore;
+    c.view.intensityAfter = s.intensityAfter;
+    c.setRounds(s.rounds);
     const index = Math.max(0, Math.min(s.stepIndex, c.steps.length));
     c.enterStep(index, s.stepElapsedMs, true);
     return c;
@@ -175,7 +191,7 @@ export class SessionController implements BreathListener {
     if (step.question === QuestionId.WHEN && a === Answer.NOT_NOW) {
       // Gentle return to breathing, no pressure.
       this.view.notNowReturn = true;
-      this.enterStep(SessionPlanner.completionIndex(this.steps), 0, false);
+      this.enterStep(SessionPlanner.completionIndex(this.steps, this.view.stepIndex), 0, false);
       return;
     }
     this.next();
@@ -186,7 +202,7 @@ export class SessionController implements BreathListener {
       return;
     }
     this.view.emotion = e;
-    if (SupportRules.recommendsProfessional(RATING_NONE, e)) {
+    if (SupportRules.recommendsProfessional(INTENSITY_NONE, e)) {
       this.view.emotionNote = true;
       this.publish();
       return;
@@ -207,15 +223,46 @@ export class SessionController implements BreathListener {
     this.chooseEmotion(Emotion.NONE);
   }
 
-  /** 1..5, or RATING_NONE for "Skip". */
-  rate(rating: number): void {
-    if (this.view.stage !== Stage.CHECK_IN) {
+  /** Intensity of the emotion before the practice, 1..5. */
+  rateBefore(intensity: number): void {
+    if (this.view.stage !== Stage.INTENSITY || this.view.paused) {
       return;
     }
-    this.view.rating = rating;
-    this.view.message = SupportRules.completionMessage(rating, this.messageSeed);
-    this.view.professionalHint = SupportRules.recommendsProfessional(rating, this.view.emotion);
+    this.view.intensityBefore = Math.max(INTENSITY_MIN, Math.min(INTENSITY_MAX, Math.round(intensity)));
     this.next();
+  }
+
+  /** Intensity after the round: INTENSITY_FREE ("Free") ends the practice, 1..5 offers one more round. */
+  rate(intensity: number): void {
+    if (this.view.stage !== Stage.CHECK_IN || this.view.repeatOffer) {
+      return;
+    }
+    this.view.intensityAfter = Math.max(INTENSITY_FREE, Math.min(INTENSITY_MAX, Math.round(intensity)));
+    if (this.view.intensityAfter === INTENSITY_FREE) {
+      this.finishRounds();
+      return;
+    }
+    this.view.repeatOffer = true;
+    this.publish();
+  }
+
+  /** "Once more": another round of the questions. */
+  repeat(): void {
+    if (this.view.stage !== Stage.CHECK_IN || !this.view.repeatOffer) {
+      return;
+    }
+    this.setRounds(this.view.rounds + 1);
+    this.next();
+  }
+
+  /** "Finish" after 1..5, or "Free": to the completion message. */
+  finishRounds(): void {
+    if (this.view.stage !== Stage.CHECK_IN || this.view.intensityAfter === INTENSITY_NONE) {
+      return;
+    }
+    this.view.message = SupportRules.completionMessage(this.view.intensityAfter, this.messageSeed);
+    this.view.professionalHint = SupportRules.recommendsProfessional(this.view.intensityAfter, this.view.emotion);
+    this.enterStep(this.steps.length - 1, 0, false);
   }
 
   /** "Next" on the completion message -> summary. */
@@ -298,7 +345,9 @@ export class SessionController implements BreathListener {
     r.status = status;
     r.stoppedAt = status === SessionStatus.INTERRUPTED ? this.view.stage : '';
     r.emotionBefore = this.view.emotion;
-    r.ratingAfter = this.view.rating;
+    r.intensityBefore = this.view.intensityBefore;
+    r.intensityAfter = this.view.intensityAfter;
+    r.rounds = this.view.rounds;
     return r;
   }
 
@@ -317,7 +366,10 @@ export class SessionController implements BreathListener {
     s.activeMs = this.activeMs();
     s.cyclesDone = this.cyclesBefore;
     s.emotion = this.view.emotion;
-    s.rating = this.view.rating;
+    s.intensityBefore = this.view.intensityBefore;
+    s.intensityAfter = this.view.intensityAfter;
+    s.rounds = this.view.rounds;
+    s.askEmotion = !this.config.presetEmotion;
     s.stage = this.view.stage;
     return s;
   }
@@ -397,6 +449,7 @@ export class SessionController implements BreathListener {
     this.clearIntroTimer();
     this.view.stepIndex = index;
     this.view.emotionNote = false;
+    this.view.repeatOffer = false;
 
     if (index >= this.steps.length) {
       this.view.stage = Stage.SUMMARY;
@@ -453,6 +506,14 @@ export class SessionController implements BreathListener {
     }
     this.persist();
     this.publish();
+  }
+
+  /** Rebuilds the plan for `rounds` rounds; the steps before the new round stay the same. */
+  private setRounds(rounds: number): void {
+    const n = rounds >= 1 ? Math.floor(rounds) : 1;
+    this.view.rounds = n;
+    this.steps = SessionPlanner.build(this.config.durationMin, this.config.mode, this.pattern, n,
+      !this.config.presetEmotion);
   }
 
   private armIntroTimer(): void {

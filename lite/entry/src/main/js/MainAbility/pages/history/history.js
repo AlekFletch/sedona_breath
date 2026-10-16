@@ -1,6 +1,6 @@
 import { formatMmSs } from '../../core/Timing.js';
 import { Store } from '../../common/store.js';
-import { loadHistory } from '../../common/history.js';
+import { intensityText, loadHistory } from '../../common/history.js';
 import { storeSystem } from '../../common/system.js';
 import { focusList, go, isBackSwipe, useBackground } from '../../common/ui.js';
 import templateKeys from '../../common/keys/history.js';
@@ -41,13 +41,14 @@ export default {
             status = status + ' · ' + store.fmt('history_stopped_at', store.label('stage_', r.stoppedAt, 'breathing'));
           }
           var before = r.emotionBefore ? store.label('emotion_', r.emotionBefore, 'other') : store.t('dash');
-          var after = r.ratingAfter > 0 ? store.fmt('fmt_rating', r.ratingAfter) : store.t('dash');
+          var after = intensityText(store, r);
           items.push({
             head: dateText(r.startedAt) + '  ' + formatMmSs(r.durationSec * 1000),
             mode: store.label('mode_', r.mode, 'full'),
             status: status,
             color: interrupted ? '#F2C27E' : '#8FE0B8',
-            ba: store.fmt('history_before', before) + '  ' + store.fmt('history_after', after)
+            before: store.fmt('history_before', before),
+            after: store.fmt('history_after', after)
           });
         }
         this.items = items;

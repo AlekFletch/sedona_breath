@@ -1,5 +1,5 @@
 import { SessionRecord } from '../core/SessionRecord';
-import { Emotion, RATING_NONE, SessionStatus } from '../core/SessionTypes';
+import { Emotion, SessionStatus } from '../core/SessionTypes';
 import { formatMmSs } from '../core/Timing';
 import { HistoryRepository } from '../services/HistoryRepository';
 import { Res } from '../components/Res';
@@ -74,8 +74,8 @@ export struct HistoryPage {
           Res.emotion(r.emotionBefore))))
           .fontSize($r('app.float.font_xs'))
           .fontColor($r('app.color.text_secondary'))
-        Text($r('app.string.history_after', r.ratingAfter === RATING_NONE ? this.str($r('app.string.dash')) :
-          this.str($r('app.string.fmt_rating'), r.ratingAfter)))
+        Text($r('app.string.history_after',
+          Res.intensityText(this.getUIContext().getHostContext(), r.intensityBefore, r.intensityAfter)))
           .fontSize($r('app.float.font_xs'))
           .fontColor($r('app.color.text_secondary'))
       }

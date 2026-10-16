@@ -5,11 +5,13 @@ import { textHeight, wrap } from '../../common/textSize.js';
 import templateKeys from '../../common/keys/prompt.js';
 
 /*
- * Screens 4, 6 and 7 of a running session: Sedona questions, emotion choice (full practice),
- * check-in 1..5 and the completion message (breathing is on pages/session; see common/sessionPage.js).
- * One list: counter, a big text, a small text, a main button, option buttons (`for`), the rating
- * row and a last button; each screen fills what it needs.
+ * Screens 4, 6 and 7 of a running session: intensity before, Sedona questions, emotion choice (full
+ * practice), intensity after with "Free" and "Once more?", the completion message (breathing is on
+ * pages/session; see common/sessionPage.js). One list: a top gap that centres short screens, counter,
+ * a big text, a small text, a main button, option buttons (`for`), the 1..5 row and a last button;
+ * each screen fills what it needs.
  */
+var SCREEN_H = 480; // Watch Fit screen height, px
 var firstAction = '';
 var lastAction = '';
 
@@ -17,7 +19,7 @@ export default sessionPage({
   name: 'prompt',
   keys: templateKeys,
   // Restored from the snapshot only: questions never start a session.
-  core: { SessionController: PromptFlow },
+  core: { Flow: PromptFlow, readPlan: true },
   data: {
     screen: '',
     counterText: '',
@@ -29,7 +31,9 @@ export default sessionPage({
     bodyR: 48,
     firstText: '',
     options: [],
-    lastText: ''
+    scale: false,
+    lastText: '',
+    topGap: 0
   },
   paint(v) {
     var strings = current.strings;
@@ -39,6 +43,7 @@ export default sessionPage({
     var first = '';
     var last = '';
     var options = [];
+    var scale = false;
     var i;
     firstAction = '';
     lastAction = '';
@@ -62,10 +67,20 @@ export default sessionPage({
       }
       lastAction = 'skipEmotion';
       last = strings.t('btn_skip');
+    } else if (v.stage === 'intensity') {
+      head = strings.t('intensity_title');
+      scale = true;
+    } else if (v.stage === 'checkIn' && v.repeatOffer) {
+      head = strings.t('repeat_title');
+      firstAction = 'repeat';
+      first = strings.t('btn_repeat');
+      lastAction = 'finishRounds';
+      last = strings.t('btn_finish');
     } else if (v.stage === 'checkIn') {
       head = strings.t('checkin_title');
-      lastAction = 'skipRating';
-      last = strings.t('btn_skip');
+      scale = true;
+      lastAction = 'free';
+      last = strings.t('btn_free');
     } else if (v.stage === 'message') {
       head = strings.label('msg_', v.message, 'gentle1');
       if (v.professionalHint) {
@@ -86,7 +101,12 @@ export default sessionPage({
     this.bodyText = body;
     this.firstText = first;
     this.options = options;
+    this.scale = scale;
     this.lastText = last;
+    // Rows as the list draws them (li 76, li-line 46): a short screen goes to the middle.
+    var h = (counter !== '' ? 46 : 0) + (head !== '' ? this.headR : 0) + (body !== '' ? this.bodyR : 0) +
+      (first !== '' ? 76 : 0) + options.length * 76 + (scale ? 76 + 46 : 0) + (last !== '' ? 76 : 0);
+    this.topGap = h < SCREEN_H ? Math.floor((SCREEN_H - h) / 2) : 0;
   },
   methods: {
     tapFirst() {
@@ -108,14 +128,24 @@ export default sessionPage({
         c.acknowledgeEmotionNote();
       } else if (id === 'skipEmotion') {
         c.skipEmotion();
-      } else if (id === 'skipRating') {
+      } else if (id === 'free') {
         c.rate(0);
+      } else if (id === 'repeat') {
+        c.repeat();
+      } else if (id === 'finishRounds') {
+        c.finishRounds();
       } else if (id === 'finishMessage') {
         c.finishMessage();
       }
     },
+    /* The 1..5 row: the intensity before, or after a round. */
     rate(n) {
-      if (this.act()) {
+      if (!this.act()) {
+        return;
+      }
+      if (current.c.view.stage === 'intensity') {
+        current.c.rateBefore(Number(n));
+      } else {
         current.c.rate(Number(n));
       }
     }

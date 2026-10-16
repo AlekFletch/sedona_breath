@@ -18,7 +18,9 @@ function record(startedAt: number, status: SessionStatus): SessionRecord {
   r.status = status;
   r.stoppedAt = status === SessionStatus.INTERRUPTED ? Stage.QUESTION : '';
   r.emotionBefore = Emotion.TENSION;
-  r.ratingAfter = 4;
+  r.intensityBefore = 4;
+  r.intensityAfter = 2;
+  r.rounds = 2;
   return r;
 }
 

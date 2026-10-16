@@ -7,16 +7,27 @@
 // this between LegacyCompileLiteJS and LegacyGenerateLiteCode; then it checks the sizes.
 // Found on Watch Fit 4 Pro with the RepPulse lite app (same account, same watch).
 //
-// Usage: node tools/minify-lite.mjs [--check-only]
+// Usage: node tools/minify-lite.mjs [--check-only] [--product <name>]
+// Without --product it takes the most recently built product (default, release).
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const OUT = path.join(root, 'lite/entry/build/default/intermediates/loader_out_lite/default/js/MainAbility');
+const BUILD = path.join(root, 'lite/entry/build');
 const LIMIT = 48 * 1024;
 const checkOnly = process.argv.includes('--check-only');
+const productArg = process.argv.indexOf('--product');
+
+const outOf = (product) => path.join(BUILD, product, 'intermediates/loader_out_lite/default/js/MainAbility');
+const latestProduct = () => {
+  const built = (fs.existsSync(BUILD) ? fs.readdirSync(BUILD) : [])
+    .filter((p) => fs.existsSync(outOf(p)))
+    .sort((a, b) => fs.statSync(outOf(b)).mtimeMs - fs.statSync(outOf(a)).mtimeMs);
+  return built[0] || 'default';
+};
+const OUT = outOf(productArg >= 0 ? process.argv[productArg + 1] : latestProduct());
 
 const files = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
   const p = path.join(dir, e.name);

@@ -57,3 +57,11 @@ function startOfToday(now) {
   d.setHours(0, 0, 0, 0);
   return d.getTime();
 }
+
+/** "4 → free", "5 → 2", "3 → —": intensity before and after (texts: Strings or Store). */
+export function intensityText(texts, r) {
+  var before = r.intensityBefore > 0 ? String(r.intensityBefore) : texts.t('dash');
+  var after = r.intensityAfter === 0 ? texts.t('intensity_free')
+    : (r.intensityAfter > 0 ? String(r.intensityAfter) : texts.t('dash'));
+  return texts.fmt('fmt_intensity', before, after);
+}

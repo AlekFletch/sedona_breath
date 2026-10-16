@@ -30,24 +30,70 @@ LiteHaptics.prototype.stop = function () {
   // Not available on lite wearables; pending ticks are cancelled by the scheduler.
 };
 
-/** Clock + Scheduler. Lite has no monotonic clock API: Date.now() is used (injectable for tests). */
-export function LiteTime(timers, now) {
-  this.timers = timers;
+/**
+ * Clock + Scheduler. Lite has no monotonic clock API: Date.now() is used (injectable for tests).
+ *
+ * No setTimeout per task: the core schedules every vibration tick and phase end at once (10+ on a
+ * 4-7-8 inhale), and the watch runs only a few timers at a time. On Watch Fit 4 Pro the phase
+ * timer was never set: the first inhale vibrated, then the phase, the label and the steps stood
+ * still. Tasks wait in a queue instead and the page runs the due ones from its one interval (poll).
+ */
+export function LiteTime(now) {
   this.nowFn = now || function () {
     return Date.now();
   };
+  this.tasks = [];
+  this.nextId = 1;
+  this.last = 0;
 }
 
+/** Never goes back: the wall clock can step back on a time sync, and the circle would jump. */
 LiteTime.prototype.now = function () {
-  return this.nowFn();
+  var t = this.nowFn();
+  if (t < this.last) {
+    t = this.last;
+  }
+  this.last = t;
+  return t;
 };
 
 LiteTime.prototype.schedule = function (delayMs, cb) {
-  return this.timers.setTimeout(cb, Math.max(0, delayMs));
+  var id = this.nextId++;
+  this.tasks.push({ id: id, due: this.now() + Math.max(0, delayMs), cb: cb });
+  return id;
 };
 
 LiteTime.prototype.cancel = function (handle) {
-  this.timers.clearTimeout(handle);
+  for (var i = 0; i < this.tasks.length; i++) {
+    if (this.tasks[i].id === handle) {
+      this.tasks.splice(i, 1);
+      return;
+    }
+  }
+};
+
+/** Runs the due tasks, earliest first (a task may schedule or cancel others). */
+LiteTime.prototype.poll = function () {
+  var now = this.now();
+  // A guard: a task that keeps scheduling itself with no delay waits for the next poll.
+  for (var n = 0; n < 100; n++) {
+    var first = -1;
+    for (var i = 0; i < this.tasks.length; i++) {
+      if (this.tasks[i].due <= now && (first < 0 || this.tasks[i].due < this.tasks[first].due)) {
+        first = i;
+      }
+    }
+    if (first < 0) {
+      return;
+    }
+    var task = this.tasks.splice(first, 1)[0];
+    task.cb();
+  }
+};
+
+/** Drops every task (the page is leaving). */
+LiteTime.prototype.clear = function () {
+  this.tasks = [];
 };
 
 /**

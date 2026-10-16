@@ -85,14 +85,14 @@
 /* Page styles: edit below this line. */
 .li-entry {
   width: 360px;
-  height: 172px;
+  height: 206px;
   justify-content: center;
   align-items: center;
   background-color: transparent;
 }
 .entry-box {
   width: 330px;
-  height: 162px;
+  height: 196px;
   border-radius: 22px;
   border-width: 2px;
   border-color: #2C6E50;

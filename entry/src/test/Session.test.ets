@@ -3,7 +3,9 @@ import { FreeRhythm, PatternCatalog, PatternId } from '../main/ets/core/BreathPa
 import { PlanStep, SessionPlanner, StepKind } from '../main/ets/core/SessionPlan';
 import { SessionConfig, SessionController, SessionObserver, SessionView, SnapshotSink } from '../main/ets/core/SessionController';
 import { SessionSnapshot } from '../main/ets/core/SessionRecord';
-import { Answer, Emotion, RATING_NONE, SessionMode, SessionStatus, Stage } from '../main/ets/core/SessionTypes';
+import {
+  Answer, Emotion, INTENSITY_FREE, INTENSITY_NONE, QuestionId, SessionMode, SessionStatus, Stage
+} from '../main/ets/core/SessionTypes';
 import { CompletionMessage, SupportRules } from '../main/ets/core/SupportRules';
 import { ManualTime } from '../main/ets/core/ManualTime';
 import { HapticDriver, LONG_PULSE_MS } from '../main/ets/core/Vibration';
@@ -70,29 +72,86 @@ function finishBreathing(t: ManualTime, c: SessionController): void {
   t.advance(c.remainingMs() + 60000 * 20);
 }
 
+/** Intro, the emotion and its intensity: to the lead-in breathing. */
+function startBreathing(c: SessionController, intensity: number, emotion: Emotion = Emotion.TENSION): void {
+  c.start();
+  c.finishIntro();
+  c.chooseEmotion(emotion);
+  c.rateBefore(intensity);
+}
+
 export default function sessionTest() {
   describe('SessionPlanner', () => {
     it('fullMode478ThreeMinutes', 0, () => {
       const p = PatternCatalog.build(PatternId.RELAX_478, new FreeRhythm());
       const steps = SessionPlanner.build(3, SessionMode.FULL, p);
       expect(kinds(steps)).assertEqual(
-        'intro B2 question emotion B1 question B1 question B1 question B1 question completionBreath checkIn message');
+        'intro emotion intensity B2 question B1 question B1 question B1 question completionBreath checkIn message');
       expect(steps[steps.length - 3].cycles).assertEqual(3);
     });
 
-    it('quickModeFourQuestionsNoEmotion', 0, () => {
+    it('quickModeThreeQuestions', 0, () => {
       const p = PatternCatalog.build(PatternId.CALM_4_6, new FreeRhythm());
       const steps = SessionPlanner.build(5, SessionMode.QUICK, p);
+      // The extra time goes into the pauses between the questions, not into the lead-in.
       expect(kinds(steps)).assertEqual(
-        'intro B13 question B2 question B2 question B2 question completionBreath checkIn message');
-      expect(steps.filter((s: PlanStep) => s.kind === StepKind.QUESTION)[3].questionTotal).assertEqual(4);
+        'intro emotion intensity B2 question B9 question B8 question completionBreath checkIn message');
+      expect(steps.filter((s: PlanStep) => s.kind === StepKind.QUESTION)[2].questionTotal).assertEqual(3);
     });
 
     it('shortSessionUsesOneCyclePauses', 0, () => {
       const p = PatternCatalog.build(PatternId.CALM_4_6, new FreeRhythm());
       const steps = SessionPlanner.build(2, SessionMode.QUICK, p);
       expect(kinds(steps)).assertEqual(
-        'intro B2 question B1 question B1 question B1 question completionBreath checkIn message');
+        'intro emotion intensity B2 question B1 question B1 question completionBreath checkIn message');
+    });
+
+    it('questionsStartEarlyAtAnyDuration', 0, () => {
+      const p = PatternCatalog.build(PatternId.RELAX_478, new FreeRhythm());
+      for (const d of [2, 3, 5, 7, 10]) {
+        const steps = SessionPlanner.build(d, SessionMode.FULL, p);
+        let i = 0;
+        let before = 0;
+        while (steps[i].kind !== StepKind.QUESTION) {
+          if (steps[i].isBreathing()) {
+            before += SessionPlanner.estimateMs(steps[i], p); // breathing before the first question
+          }
+          i++;
+        }
+        expect(before <= 60000).assertTrue();
+      }
+    });
+
+    it('emotionAskedBeforeTheSession', 0, () => {
+      const p = PatternCatalog.build(PatternId.RELAX_478, new FreeRhythm());
+      const steps = SessionPlanner.build(3, SessionMode.QUICK, p, 1, false);
+      expect(kinds(steps).indexOf('intro B2 question')).assertEqual(0);
+      const t = new ManualTime();
+      const sink = new Sink();
+      const cfg = config(SessionMode.QUICK, PatternId.CALM_4_6, 3);
+      cfg.presetEmotion = true;
+      cfg.emotion = Emotion.ANGER;
+      cfg.intensityBefore = 5;
+      const c = new SessionController(cfg, t, t, new Haptics(), sink, () => 0);
+      c.start();
+      c.finishIntro();
+      expect(c.view.stage).assertEqual(Stage.BREATHING);
+      c.interrupt();
+      const r = SessionController.fromSnapshot(sink.last as SessionSnapshot, t, t, new Haptics(), new Sink(), () => 0);
+      expect(r.steps.length).assertEqual(c.steps.length);
+      expect(r.view.emotion).assertEqual(Emotion.ANGER);
+      expect(r.buildRecord(SessionStatus.INTERRUPTED).intensityBefore).assertEqual(5);
+    });
+
+    it('eachRoundAddsQuestionsWithoutEmotion', 0, () => {
+      const p = PatternCatalog.build(PatternId.RELAX_478, new FreeRhythm());
+      const one = SessionPlanner.build(3, SessionMode.FULL, p);
+      const two = SessionPlanner.build(3, SessionMode.FULL, p, 2);
+      expect(kinds(two.slice(0, one.length - 1))).assertEqual(kinds(one.slice(0, one.length - 1)));
+      expect(kinds(two.slice(one.length - 1))).assertEqual(
+        'B1 question B1 question B1 question B1 question completionBreath checkIn message');
+      expect(two.filter((st: PlanStep) => st.kind === StepKind.EMOTION).length).assertEqual(1);
+      expect(SessionPlanner.completionIndex(two, one.length)).assertEqual(two.length - 3);
     });
 
     it('longerDurationMeansMoreBreathing', 0, () => {
@@ -105,7 +164,7 @@ export default function sessionTest() {
         prev = total;
       }
       const ten = SessionPlanner.totalEstimateMs(SessionPlanner.build(10, SessionMode.FULL, p), p);
-      expect(Math.abs(ten - 600000) < 16000).assertTrue();
+      expect(Math.abs(ten - 600000) < 17000).assertTrue();
     });
 
     it('completionIs2to3CyclesWithin30to60s', 0, () => {
@@ -120,18 +179,18 @@ export default function sessionTest() {
   });
 
   describe('SupportRules', () => {
-    it('supportiveFor1and2Only', 0, () => {
-      expect(SupportRules.completionMessage(1, 0)).assertEqual(CompletionMessage.SUPPORTIVE);
-      expect(SupportRules.completionMessage(2, 5)).assertEqual(CompletionMessage.SUPPORTIVE);
+    it('supportiveForStrongIntensityOnly', 0, () => {
+      expect(SupportRules.completionMessage(5, 0)).assertEqual(CompletionMessage.SUPPORTIVE);
+      expect(SupportRules.completionMessage(4, 5)).assertEqual(CompletionMessage.SUPPORTIVE);
       expect(SupportRules.completionMessage(3, 0) === CompletionMessage.SUPPORTIVE).assertFalse();
-      expect(SupportRules.completionMessage(RATING_NONE, 0) === CompletionMessage.SUPPORTIVE).assertFalse();
+      expect(SupportRules.completionMessage(INTENSITY_FREE, 0) === CompletionMessage.SUPPORTIVE).assertFalse();
     });
 
-    it('professionalHintForRating1OrFear', 0, () => {
-      expect(SupportRules.recommendsProfessional(1, Emotion.NONE)).assertTrue();
-      expect(SupportRules.recommendsProfessional(2, Emotion.NONE)).assertFalse();
-      expect(SupportRules.recommendsProfessional(RATING_NONE, Emotion.FEAR)).assertTrue();
-      expect(SupportRules.recommendsProfessional(5, Emotion.ANXIETY)).assertFalse();
+    it('professionalHintForIntensity5OrFear', 0, () => {
+      expect(SupportRules.recommendsProfessional(5, Emotion.NONE)).assertTrue();
+      expect(SupportRules.recommendsProfessional(4, Emotion.NONE)).assertFalse();
+      expect(SupportRules.recommendsProfessional(INTENSITY_NONE, Emotion.FEAR)).assertTrue();
+      expect(SupportRules.recommendsProfessional(INTENSITY_FREE, Emotion.ANXIETY)).assertFalse();
     });
   });
 
@@ -146,47 +205,111 @@ export default function sessionTest() {
       c.start();
       expect(c.view.stage).assertEqual(Stage.INTRO);
       t.advance(9000); // intro auto-advances after 3 slides
+      expect(c.view.stage).assertEqual(Stage.EMOTION);
+      c.chooseEmotion(Emotion.TENSION);
+      expect(c.view.stage).assertEqual(Stage.INTENSITY);
+      c.rateBefore(4);
       expect(c.view.stage).assertEqual(Stage.BREATHING);
       finishBreathing(t, c);
       expect(c.view.stage).assertEqual(Stage.QUESTION);
       expect(c.view.questionIndex).assertEqual(1);
-      c.answer(Answer.CONTINUE);
-      expect(c.view.stage).assertEqual(Stage.EMOTION);
-      c.chooseEmotion(Emotion.TENSION);
-      for (let q = 2; q <= 5; q++) {
+      // The emotion choice replaced "What do I feel right now?": the questions start with "allow".
+      expect(c.view.question).assertEqual(QuestionId.ALLOW);
+      c.answer(Answer.YES);
+      for (let q = 2; q <= 4; q++) {
         finishBreathing(t, c);
         expect(c.view.stage).assertEqual(Stage.QUESTION);
         expect(c.view.questionIndex).assertEqual(q);
-        expect(c.view.questionTotal).assertEqual(5);
-        c.answer(q === 5 ? Answer.NOW : Answer.DONT_KNOW);
+        expect(c.view.questionTotal).assertEqual(4);
+        c.answer(q === 4 ? Answer.NOW : Answer.DONT_KNOW);
       }
       expect(c.view.stage).assertEqual(Stage.COMPLETION_BREATHING);
       finishBreathing(t, c);
       expect(c.view.stage).assertEqual(Stage.CHECK_IN);
       expect(h.pulses[h.pulses.length - 1]).assertEqual(LONG_PULSE_MS);
-      c.rate(4);
+      c.rate(INTENSITY_FREE);
       expect(c.view.stage).assertEqual(Stage.MESSAGE);
       c.finishMessage();
       expect(c.view.stage).assertEqual(Stage.SUMMARY);
       expect(w.summary).assertEqual(1);
       const r = c.buildRecord(SessionStatus.COMPLETED);
       expect(r.emotionBefore).assertEqual(Emotion.TENSION);
-      expect(r.ratingAfter).assertEqual(4);
-      expect(r.cycles).assertEqual(2 + 4 + 3);
+      expect(r.intensityBefore).assertEqual(4);
+      expect(r.intensityAfter).assertEqual(INTENSITY_FREE);
+      expect(r.rounds).assertEqual(1);
+      expect(r.cycles).assertEqual(2 + 3 + 3);
       expect(r.stoppedAt).assertEqual('');
+    });
+
+    it('intensityLeftOffersOneMoreRound', 0, () => {
+      const t = new ManualTime();
+      const sink = new Sink();
+      const c = new SessionController(config(SessionMode.QUICK, PatternId.CALM_4_6, 2), t, t, new Haptics(), sink,
+        () => 0);
+      startBreathing(c, 5);
+      const toCheckIn = () => {
+        while (c.view.stage !== Stage.CHECK_IN) {
+          if (c.view.stage === Stage.QUESTION) {
+            c.answer(Answer.YES);
+          } else {
+            finishBreathing(t, c);
+          }
+        }
+      };
+      toCheckIn();
+      c.rate(3);
+      expect(c.view.stage).assertEqual(Stage.CHECK_IN);
+      expect(c.view.repeatOffer).assertTrue();
+      c.repeat();
+      expect(c.view.rounds).assertEqual(2);
+      expect(c.view.stage).assertEqual(Stage.BREATHING);
+      expect((sink.last as SessionSnapshot).rounds).assertEqual(2);
+      finishBreathing(t, c);
+      expect(c.view.stage).assertEqual(Stage.QUESTION);
+      expect(c.view.questionIndex).assertEqual(1);
+      toCheckIn();
+      expect(c.view.repeatOffer).assertFalse();
+      c.rate(2);
+      c.finishRounds();
+      expect(c.view.stage).assertEqual(Stage.MESSAGE);
+      const r = c.buildRecord(SessionStatus.COMPLETED);
+      expect(r.intensityBefore).assertEqual(5);
+      expect(r.intensityAfter).assertEqual(2);
+      expect(r.rounds).assertEqual(2);
+    });
+
+    it('restoredSecondRoundKeepsItsPlan', 0, () => {
+      const t = new ManualTime();
+      const sink = new Sink();
+      const c = new SessionController(config(SessionMode.QUICK, PatternId.CALM_4_6, 2), t, t, new Haptics(), sink,
+        () => 0);
+      startBreathing(c, 3);
+      while (c.view.stage !== Stage.CHECK_IN) {
+        if (c.view.stage === Stage.QUESTION) {
+          c.answer(Answer.NO);
+        } else {
+          finishBreathing(t, c);
+        }
+      }
+      c.rate(4);
+      c.repeat();
+      finishBreathing(t, c);
+      c.interrupt();
+      const r = SessionController.fromSnapshot(sink.last as SessionSnapshot, t, t, new Haptics(), new Sink(), () => 0);
+      expect(r.steps.length).assertEqual(c.steps.length);
+      expect(r.view.stage).assertEqual(Stage.QUESTION);
+      expect(r.view.rounds).assertEqual(2);
+      expect(r.view.intensityAfter).assertEqual(4);
     });
 
     it('notNowReturnsGentlyToBreathing', 0, () => {
       const t = new ManualTime();
       const c = new SessionController(config(SessionMode.FULL, PatternId.CALM_4_6, 2), t, t, new Haptics(), new Sink(),
         () => 0);
-      c.start();
-      c.finishIntro();
-      while (c.view.stage !== Stage.QUESTION || c.view.questionIndex !== 5) {
+      startBreathing(c, 3);
+      while (c.view.stage !== Stage.QUESTION || c.view.question !== QuestionId.WHEN) {
         if (c.view.stage === Stage.QUESTION) {
           c.answer(Answer.SKIP);
-        } else if (c.view.stage === Stage.EMOTION) {
-          c.skipEmotion();
         } else {
           finishBreathing(t, c);
         }
@@ -202,21 +325,18 @@ export default function sessionTest() {
         () => 0);
       c.start();
       c.finishIntro();
-      finishBreathing(t, c);
-      c.answer(Answer.CONTINUE);
       c.chooseEmotion(Emotion.FEAR);
       expect(c.view.stage).assertEqual(Stage.EMOTION);
       expect(c.view.emotionNote).assertTrue();
       c.acknowledgeEmotionNote();
-      expect(c.view.stage).assertEqual(Stage.BREATHING);
+      expect(c.view.stage).assertEqual(Stage.INTENSITY);
     });
 
-    it('rating1GivesSupportAndProfessionalHint', 0, () => {
+    it('intensity5GivesSupportAndProfessionalHint', 0, () => {
       const t = new ManualTime();
       const c = new SessionController(config(SessionMode.QUICK, PatternId.CALM_4_6, 2), t, t, new Haptics(), new Sink(),
         () => 0);
-      c.start();
-      c.finishIntro();
+      startBreathing(c, 5);
       while (c.view.stage !== Stage.CHECK_IN) {
         if (c.view.stage === Stage.QUESTION) {
           c.answer(Answer.YES);
@@ -224,7 +344,9 @@ export default function sessionTest() {
           finishBreathing(t, c);
         }
       }
-      c.rate(1);
+      c.rate(5);
+      c.finishRounds();
+      expect(c.view.stage).assertEqual(Stage.MESSAGE);
       expect(c.view.message).assertEqual(CompletionMessage.SUPPORTIVE);
       expect(c.view.professionalHint).assertTrue();
     });
@@ -233,8 +355,7 @@ export default function sessionTest() {
       const t = new ManualTime();
       const h = new Haptics();
       const c = new SessionController(config(SessionMode.QUICK, PatternId.RELAX_478, 3), t, t, h, new Sink(), () => 0);
-      c.start();
-      c.finishIntro();
+      startBreathing(c, 3);
       t.advance(1000);
       const pulses = h.pulses.length;
       const stops = h.stops;
@@ -255,8 +376,7 @@ export default function sessionTest() {
       const sink = new Sink();
       const c = new SessionController(config(SessionMode.FULL, PatternId.RELAX_478, 5), t, t, new Haptics(), sink,
         () => 0);
-      c.start();
-      c.finishIntro();
+      startBreathing(c, 3);
       t.advance(25000); // 2 s into HOLD_IN of cycle 2
       c.interrupt();
       const snap = sink.last as SessionSnapshot;
@@ -279,8 +399,7 @@ export default function sessionTest() {
       const sink = new Sink();
       const c = new SessionController(config(SessionMode.QUICK, PatternId.CALM_4_6, 3), t, t, new Haptics(), sink,
         () => 0);
-      c.start();
-      c.finishIntro();
+      startBreathing(c, 3);
       finishBreathing(t, c);
       c.pause();
       const r = c.buildRecord(SessionStatus.INTERRUPTED);

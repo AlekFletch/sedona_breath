@@ -116,6 +116,14 @@
   color: #F2EEDD;
   text-overflow: ellipsis;
 }
+.btn-text-primary-sm {
+  width: 300px;
+  height: 32px;
+  font-size: 24px;
+  text-align: center;
+  color: #0F2E1F;
+  text-overflow: ellipsis;
+}
 .card {
   width: 330px;
   height: 86px;
@@ -220,4 +228,63 @@
 /* Pause / end dialog: a plain column, it fits the screen without a list. */
 .dlg-gap {
   margin-top: 12px;
+}
+/* 1..5 intensity row (pages/prompt, pages/feel). */
+.rate-row {
+  width: 330px;
+  height: 64px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.rate {
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+  border-width: 2px;
+  border-color: #3E8C66;
+  background-color: #0B3826;
+  justify-content: center;
+  align-items: center;
+}
+.rate-text {
+  width: 56px;
+  height: 36px;
+  font-size: 30px;
+  text-align: center;
+  color: #E8D9A0;
+}
+.pair {
+  width: 330px;
+  height: 40px;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.scale-low {
+  width: 160px;
+  height: 36px;
+  font-size: 24px;
+  text-align: left;
+  color: #A9C9B6;
+}
+.scale-high {
+  width: 160px;
+  height: 36px;
+  font-size: 24px;
+  text-align: right;
+  color: #A9C9B6;
+}
+/* Option button as a single text (no div): the emotion screen has 13 of them and the heap is tight. */
+.opt {
+  width: 330px;
+  height: 62px;
+  border-radius: 31px;
+  border-width: 2px;
+  border-color: #3E8C66;
+  background-color: #0B3826;
+  font-size: 30px;
+  text-align: center;
+  color: #F2EEDD;
+  text-overflow: ellipsis;
 }

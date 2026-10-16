@@ -133,8 +133,7 @@
 .dlg-gap {
   margin-top: 12px;
 }
-
-/* Page styles: edit below this line. */
+/* 1..5 intensity row (pages/prompt, pages/feel). */
 .rate-row {
   width: 330px;
   height: 64px;
@@ -193,3 +192,5 @@
   color: #F2EEDD;
   text-overflow: ellipsis;
 }
+
+/* Page styles: edit below this line. */

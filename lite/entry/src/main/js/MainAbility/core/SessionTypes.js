@@ -4,9 +4,12 @@
  */
 export var SessionMode;
 (function (SessionMode) {
-    /** Breathing + questions 1-4. */
+    /** Breathing + questions 2-4. */
     SessionMode["QUICK"] = "quick";
-    /** Breathing + questions 1-5, emotion choice after question 1. */
+    /**
+     * Breathing + questions 2-5. Both modes start with the emotion choice and its intensity, which
+     * replaces question 1 ("What do I feel right now?"): asked twice, it read as the same question again.
+     */
     SessionMode["FULL"] = "full";
 })(SessionMode || (SessionMode = {}));
 export var QuestionId;
@@ -60,10 +63,13 @@ export var SessionStatus;
 export var Stage;
 (function (Stage) {
     Stage["INTRO"] = "intro";
+    /** Intensity of the emotion before the practice. */
+    Stage["INTENSITY"] = "intensity";
     Stage["BREATHING"] = "breathing";
     Stage["QUESTION"] = "question";
     Stage["EMOTION"] = "emotion";
     Stage["COMPLETION_BREATHING"] = "completionBreathing";
+    /** Intensity after a round: 1..5, or "Free"; 1..5 offers one more round. */
     Stage["CHECK_IN"] = "checkIn";
     Stage["MESSAGE"] = "message";
     Stage["SUMMARY"] = "summary";
@@ -71,10 +77,13 @@ export var Stage;
 export var DURATIONS_MIN = [2, 3, 5, 7, 10];
 export var DEFAULT_DURATION_MIN = 3;
 export var QUICK_START_DURATION_MIN = 3;
-/** Rating scale 1..5, 0 = not given / skipped. */
-export var RATING_MIN = 1;
-export var RATING_MAX = 5;
-export var RATING_NONE = 0;
+/** Intensity of the emotion, before and after the practice: 1 (weak) .. 5 (strong). */
+export var INTENSITY_MIN = 1;
+export var INTENSITY_MAX = 5;
+/** After the practice only: "Free", the emotion has let go. */
+export var INTENSITY_FREE = 0;
+/** Not asked yet. */
+export var INTENSITY_NONE = -1;
 export function parseEmotion(value) {
     for (var _i = 0, EMOTIONS_1 = EMOTIONS; _i < EMOTIONS_1.length; _i++) {
         var e = EMOTIONS_1[_i];
@@ -88,7 +97,7 @@ export function parseMode(value) {
     return value === SessionMode.QUICK ? SessionMode.QUICK : SessionMode.FULL;
 }
 export function parseStage(value) {
-    var all = [Stage.INTRO, Stage.BREATHING, Stage.QUESTION, Stage.EMOTION,
+    var all = [Stage.INTRO, Stage.INTENSITY, Stage.BREATHING, Stage.QUESTION, Stage.EMOTION,
         Stage.COMPLETION_BREATHING, Stage.CHECK_IN, Stage.MESSAGE, Stage.SUMMARY];
     for (var _i = 0, all_1 = all; _i < all_1.length; _i++) {
         var s = all_1[_i];
@@ -120,6 +129,6 @@ export function answersFor(q) {
 }
 export function questionsFor(mode) {
     return mode === SessionMode.QUICK
-        ? [QuestionId.FEEL, QuestionId.ALLOW, QuestionId.COULD_RELEASE, QuestionId.WOULD_RELEASE]
-        : [QuestionId.FEEL, QuestionId.ALLOW, QuestionId.COULD_RELEASE, QuestionId.WOULD_RELEASE, QuestionId.WHEN];
+        ? [QuestionId.ALLOW, QuestionId.COULD_RELEASE, QuestionId.WOULD_RELEASE]
+        : [QuestionId.ALLOW, QuestionId.COULD_RELEASE, QuestionId.WOULD_RELEASE, QuestionId.WHEN];
 }

@@ -4,12 +4,14 @@
  */
 var SNAPSHOT_FILE = 'snapshot.json';
 var PENDING_FILE = 'pending.json';
+var PLAN_FILE = 'plan.json';
 
 export function plainRecord(r) {
   return {
     id: r.id || 0, startedAt: r.startedAt, endedAt: r.endedAt, durationSec: r.durationSec, plannedMin: r.plannedMin,
     mode: r.mode, patternId: r.patternId, cycles: r.cycles, status: r.status, stoppedAt: r.stoppedAt,
-    emotionBefore: r.emotionBefore, ratingAfter: r.ratingAfter, heartRateAvg: 0
+    emotionBefore: r.emotionBefore, intensityBefore: typeof r.intensityBefore === 'number' ? r.intensityBefore : -1,
+    intensityAfter: typeof r.intensityAfter === 'number' ? r.intensityAfter : -1, rounds: r.rounds || 1, heartRateAvg: 0
   };
 }
 
@@ -32,6 +34,19 @@ SessionFiles.prototype.save = function (snapshot, cb) {
 /** SnapshotSink.clear. */
 SessionFiles.prototype.clear = function () {
   this.files.remove(SNAPSHOT_FILE);
+  this.files.remove(PLAN_FILE);
+};
+
+/** The session plan for pages/prompt (common/plan.js), written by pages/session. */
+SessionFiles.prototype.writePlan = function (text, cb) {
+  this.files.write(PLAN_FILE, text, cb);
+};
+
+/** cb(text), '' when there is none. */
+SessionFiles.prototype.readPlan = function (cb) {
+  this.files.read(PLAN_FILE, '', function (text) {
+    cb(typeof text === 'string' ? text : '');
+  });
 };
 
 /**

@@ -1,11 +1,12 @@
 /*
- * Safety & wording rules. One rule for the whole app:
- *  - rating 1 or 2  -> supportive completion message;
- *  - rating 1 or emotion FEAR -> gentle suggestion to reach out to a close
+ * Safety & wording rules. One rule for the whole app, by the intensity of the emotion after the
+ * practice (1 weak .. 5 strong, 0 = free):
+ *  - intensity 4 or 5 -> supportive completion message;
+ *  - intensity 5 or emotion FEAR -> gentle suggestion to reach out to a close
  *    person or a professional (no emergency numbers until the region is known).
  * Pure logic, portable to the lite-wearable JS build.
  */
-import { Emotion, RATING_NONE } from './SessionTypes';
+import { Emotion } from './SessionTypes';
 
 export enum CompletionMessage {
   GENTLE_1 = 'gentle1',
@@ -19,17 +20,17 @@ export const GENTLE_MESSAGES: CompletionMessage[] = [
 ];
 
 export class SupportRules {
-  static isSupportiveRating(rating: number): boolean {
-    return rating === 1 || rating === 2;
+  static isSupportiveIntensity(intensity: number): boolean {
+    return intensity === 4 || intensity === 5;
   }
 
-  static recommendsProfessional(rating: number, emotion: Emotion): boolean {
-    return rating === 1 || emotion === Emotion.FEAR;
+  static recommendsProfessional(intensity: number, emotion: Emotion): boolean {
+    return intensity === 5 || emotion === Emotion.FEAR;
   }
 
-  /** Message after the check-in. `seed` rotates the gentle texts (e.g. number of saved sessions). */
-  static completionMessage(rating: number, seed: number): CompletionMessage {
-    if (rating !== RATING_NONE && SupportRules.isSupportiveRating(rating)) {
+  /** Message at the end. `seed` rotates the gentle texts (e.g. number of saved sessions). */
+  static completionMessage(intensity: number, seed: number): CompletionMessage {
+    if (SupportRules.isSupportiveIntensity(intensity)) {
       return CompletionMessage.SUPPORTIVE;
     }
     const i = Math.abs(Math.floor(seed)) % GENTLE_MESSAGES.length;

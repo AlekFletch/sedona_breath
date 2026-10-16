@@ -3,7 +3,7 @@
  * Persisted models. Pure logic, portable to the lite-wearable JS build.
  */
 import { PatternId } from './BreathPattern.js';
-import { Emotion, RATING_NONE, SessionMode, SessionStatus, Stage } from './SessionTypes.js';
+import { Emotion, INTENSITY_NONE, SessionMode, SessionStatus, Stage } from './SessionTypes.js';
 /** One row of the history. */
 var SessionRecord = /** @class */ (function () {
     function SessionRecord() {
@@ -20,7 +20,12 @@ var SessionRecord = /** @class */ (function () {
         /** Stage at which an interrupted session stopped; empty for completed ones. */
         this.stoppedAt = '';
         this.emotionBefore = Emotion.NONE;
-        this.ratingAfter = RATING_NONE;
+        /** Intensity of the emotion before the practice, 1..5 (INTENSITY_NONE if not asked yet). */
+        this.intensityBefore = INTENSITY_NONE;
+        /** After the last round: 1..5, INTENSITY_FREE, or INTENSITY_NONE. */
+        this.intensityAfter = INTENSITY_NONE;
+        /** Rounds of questions done or started (1 + "Once more"). */
+        this.rounds = 1;
         /** Average heart rate from Health Kit (0 = not available / not consented). */
         this.heartRateAvg = 0;
     }
@@ -49,7 +54,11 @@ var SessionSnapshot = /** @class */ (function () {
         this.activeMs = 0;
         this.cyclesDone = 0;
         this.emotion = Emotion.NONE;
-        this.rating = RATING_NONE;
+        this.intensityBefore = INTENSITY_NONE;
+        this.intensityAfter = INTENSITY_NONE;
+        this.rounds = 1;
+        /** false: the emotion and its intensity were asked before the session. */
+        this.askEmotion = true;
         this.stage = Stage.INTRO;
     }
     return SessionSnapshot;

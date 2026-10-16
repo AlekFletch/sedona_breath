@@ -209,10 +209,6 @@
       "value": "Pause"
     },
     {
-      "name": "remaining",
-      "value": "%s left"
-    },
-    {
       "name": "paused_title",
       "value": "Paused"
     },
@@ -290,7 +286,7 @@
     },
     {
       "name": "emotion_title",
-      "value": "Which feeling is it?"
+      "value": "What emotion do you feel right now?"
     },
     {
       "name": "emotion_anger",
@@ -354,15 +350,15 @@
     },
     {
       "name": "checkin_title",
-      "value": "How do you feel now?"
+      "value": "How strong is the emotion now?"
     },
     {
       "name": "checkin_low",
-      "value": "hard"
+      "value": "weak"
     },
     {
       "name": "checkin_high",
-      "value": "good"
+      "value": "strong"
     },
     {
       "name": "msg_gentle1",
@@ -406,7 +402,7 @@
     },
     {
       "name": "summary_rating",
-      "value": "Rating after"
+      "value": "Intensity"
     },
     {
       "name": "summary_hr",
@@ -415,10 +411,6 @@
     {
       "name": "fmt_bpm",
       "value": "%d bpm"
-    },
-    {
-      "name": "fmt_rating",
-      "value": "%d of 5"
     },
     {
       "name": "saved_toast",
@@ -454,7 +446,7 @@
     },
     {
       "name": "history_after",
-      "value": "After: %s"
+      "value": "Emotion: %s"
     },
     {
       "name": "dash",
@@ -482,7 +474,7 @@
     },
     {
       "name": "stage_checkIn",
-      "value": "check-in"
+      "value": "intensity after"
     },
     {
       "name": "stage_message",
@@ -522,15 +514,15 @@
     },
     {
       "name": "settings_default_pattern",
-      "value": "Default breathing"
+      "value": "Breathing"
     },
     {
       "name": "settings_default_duration",
-      "value": "Default duration"
+      "value": "Duration"
     },
     {
       "name": "settings_default_mode",
-      "value": "Default mode"
+      "value": "Mode"
     },
     {
       "name": "settings_vibration",
@@ -621,8 +613,40 @@
       "value": "Back"
     },
     {
-      "name": "home_quick",
-      "value": "Quick · 3 min"
+      "name": "intensity_title",
+      "value": "How strong is the emotion right now?"
+    },
+    {
+      "name": "btn_free",
+      "value": "I'm free"
+    },
+    {
+      "name": "repeat_title",
+      "value": "The emotion is still here. One more round?"
+    },
+    {
+      "name": "btn_repeat",
+      "value": "Once more"
+    },
+    {
+      "name": "fmt_intensity",
+      "value": "%1$s → %2$s"
+    },
+    {
+      "name": "intensity_free",
+      "value": "free"
+    },
+    {
+      "name": "summary_rounds",
+      "value": "Rounds"
+    },
+    {
+      "name": "stage_intensity",
+      "value": "intensity before"
+    },
+    {
+      "name": "btn_practice",
+      "value": "Practice"
     }
   ]
 }

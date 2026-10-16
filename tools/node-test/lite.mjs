@@ -33,10 +33,11 @@ const { SessionFiles } = await load('common/records.js');
 const H = await load('common/history.js');
 const { PromptFlow } = await load('common/promptFlow.js');
 const { planOf } = await load('common/plan.js');
+const { BreathFlow, circleScale } = await load('common/breathFlow.js');
 const { pageForStage } = await load('common/stages.js');
 const { wrap, textHeight } = await load('common/textSize.js');
 const { ManualTime } = await load('core/ManualTime.js');
-const { SessionConfig, SessionController } = await load('core/SessionController.js');
+const { BreathVisual, SessionConfig, SessionController } = await load('core/SessionController.js');
 const { FreeRhythm } = await load('core/BreathPattern.js');
 const i18n = JSON.parse(fs.readFileSync(path.join(src, 'i18n/ru-RU.json'), 'utf8'));
 
@@ -95,8 +96,14 @@ function sessionFiles(files = {}) {
   return { sf: new SessionFiles(new A.JsonFiles(fakeFile(files))), files };
 }
 
-function controller(mode, durationMin, vibration, sink, time, vib = []) {
+function controller(mode, durationMin, vibration, sink, time, vib = [], preset = false) {
   const config = new SessionConfig();
+  if (preset) {
+    // As on the watch: the emotion and its intensity come from pages/feel.
+    config.presetEmotion = true;
+    config.emotion = 'anger';
+    config.intensityBefore = 4;
+  }
   config.durationMin = durationMin;
   config.mode = mode;
   config.patternId = 'relax478';
@@ -259,12 +266,54 @@ test('vibrationTimingOnTheWatchDriver', () => {
   const c = controller('full', 2, true, sf, time, vib);
   c.start();
   c.finishIntro();
+  c.skipEmotion();
+  c.rateBefore(3);
   const t0 = time.now();
   // First inhale of 4-7-8: 9 short ticks, then 6 single + double on the hold.
   time.advance(11000);
   const ticks = vib.filter((v) => v.endsWith('short')).map((v) => Number(v.split(':')[0]) - t0);
   eq(ticks.slice(0, 9).join(','), '0,333,667,1000,1333,1667,2000,2333,2667', 'inhale');
   eq(ticks.slice(9).join(','), '4000,5000,6000,7000,8000,9000,10000,10160', 'hold');
+});
+test('watchSchedulerPolledFromTheTick', () => {
+  // As on the watch: LiteTime keeps the tasks, the page's 100 ms interval runs the due ones.
+  let now = 0;
+  const time = new A.LiteTime(() => now);
+  const run = (ms) => {
+    for (const end = now + ms; now < end;) {
+      now += 100;
+      time.poll();
+    }
+  };
+  const vib = [];
+  const c = controller('quick', 2, true, sessionFiles().sf, time, vib);
+  const phases = [];
+  c.setObserver({ onUpdate: (v) => { if (phases[phases.length - 1] !== v.phase) phases.push(v.phase); }, onSummary() {} });
+  c.start();
+  run(30000); // intro slides go by themselves
+  eq(c.view.stage, 'emotion', 'the emotion first after the intro');
+  c.chooseEmotion('anxiety');
+  eq(c.view.stage, 'intensity', 'then its intensity');
+  c.rateBefore(4);
+  ok(c.view.stage === 'breathing', `breathing after the intensity, got ${c.view.stage}`);
+  const n = vib.length;
+  run(19000); // one 4-7-8 cycle
+  ok(phases.includes('holdIn') && phases.includes('exhale'), `phases change: ${phases.join(',')}`);
+  ok(vib.length - n >= 9, 'every inhale vibrates');
+  run(c.remainingMs());
+  eq(c.view.stage, 'question', 'the steps go on to the questions');
+  ok(time.tasks.length < 20, 'no task pile-up');
+  time.clear();
+  eq(time.tasks.length, 0);
+});
+test('watchClockNeverGoesBack', () => {
+  let now = 10000;
+  const time = new A.LiteTime(() => now);
+  eq(time.now(), 10000);
+  now = 9000; // a time sync stepped the wall clock back
+  eq(time.now(), 10000, 'the breathing position does not jump back');
+  now = 10500;
+  eq(time.now(), 10500);
 });
 test('pauseStopsTicksAndVibrationOff', () => {
   const time = new ManualTime();
@@ -273,6 +322,8 @@ test('pauseStopsTicksAndVibrationOff', () => {
   const c = controller('quick', 3, true, sf, time, vib);
   c.start();
   c.finishIntro();
+  c.skipEmotion();
+  c.rateBefore(3);
   time.advance(500);
   const n = vib.length;
   c.pause();
@@ -282,6 +333,8 @@ test('pauseStopsTicksAndVibrationOff', () => {
   const c2 = controller('quick', 2, false, sessionFiles().sf, time, silent);
   c2.start();
   c2.finishIntro();
+  c2.skipEmotion();
+  c2.rateBefore(3);
   time.advance(60000);
   eq(silent.length, 0);
 });
@@ -291,6 +344,8 @@ test('snapshotRestoresPausedAndRoutesToThePage', () => {
   const c = controller('full', 5, true, sf, time);
   c.start();
   c.finishIntro();
+  c.skipEmotion();
+  c.rateBefore(3);
   time.advance(25000);
   c.interrupt();
   let snap = null;
@@ -306,6 +361,7 @@ test('snapshotRestoresPausedAndRoutesToThePage', () => {
   eq(pageForStage('question'), 'prompt');
   eq(pageForStage('completionBreathing'), 'session');
   eq(pageForStage('checkIn'), 'prompt');
+  eq(pageForStage('intensity'), 'prompt');
 });
 test('pendingRecordAndDiscard', () => {
   const { sf, files } = sessionFiles();
@@ -320,6 +376,18 @@ test('pendingRecordAndDiscard', () => {
   sf.discardAll();
   eq(Object.keys(files).length, 0);
 });
+test('planFileWrittenReadAndCleared', () => {
+  const { sf, files } = sessionFiles();
+  let text = null;
+  sf.readPlan((t) => { text = t; });
+  eq(text, '', 'no plan yet');
+  sf.writePlan('intro:0:9000,breathing:0:38000');
+  sf.readPlan((t) => { text = t; });
+  eq(text, 'intro:0:9000,breathing:0:38000');
+  sf.save({ stepIndex: 1 });
+  sf.clear();
+  eq(Object.keys(files).length, 0, 'the plan goes with the snapshot');
+});
 
 console.log('PromptFlow mirrors SessionController');
 const strip = (s) => {
@@ -328,7 +396,7 @@ const strip = (s) => {
   delete o.plan;
   return JSON.stringify(o);
 };
-/** The snapshot pages/session hands over to pages/prompt: with the plan, through JSON like the file. */
+/** What pages/prompt restores: the snapshot plus plan.json, through JSON like the files. */
 const handoff = (c) => JSON.parse(JSON.stringify(Object.assign(c.snapshot(), { plan: planOf(c) })));
 
 /**
@@ -352,6 +420,8 @@ function parity(mode, durationMin, act) {
     flow.setMessageSeed(7);
     flow.resume();
     eq(strip(flow.snapshot()), strip(ref.snapshot()), `restored at ${ref.view.stage}`);
+    eq(`${flow.view.question} ${flow.view.questionIndex}/${flow.view.questionTotal}`,
+      `${ref.view.question} ${ref.view.questionIndex}/${ref.view.questionTotal}`, `question on restore at ${ref.view.stage}`);
     while (ref.view.stage !== 'summary' && pageForStage(ref.view.stage) === 'prompt') {
       time.advance(1500);
       act(ref);
@@ -364,7 +434,8 @@ function parity(mode, durationMin, act) {
       eq(flow.view.message, ref.view.message, 'message');
       eq(flow.view.professionalHint, ref.view.professionalHint, 'professionalHint');
       eq(strip(flow.snapshot()), strip(ref.snapshot()), `snapshot at ${ref.view.stage}`);
-      eq(flow.remainingMs(), ref.remainingMs(), 'remaining');
+      eq(flow.view.repeatOffer, ref.view.repeatOffer, 'repeatOffer');
+      if (pageForStage(ref.view.stage) === 'prompt') eq(flow.remainingMs(), ref.remainingMs(), 'remaining');
       eq(JSON.stringify(flow.buildRecord('interrupted')), JSON.stringify(Object.assign({}, ref.buildRecord('interrupted'))),
         'interrupted record');
     }
@@ -372,28 +443,134 @@ function parity(mode, durationMin, act) {
   eq(ref.view.stage, 'summary');
   return ref;
 }
-const answerAll = (answer, emotion, rating) => (c) => {
-  if (c.view.stage === 'question') c.answer(answer(c.view.question));
-  else if (c.view.stage === 'emotion') {
-    if (c.view.emotionNote) c.acknowledgeEmotionNote();
+/**
+ * Answers every prompt: intensity before 4, `answer(question)`, the emotion, intensity after
+ * `after(round)` (0 = "Free"), and "Once more" while round < rounds.
+ */
+const answerAll = (answer, emotion, after, rounds = 1) => (c) => {
+  const v = c.view;
+  if (v.stage === 'intensity') c.rateBefore(4);
+  else if (v.stage === 'question') c.answer(answer(v.question));
+  else if (v.stage === 'emotion') {
+    if (v.emotionNote) c.acknowledgeEmotionNote();
     else if (emotion) c.chooseEmotion(emotion);
     else c.skipEmotion();
-  } else if (c.view.stage === 'checkIn') c.rate(rating);
-  else if (c.view.stage === 'message') c.finishMessage();
+  } else if (v.stage === 'checkIn') {
+    if (!v.repeatOffer) c.rate(after(v.rounds));
+    else if (v.rounds < rounds) c.repeat();
+    else c.finishRounds();
+  } else if (v.stage === 'message') c.finishMessage();
 };
-test('fullPracticeAllYes', () => {
-  const r = parity('full', 5, answerAll(() => 'yes', 'tension', 4)).buildRecord('completed');
+test('fullPracticeFreeAfterOneRound', () => {
+  const r = parity('full', 5, answerAll(() => 'yes', 'tension', () => 0)).buildRecord('completed');
   eq(r.emotionBefore, 'tension');
-  eq(r.ratingAfter, 4);
+  eq(`${r.intensityBefore} ${r.intensityAfter} ${r.rounds}`, '4 0 1');
 });
-test('fullPracticeFearNoteAndLowRating', () => {
-  parity('full', 3, answerAll(() => 'no', 'fear', 1));
+test('fullPracticeFearNoteAndStrongIntensity', () => {
+  const ref = parity('full', 3, answerAll(() => 'no', 'fear', () => 5));
+  eq(ref.view.message, 'supportive');
 });
 test('quickNotNowReturnsToBreathing', () => {
-  parity('quick', 3, answerAll((q) => (q === 4 ? 'notNow' : 'skip'), '', 0));
+  parity('quick', 3, answerAll((q) => (q === 4 ? 'notNow' : 'skip'), '', () => 0));
 });
-test('fullSkipEverything', () => {
-  parity('full', 2, answerAll(() => 'skip', '', 0));
+test('twoMoreRoundsThenFree', () => {
+  const r = parity('full', 2, answerAll(() => 'skip', '', (round) => (round < 3 ? 3 : 0), 3)).buildRecord('completed');
+  eq(`${r.intensityBefore} ${r.intensityAfter} ${r.rounds}`, '4 0 3');
+});
+test('oneMoreRoundThenFinish', () => {
+  const r = parity('quick', 2, answerAll(() => 'yes', '', () => 2, 2)).buildRecord('completed');
+  eq(`${r.intensityAfter} ${r.rounds}`, '2 2');
+});
+console.log('BreathFlow mirrors SessionController');
+/**
+ * The controller and a BreathFlow on two clocks kept in step. BreathFlow starts with the session
+ * and, after every prompt stage, is restored from the controller's snapshot (as pages/session is).
+ * Views, snapshots, remaining time, records and vibration must match every 250 ms.
+ */
+function breathParity(mode, durationMin, act, opts = {}) {
+  const tRef = new ManualTime();
+  const tFlow = new ManualTime();
+  const vibRef = [];
+  const vibFlow = [];
+  const ref = controller(mode, durationMin, true, sessionFiles().sf, tRef, vibRef, !!opts.preset);
+  const haptics = new A.LiteHaptics({ vibrate: (o) => vibFlow.push(`${tFlow.now()}:${o.mode}`) });
+  const make = (s) => BreathFlow.fromSnapshot(s, tFlow, tFlow, haptics, sessionFiles().sf,
+    () => 1_700_000_000_000 + tFlow.now());
+  const preset = opts.preset ? { askEmotion: false, emotion: 'anger', intensityBefore: 4 } : {};
+  let flow = new BreathFlow(Object.assign({ durationMin, mode, patternId: 'relax478', freeInhaleSec: 4, freeExhaleSec: 6,
+    vibration: true }, preset), tFlow, tFlow, haptics, sessionFiles().sf, () => 1_700_000_000_000 + tFlow.now());
+  ref.start();
+  flow.start();
+  let vibFrom = 0;
+  let guard = 0;
+  while (ref.view.stage !== 'summary' && guard++ < 2000) {
+    if (pageForStage(ref.view.stage) === 'prompt') {
+      eq(flow.view.stage, ref.view.stage, 'BreathFlow stops at the prompt');
+      flow.shutdown();
+      while (ref.view.stage !== 'summary' && pageForStage(ref.view.stage) === 'prompt') act(ref);
+      if (ref.view.stage === 'summary') break;
+      tFlow.advance(tRef.now() - tFlow.now());
+      vibFrom = vibRef.length;
+      flow = make(JSON.parse(JSON.stringify(ref.snapshot())));
+      if (ref.view.notNowReturn) flow.view.notNowReturn = true; // router param notNow, as sessionPage does
+      ok(flow.isPaused(), 'restored paused');
+      // The controller has already started the step; the page resumes the restored one at once.
+      vibRef.length = vibFrom;
+      vibFlow.length = 0;
+      flow.resume();
+      ref.pause();
+      ref.resume();
+      vibRef.splice(0, vibFrom);
+      vibFrom = 0;
+      vibFlow.splice(0, vibFlow.length - vibRef.length);
+    }
+    if (opts.pauseAt && ref.view.stage === 'breathing' && guard === opts.pauseAt) {
+      ref.pause();
+      flow.pause();
+      tRef.advance(5000);
+      tFlow.advance(5000);
+      ref.resume();
+      flow.resume();
+    }
+    tRef.advance(250);
+    tFlow.advance(250);
+    const at = `${ref.view.stage}#${ref.view.stepIndex} t=${tRef.now()}`;
+    eq(flow.view.stage, ref.view.stage, `stage ${at}`);
+    if (pageForStage(ref.view.stage) === 'prompt') continue;
+    // introIndex is shown on the intro only (the core keeps the last one afterwards).
+    const intro = (v) => (v.stage === 'intro' ? v.introIndex : '-');
+    eq(`${intro(flow.view)} ${flow.view.phase} ${flow.view.cycle} ${flow.view.paused}`,
+      `${intro(ref.view)} ${ref.view.phase} ${ref.view.cycle} ${ref.view.paused}`, `view ${at}`);
+    eq(flow.view.notNowReturn, ref.view.notNowReturn, `notNowReturn ${at}`);
+    eq(strip(flow.snapshot()), strip(ref.snapshot()), `snapshot ${at}`);
+    eq(flow.remainingMs(), ref.remainingMs(), `remaining ${at}`);
+    eq(flow.currentPhase(), ref.currentPhase(), `phase ${at}`);
+    eq(flow.phaseProgress(), ref.phaseProgress(), `progress ${at}`);
+    eq(JSON.stringify(flow.buildRecord('interrupted')), JSON.stringify(Object.assign({}, ref.buildRecord('interrupted'))),
+      `record ${at}`);
+    eq(vibFlow.join(' '), vibRef.slice(vibFrom).join(' '), `vibration ${at}`);
+  }
+  eq(ref.view.stage, 'summary');
+}
+test('breathFlowFullPractice', () => {
+  breathParity('full', 3, answerAll(() => 'yes', 'tension', () => 0));
+});
+test('breathFlowQuickWithPause', () => {
+  breathParity('quick', 2, answerAll(() => 'skip', '', () => 0), { pauseAt: 60 });
+});
+test('breathFlowNotNowReturn', () => {
+  breathParity('full', 2, answerAll((q) => (q === 5 ? 'notNow' : 'no'), 'fear', () => 1));
+});
+test('breathFlowEmotionAskedBefore', () => {
+  breathParity('full', 3, answerAll(() => 'yes', '', (round) => (round < 2 ? 3 : 0), 2), { preset: true });
+});
+test('breathFlowSecondRound', () => {
+  breathParity('full', 3, answerAll(() => 'yes', '', (round) => (round < 2 ? 4 : 0), 2));
+});
+test('circleScaleMatchesTheCore', () => {
+  for (const ph of ['inhale', 'holdIn', 'exhale', 'holdOut']) {
+    for (const p of [-1, 0, 0.3, 1, 2]) eq(circleScale(ph, p), BreathVisual.scaleAt(ph, p), `${ph} ${p}`);
+  }
 });
 test('promptFlowPauseAndDiscard', () => {
   const time = new ManualTime();
@@ -401,6 +578,8 @@ test('promptFlowPauseAndDiscard', () => {
   const ref = controller('quick', 3, false, sessionFiles().sf, time);
   ref.start();
   ref.finishIntro();
+  ref.skipEmotion();
+  ref.rateBefore(3);
   breatheThrough(time, ref);
   eq(PromptFlow.fromSnapshot(ref.snapshot(), time, time, null, sf, () => 0), null, 'no plan: pages/session restores it');
   const restoredFrom = handoff(ref);
@@ -413,7 +592,7 @@ test('promptFlowPauseAndDiscard', () => {
   flow.interrupt();
   ok(flow.isPaused());
   eq(flow.snapshot().activeMs, restoredFrom.activeMs + 2000, 'active time counts only while resumed');
-  eq(JSON.stringify(flow.snapshot().plan), JSON.stringify(restoredFrom.plan), 'the plan travels on with the snapshot');
+  ok(!('plan' in flow.snapshot()), 'the plan stays in plan.json, out of the snapshot');
   flow.discard();
   ok(flow.isEnded());
   ok(!('internal://app/snapshot.json' in files), 'discard drops the snapshot');

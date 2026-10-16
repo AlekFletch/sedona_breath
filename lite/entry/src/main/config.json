@@ -45,7 +45,7 @@
         "pages": [
           "pages/index/index",
           "pages/onboarding/onboarding",
-          "pages/setup/setup",
+          "pages/feel/feel",
           "pages/session/session",
           "pages/prompt/prompt",
           "pages/hop/hop",

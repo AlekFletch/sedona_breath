@@ -2,7 +2,7 @@ import app from '@system.app';
 import { Store } from '../../common/store.js';
 import { storeSystem } from '../../common/system.js';
 import { textHeight, wrap } from '../../common/textSize.js';
-import { focusList, go, isBackSwipe, useBackground } from '../../common/ui.js';
+import { go, isBackSwipe, useBackground } from '../../common/ui.js';
 import templateKeys from '../../common/keys/onboarding.js';
 
 var store = null;
@@ -20,10 +20,8 @@ export default {
     head: '',
     t1: '',
     h1: 34,
-    r1: 44,
     t2: '',
     h2: 34,
-    r2: 44,
     buttonText: ''
   },
   onInit() {
@@ -31,9 +29,6 @@ export default {
     step = 0;
     store = new Store(storeSystem(), templateKeys, (path) => this.$t(path));
     store.loadSettings(() => this.paint());
-  },
-  onShow() {
-    focusList(this, true);
   },
   paint() {
     var head = '';
@@ -55,10 +50,8 @@ export default {
     t1 = wrap(t1, false);
     t2 = wrap(t2, false);
     this.h1 = textHeight(t1, false);
-    this.r1 = this.h1 + 10;
     this.t1 = t1;
     this.h2 = textHeight(t2, false);
-    this.r2 = this.h2 + 10;
     this.t2 = t2;
     this.buttonText = store.t(step < LAST_STEP ? 'btn_next' : (this.readOnly ? 'btn_ok' : 'btn_accept'));
   },
@@ -85,7 +78,6 @@ export default {
     } else if (this.readOnly) {
       go(this, 'settings');
     } else {
-      focusList(this, false);
       app.terminate(); // without consent the app cannot be used
     }
   }

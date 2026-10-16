@@ -209,10 +209,6 @@
       "value": "Пауза"
     },
     {
-      "name": "remaining",
-      "value": "Осталось %s"
-    },
-    {
       "name": "paused_title",
       "value": "Пауза"
     },
@@ -290,7 +286,7 @@
     },
     {
       "name": "emotion_title",
-      "value": "Какое это чувство?"
+      "value": "Какую эмоцию ты сейчас чувствуешь?"
     },
     {
       "name": "emotion_anger",
@@ -354,15 +350,15 @@
     },
     {
       "name": "checkin_title",
-      "value": "Как ты себя чувствуешь сейчас?"
+      "value": "Насколько сильна эмоция теперь?"
     },
     {
       "name": "checkin_low",
-      "value": "тяжело"
+      "value": "слабая"
     },
     {
       "name": "checkin_high",
-      "value": "хорошо"
+      "value": "сильная"
     },
     {
       "name": "msg_gentle1",
@@ -406,7 +402,7 @@
     },
     {
       "name": "summary_rating",
-      "value": "Оценка после"
+      "value": "Интенсивность"
     },
     {
       "name": "summary_hr",
@@ -415,10 +411,6 @@
     {
       "name": "fmt_bpm",
       "value": "%d уд/мин"
-    },
-    {
-      "name": "fmt_rating",
-      "value": "%d из 5"
     },
     {
       "name": "saved_toast",
@@ -454,7 +446,7 @@
     },
     {
       "name": "history_after",
-      "value": "После: %s"
+      "value": "Эмоция: %s"
     },
     {
       "name": "dash",
@@ -482,7 +474,7 @@
     },
     {
       "name": "stage_checkIn",
-      "value": "оценка"
+      "value": "оценка после"
     },
     {
       "name": "stage_message",
@@ -522,15 +514,15 @@
     },
     {
       "name": "settings_default_pattern",
-      "value": "Дыхание по умолчанию"
+      "value": "Дыхание"
     },
     {
       "name": "settings_default_duration",
-      "value": "Длительность по умолчанию"
+      "value": "Длительность"
     },
     {
       "name": "settings_default_mode",
-      "value": "Режим по умолчанию"
+      "value": "Режим"
     },
     {
       "name": "settings_vibration",
@@ -621,8 +613,40 @@
       "value": "Назад"
     },
     {
-      "name": "home_quick",
-      "value": "Быстро · 3 мин"
+      "name": "intensity_title",
+      "value": "Насколько сильна эмоция сейчас?"
+    },
+    {
+      "name": "btn_free",
+      "value": "Свободен"
+    },
+    {
+      "name": "repeat_title",
+      "value": "Эмоция ещё здесь. Пройти цикл ещё раз?"
+    },
+    {
+      "name": "btn_repeat",
+      "value": "Ещё раз"
+    },
+    {
+      "name": "fmt_intensity",
+      "value": "%1$s → %2$s"
+    },
+    {
+      "name": "intensity_free",
+      "value": "свободен"
+    },
+    {
+      "name": "summary_rounds",
+      "value": "Циклы вопросов"
+    },
+    {
+      "name": "stage_intensity",
+      "value": "оценка до"
+    },
+    {
+      "name": "btn_practice",
+      "value": "Практика"
     }
   ]
 }

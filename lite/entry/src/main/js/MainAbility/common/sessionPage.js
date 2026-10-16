@@ -5,11 +5,13 @@
  * A single page with all of it needs ~106 KB of JS heap in the simulator, more than the watch
  * has. So the session is split and moves between the pages through the SessionController
  * snapshot: when the controller enters a stage of the other page, this page saves the snapshot
- * and opens the other one, which restores it and resumes at once. pages/prompt walks its steps
- * with common/promptFlow.js instead of the full controller (see there).
+ * and opens the other one, which restores it and resumes at once. Neither page bundles the full
+ * controller: pages/session walks its steps with common/breathFlow.js, pages/prompt with
+ * common/promptFlow.js; both mirror the core SessionController (see there).
  *
  * Router params (strings): launch = 'new' | 'resume' | 'handoff', lang = 'ru' | 'en' | 'es';
- * for 'new' also durationMin, mode, patternId, vibration ('1' / '0'), freeIn, freeEx (Store.sessionParams);
+ * for 'new' also durationMin, mode, patternId, vibration ('1' / '0'), freeIn, freeEx (Store.sessionParams),
+ * emotion and intensity (pages/feel);
  * notNow = '1' when the user answered "Not now". These pages do not read settings.json.
  * The controller lives in module variables, not in page data, so the framework does not observe it.
  * Handoffs go through pages/hop: the bytecode of both pages does not fit the heap together.
@@ -20,7 +22,6 @@ import battery from '@system.battery';
 import brightness from '@system.brightness';
 import file from '@system.file';
 import { SessionStatus } from '../core/SessionTypes.js';
-import { formatMmSs } from '../core/Timing.js';
 import { JsonFiles, LiteHaptics, LiteTime } from './adapters.js';
 import { SessionFiles } from './records.js';
 import { pageForStage } from './stages.js';
@@ -35,20 +36,9 @@ var MODAL_INTERRUPTED = 3;
 var MODAL_LOW_BATTERY = 4;
 
 var TICK_MS = 100;
-var REMAINING_EVERY = 5;        // remaining time refresh: every 500 ms
 var BATTERY_EVERY = 300;        // battery check: every 30 s
 var SNAPSHOT_EVERY = 50;        // periodic snapshot while running: every 5 s
 var LOW_BATTERY = 0.10;
-
-/* The runtime's timers for LiteTime (here, not in common/system.js: this page does not need the rest of it). */
-var timers = {
-  setTimeout: function (cb, ms) {
-    return setTimeout(cb, ms);
-  },
-  clearTimeout: function (h) {
-    clearTimeout(h);
-  }
-};
 
 /** Shared state of the current page (one page is alive at a time): texts, session files, controller. */
 export var current = {
@@ -57,10 +47,10 @@ export var current = {
   c: null
 };
 var timer = null;
+/* Clock and scheduler of the controller: its tasks run from tick(), not from their own timers (see LiteTime). */
+var time = null;
 var ticks = 0;
 var leaving = false;
-/* pages/session: the plan for pages/prompt (common/plan.js), made on attach, not on handoff, where the heap is fullest. */
-var plan = '';
 
 function keepScreenOn(on) {
   try {
@@ -92,8 +82,9 @@ function wallClock() {
 
 /**
  * Builds a session page. `page` gives its name ('session' | 'prompt'), template keys, the
- * controller (`core`: SessionController with fromSnapshot; pages/session adds create(params, ...)
- * for a new session and plan(controller) for the handoff, pages/prompt passes PromptFlow), own
+ * controller (`core.Flow` with fromSnapshot: BreathFlow or PromptFlow; pages/session also gives
+ * create(params, ...) for a new session and plan(controller) for plan.json; pages/prompt sets
+ * readPlan), own
  * data fields, paint(view) and its own tap handlers.
  */
 export function sessionPage(page) {
@@ -106,14 +97,15 @@ export function sessionPage(page) {
     vibration: '',
     freeIn: '',
     freeEx: '',
+    emotion: '',
+    intensity: '',
     notNow: '',
     bg: '',
     s: {},
     modal: 0,
     dialogTitle: '',
     dialogH: 46,
-    dialogBody: '',
-    remainingText: ''
+    dialogBody: ''
   };
   var k;
   for (k in page.data) {
@@ -135,25 +127,20 @@ export function sessionPage(page) {
       ticks = 0;
       leaving = false;
       this.s = strings.strings();
-      var time = new LiteTime(timers);
+      time = new LiteTime();
       var haptics = new LiteHaptics(vibrator);
       if (this.launch !== 'new') {
         files.readSnapshot((snap) => {
           if (snap === null) {
             this.leave('index');
-            return;
+          } else if (page.core.readPlan) {
+            files.readPlan((text) => {
+              snap.plan = text;
+              this.restore(snap, haptics);
+            });
+          } else {
+            this.restore(snap, haptics);
           }
-          var restored = page.core.SessionController.fromSnapshot(snap, time, time, haptics, files, wallClock);
-          if (restored === null) {
-            // pages/prompt and a snapshot without the plan: pages/session restores it and hands it back.
-            this.go('hop', { to: 'session', launch: 'resume' });
-            return;
-          }
-          restored.setMessageSeed(snap.savedAt);
-          if (this.notNow === '1') {
-            restored.view.notNowReturn = true;
-          }
-          this.attach(restored, this.launch === 'handoff');
         });
         return;
       }
@@ -163,9 +150,27 @@ export function sessionPage(page) {
       c.start();
     },
 
+    restore(snap, haptics) {
+      var restored = page.core.Flow.fromSnapshot(snap, time, time, haptics, current.files, wallClock);
+      if (restored === null) {
+        // pages/prompt without the plan file: pages/session restores the session and writes it.
+        this.go('hop', { to: 'session', launch: 'resume' });
+        return;
+      }
+      restored.setMessageSeed(snap.savedAt);
+      if (this.notNow === '1') {
+        restored.view.notNowReturn = true;
+      }
+      this.attach(restored, this.launch === 'handoff');
+    },
+
     attach(c, resumeNow) {
       current.c = c;
-      plan = page.core.plan ? page.core.plan(c) : '';
+      if (page.core.plan) {
+        // The plan for pages/prompt (common/plan.js): written now, while the heap is still free,
+        // not with the snapshot on handoff, where there was no room to serialize it.
+        current.files.writePlan(page.core.plan(c));
+      }
       c.setObserver({
         onUpdate: (v) => this.update(v),
         onSummary: () => this.toSummary()
@@ -195,7 +200,6 @@ export function sessionPage(page) {
       if (this.modal === MODAL_NONE) {
         page.paint.call(this, v);
       }
-      this.remainingText = current.strings.fmt('remaining', formatMmSs(current.c.remainingMs()));
     },
 
     /* The controller entered a stage of the other page: hand the session over through the snapshot. */
@@ -207,9 +211,6 @@ export function sessionPage(page) {
       focusList(this, false);
       this.screen = '';
       var snap = c.snapshot();
-      if (plan !== '') {
-        snap.plan = plan;
-      }
       c.shutdown();
       current.files.save(snap, () => {
         this.go('hop', { to: target, launch: 'handoff', notNow: notNow ? '1' : '' });
@@ -246,6 +247,9 @@ export function sessionPage(page) {
         clearInterval(timer);
         timer = null;
       }
+      if (time !== null) {
+        time.clear();
+      }
     },
 
     tick() {
@@ -254,15 +258,14 @@ export function sessionPage(page) {
         return;
       }
       ticks++;
+      // Phase ends, vibration ticks and intro slides of the controller.
+      time.poll();
+      if (current.c === null || c.isEnded() || leaving) {
+        return;
+      }
       var running = !c.isPaused() && this.modal === MODAL_NONE;
       if (running && page.onTick) {
         page.onTick.call(this, c);
-      }
-      if (ticks % REMAINING_EVERY === 0) {
-        var text = current.strings.fmt('remaining', formatMmSs(c.remainingMs()));
-        if (text !== this.remainingText) {
-          this.remainingText = text;
-        }
       }
       if (running && ticks % SNAPSHOT_EVERY === 0) {
         current.files.save(c.snapshot());

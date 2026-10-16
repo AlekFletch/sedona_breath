@@ -1,18 +1,18 @@
-<!-- Screen 1: Home -->
+<!-- Screen 1: Home. The first item centres the buttons vertically (topGap). Nothing but the background
+  until the settings are read: on the first launch the page goes straight on to the onboarding. -->
 <stack class="root" onswipe="onSwipe">
   <image class="bg" src="{{ bg }}"></image>
-  <div class="frame">
+  <div class="frame" if="{{ ready }}">
     <list class="list" ref="list">
+      <list-item class="li-text" style="height: {{ topGap }}px;" if="{{ topGap > 0 }}"></list-item>
       <list-item class="li-title"><text class="title">{{ s.app_name }}</text></list-item>
       <list-item class="li-line" if="{{ unfinished }}"><text class="warn">{{ s.home_unfinished }}</text></list-item>
       <list-item class="li">
         <div class="btn-primary" onclick="tapMain"><text class="btn-text-primary">{{ mainText }}</text></div>
       </list-item>
-      <list-item class="li">
-        <div class="btn" onclick="tapSecond"><text class="btn-text">{{ secondText }}</text></div>
+      <list-item class="li" if="{{ unfinished }}">
+        <div class="btn" onclick="dropUnfinished"><text class="btn-text">{{ s.btn_finish }}</text></div>
       </list-item>
-      <list-item class="li-line" if="{{ lastText !== '' }}"><text class="small">{{ lastText }}</text></list-item>
-      <list-item class="li-line" if="{{ lastText !== '' }}"><text class="accent">{{ todayText }}</text></list-item>
       <list-item class="li">
         <div class="btn" onclick="openHistory"><text class="btn-text">{{ s.btn_history }}</text></div>
       </list-item>

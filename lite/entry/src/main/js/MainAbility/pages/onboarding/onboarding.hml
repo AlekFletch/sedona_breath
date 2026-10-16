@@ -1,19 +1,13 @@
-<!-- Screen 11 in steps: what the practice is, disclaimer, safety, consent -->
+<!--
+  Screen 11 in steps: what the practice is, disclaimer, safety, consent. Centred by the frame, no list:
+  a list on the watch keeps the row heights of the previous step.
+-->
 <stack class="root" onswipe="onSwipe">
   <image class="bg" src="{{ bg }}"></image>
   <div class="frame">
-    <list class="list" ref="list">
-      <list-item class="li-title" if="{{ head !== '' }}"><text class="title">{{ head }}</text></list-item>
-      <list-item class="li-text" style="height: {{ r1 }}px;" if="{{ t1 !== '' }}">
-        <text class="body" style="height: {{ h1 }}px;">{{ t1 }}</text>
-      </list-item>
-      <list-item class="li-text" style="height: {{ r2 }}px;" if="{{ t2 !== '' }}">
-        <text class="body" style="height: {{ h2 }}px;">{{ t2 }}</text>
-      </list-item>
-      <list-item class="li">
-        <div class="btn-primary" onclick="next"><text class="btn-text-primary">{{ buttonText }}</text></div>
-      </list-item>
-      <list-item class="li-gap"></list-item>
-    </list>
+    <text class="title" if="{{ head !== '' }}">{{ head }}</text>
+    <text class="body dlg-gap" style="height: {{ h1 }}px;" if="{{ t1 !== '' }}">{{ t1 }}</text>
+    <text class="body dlg-gap" style="height: {{ h2 }}px;" if="{{ t2 !== '' }}">{{ t2 }}</text>
+    <div class="btn-primary dlg-gap" onclick="next"><text class="btn-text-primary">{{ buttonText }}</text></div>
   </div>
 </stack>

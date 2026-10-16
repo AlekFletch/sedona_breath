@@ -21,11 +21,13 @@ const CREATE_SQL = `CREATE TABLE IF NOT EXISTS ${TABLE} (
   status TEXT NOT NULL,
   stopped_at TEXT NOT NULL DEFAULT '',
   emotion TEXT NOT NULL DEFAULT '',
-  rating INTEGER NOT NULL DEFAULT 0,
+  intensity_before INTEGER NOT NULL DEFAULT -1,
+  intensity_after INTEGER NOT NULL DEFAULT -1,
+  rounds INTEGER NOT NULL DEFAULT 1,
   heart_rate INTEGER NOT NULL DEFAULT 0)`;
 
 const COLUMNS = 'id, started_at, ended_at, duration_sec, planned_min, mode, pattern, cycles, status, stopped_at, ' +
-  'emotion, rating, heart_rate';
+  'emotion, intensity_before, intensity_after, rounds, heart_rate';
 
 /**
  * Session history in RelationalStore (SQLite):
@@ -70,7 +72,9 @@ export class HistoryRepository {
       'status': r.status,
       'stopped_at': r.stoppedAt,
       'emotion': r.emotionBefore,
-      'rating': r.ratingAfter,
+      'intensity_before': r.intensityBefore,
+      'intensity_after': r.intensityAfter,
+      'rounds': r.rounds,
       'heart_rate': r.heartRateAvg
     };
     const id = await store.insert(TABLE, values);
@@ -124,8 +128,10 @@ export class HistoryRepository {
       r.status = rs.getString(8) === SessionStatus.INTERRUPTED ? SessionStatus.INTERRUPTED : SessionStatus.COMPLETED;
       r.stoppedAt = rs.getString(9);
       r.emotionBefore = parseEmotion(rs.getString(10));
-      r.ratingAfter = rs.getLong(11);
-      r.heartRateAvg = rs.getLong(12);
+      r.intensityBefore = rs.getLong(11);
+      r.intensityAfter = rs.getLong(12);
+      r.rounds = rs.getLong(13);
+      r.heartRateAvg = rs.getLong(14);
       out.push(r);
     }
     rs.close();
