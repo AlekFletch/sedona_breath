@@ -8,8 +8,12 @@
 - [ ] Изменения закоммичены, версия в `lite/entry/src/main/config.json` (`version.code` / `version.name`) поднята для каждой новой загрузки.
 - [x] Release-сертификат `SedonaLiteRelease` и профиль `SedonaLiteReleaseProfile` созданы 16.10.2026 (до 16.10.2029), подпись `release` прописана в `lite/build-profile.json5` (раздел 2).
 - [x] Пакет `lite/out/SedonaBreathLite-1.0.0-release.app` собран release-подписью 16.10.2026 (раздел 3). Пересобрать после последних правок и проверки на часах.
-- [ ] Приложение добавлено в AppGallery Connect → «Приложения и атомарные сервисы» → HarmonyOS → «Опубликовать» (выбрать App ID `com.alekfletch.sedonabreath.lite`).
-- [ ] Скриншоты с часов в `store/screenshots/`.
+- [x] Карточка создана 16.10.2026 (App ID 6917618960378478308): название «Sedona Breath» на en/ru/es-ES/es-419 (совпадает с `MainAbility_label`), значок, устройство «Спортивные часы», категория «Здоровье и спорт», e-mail поддержки, описания, 198 стран без материкового Китая, рейтинг 3+, политика, ИИ не используется, примечание для модератора, бесплатно.
+- [x] В `config.json` есть `distroFilter`: только прямоугольный экран 408×480 (у Breath Trainer модерация отклонила версию, обрезанную на круглых часах).
+- [x] Значок пакета и магазина — круг на прозрачном фоне (`AppScope/.../foreground.png`), как у Breath Trainer.
+- [ ] Загрузить `lite/out/SedonaBreathLite-1.0.0-release.app` («Версия приложения» → «Выбрать»).
+- [ ] Загрузить скриншоты: en, es-ES, es-419 — `store/screenshots-square/en/*.webp`, ru — `store/screenshots-square/ru/*.webp`.
+- [ ] Отправить на проверку.
 - [ ] Политика конфиденциальности доступна по публичной ссылке (раздел 4).
 
 ## 2. Release-подпись (AppGallery Connect)
@@ -47,7 +51,7 @@ Release-пакет не ставится на часы через DevEco Assista
 | Разрешения | `ohos.permission.VIBRATE` |
 | Возрастной рейтинг | анкета: насилия, азартных игр, покупок, общения и сбора данных нет; тема — эмоциональное самочувствие |
 | Иконка 216×216 | [`store/icon_216.png`](../store/icon_216.png) |
-| Скриншоты | с часов или симулятора 408×480, минимум 3: главный экран, дыхание, вопрос, итог (`store/screenshots/`) |
+| Скриншоты | `store/screenshots-square/{ru,en}/` — 840×840 (экран 408×480 ×1,5 в рамке, как у Breath Trainer), по 6 на язык; исходные кадры симулятора — `store/screenshots/` |
 | Контакт поддержки | rusgadgets@gmail.com |
 
 ### Русский
@@ -63,11 +67,11 @@ Sedona Breath — короткая практика на часах: споко�
 Как проходит практика:
 • выберите эмоцию и оцените её силу от 1 до 5;
 • дышите в ритме вибрации: 4-7-8, 4-6, «квадрат», 4-2-6 или свой ритм;
-• ответьте себе на вопросы: «Смог бы я позволить этому чувству быть?», «Смог бы я отпустить его?», «Хотел бы я?», «Когда?»;
+• ответьте себе на вопросы: «Смог бы я позволить этому чувству быть?», «Смог бы я отпустить это чувство?», «Хотел бы я отпустить это чувство?», «Когда?»;
 • после завершающего дыхания оцените эмоцию снова или отметьте «Свободен»; если эмоция ещё здесь, пройдите цикл ещё раз.
 
 Что ещё:
-• быстрый режим на 3 минуты;
+• быстрый режим для снятия стресса;
 • история практик с силой эмоции до и после;
 • вибрационные подсказки — можно заниматься, не глядя на экран;
 • работает без телефона и интернета, данные не покидают часы;
@@ -90,11 +94,11 @@ Sedona Breath is a short practice on your watch: calm breathing guided by vibrat
 How it works:
 • pick the emotion you feel and rate it from 1 to 5;
 • breathe with the vibration: 4-7-8, 4-6, box, 4-2-6 or your own rhythm;
-• ask yourself: "Could I allow this feeling to be?", "Could I let it go?", "Would I?", "When?";
+• ask yourself: "Could I allow this feeling to be here?", "Could I let this feeling go?", "Would I let this feeling go?", "When?";
 • after the closing breaths, rate the emotion again or tap "I'm free"; if it is still there, repeat the cycle.
 
 Also:
-• 3-minute quick mode;
+• quick stress relief mode;
 • practice history with intensity before and after;
 • vibration cues, so you can practise without looking at the screen;
 • works without a phone or internet, your data stays on the watch;
@@ -117,11 +121,11 @@ Sedona Breath es una práctica breve en tu reloj: respiración tranquila guiada 
 Cómo funciona:
 • elige la emoción que sientes y valora su intensidad del 1 al 5;
 • respira al ritmo de la vibración: 4-7-8, 4-6, cuadrada, 4-2-6 o tu propio ritmo;
-• pregúntate: «¿Podría permitir que este sentimiento esté?», «¿Podría soltarlo?», «¿Lo haría?», «¿Cuándo?»;
+• pregúntate: «¿Podría permitir que este sentimiento esté?», «¿Podría soltar este sentimiento?», «¿Querría soltar este sentimiento?», «¿Cuándo?»;
 • tras la respiración final, valora la emoción otra vez o marca «Libre»; si sigue ahí, repite el ciclo.
 
 Además:
-• modo rápido de 3 minutos;
+• modo de alivio rápido del estrés;
 • historial con la intensidad antes y después;
 • señales por vibración para practicar sin mirar la pantalla;
 • funciona sin teléfono ni internet, tus datos se quedan en el reloj;

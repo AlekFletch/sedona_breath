@@ -12,6 +12,20 @@
     "deviceType": [
       "liteWearable"
     ],
+    "distroFilter": {
+      "screenShape": {
+        "policy": "include",
+        "value": [
+          "rect"
+        ]
+      },
+      "screenWindow": {
+        "policy": "include",
+        "value": [
+          "408*480"
+        ]
+      }
+    },
     "reqPermissions": [
       {
         "name": "ohos.permission.VIBRATE",
