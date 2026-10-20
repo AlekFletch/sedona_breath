@@ -61,6 +61,11 @@ export default function breathEngineTest() {
       expect(f.exhaleSec).assertEqual(FreeRhythm.EXHALE_MAX);
       const g = new FreeRhythm(4, 4).normalized();
       expect(g.inhaleSec + g.exhaleSec).assertEqual(10);
+      // Independent values: changing the inhale never moves the exhale.
+      const h = new FreeRhythm(FreeRhythm.INHALE_MIN - 1, 7).normalized();
+      expect(h.inhaleSec).assertEqual(FreeRhythm.INHALE_MIN);
+      expect(h.exhaleSec).assertEqual(7);
+      expect(FreeRhythm.INHALE_MIN + FreeRhythm.EXHALE_MIN >= FreeRhythm.MIN_CYCLE_SEC).assertTrue();
     });
 
     it('unknownIdFallsBackTo478', 0, () => {

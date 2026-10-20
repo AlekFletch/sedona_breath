@@ -117,6 +117,7 @@ def main():
                     help='UI language (ru-RU or en-US). The lite simulator ignores its own -l flag and always '
                          'uses en-US, so for ru-RU the copied bundle gets ru-RU.json in place of en-US.json')
     ap.add_argument('--seed', default='', help='folder copied into the app data dir before launch')
+    ap.add_argument('--size', default='408x480', help='screen WxH; a square one is round (454x454, 466x466)')
     ap.add_argument('steps', nargs='*')
     a = ap.parse_args()
 
@@ -135,8 +136,10 @@ def main():
     name = 'reppulse' + uuid.uuid4().hex[:6]
     sid = uuid.uuid4().hex
     pipe = CommandPipe(name)
+    sw, sh = (int(x) for x in a.size.lower().split('x'))
     cmd = [SIMULATOR, '-j', js_dir, '-s', name, '-n', 'entry', '-device', 'liteWearable',
-           '-shape', 'rect', '-or', '408', '480', '-cr', '408', '480', '-lws', str(a.port),
+           '-shape', 'circle' if sw == sh else 'rect', '-or', str(sw), str(sh), '-cr', str(sw), str(sh),
+           '-lws', str(a.port),
            '-sid', sid, '-hs', str(a.heap), '-url', a.url]
     proc = subprocess.Popen(cmd, cwd=run_dir, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     log = []

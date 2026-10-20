@@ -62,13 +62,17 @@ export class BreathPattern {
 
 /** Free rhythm: separately configurable inhale / exhale, whole seconds. */
 export class FreeRhythm {
-  static readonly INHALE_MIN: number = 3;
+  static readonly INHALE_MIN: number = 4;
   static readonly INHALE_MAX: number = 8;
-  static readonly EXHALE_MIN: number = 4;
+  static readonly EXHALE_MIN: number = 6;
   static readonly EXHALE_MAX: number = 12;
   static readonly DEFAULT_INHALE: number = 4;
   static readonly DEFAULT_EXHALE: number = 6;
-  /** Stress-reduction rule: not more than ~6 breaths/min => cycle >= 10 s. */
+  /**
+   * Stress-reduction rule: not more than ~6 breaths/min => cycle >= 10 s. The ranges keep it
+   * (INHALE_MIN + EXHALE_MIN), so inhale and exhale are set independently: AppGallery review
+   * rejected 1.0.0 because lowering the inhale raised the exhale.
+   */
   static readonly MIN_CYCLE_SEC: number = 10;
 
   inhaleSec: number;
@@ -79,13 +83,10 @@ export class FreeRhythm {
     this.exhaleSec = exhaleSec;
   }
 
-  /** Clamps to allowed ranges and enforces <= 6 breaths per minute by lengthening the exhale. */
+  /** Clamps each value to its own range; the ranges already give <= 6 breaths per minute. */
   normalized(): FreeRhythm {
-    let inhale = Math.round(clamp(this.inhaleSec, FreeRhythm.INHALE_MIN, FreeRhythm.INHALE_MAX));
-    let exhale = Math.round(clamp(this.exhaleSec, FreeRhythm.EXHALE_MIN, FreeRhythm.EXHALE_MAX));
-    if (inhale + exhale < FreeRhythm.MIN_CYCLE_SEC) {
-      exhale = FreeRhythm.MIN_CYCLE_SEC - inhale;
-    }
+    const inhale = Math.round(clamp(this.inhaleSec, FreeRhythm.INHALE_MIN, FreeRhythm.INHALE_MAX));
+    const exhale = Math.round(clamp(this.exhaleSec, FreeRhythm.EXHALE_MIN, FreeRhythm.EXHALE_MAX));
     return new FreeRhythm(inhale, exhale);
   }
 }

@@ -36,6 +36,12 @@
   align-items: center;
   background-color: transparent;
 }
+/* Round screens (454 / 466 px): the first and last rows of a list scroll into the full-width band. */
+.li-round {
+  width: 360px;
+  height: 72px;
+  background-color: transparent;
+}
 .li-gap {
   width: 360px;
   height: 60px;

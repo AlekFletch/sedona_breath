@@ -61,22 +61,23 @@ var FreeRhythm = /** @class */ (function () {
         this.inhaleSec = inhaleSec;
         this.exhaleSec = exhaleSec;
     }
-    /** Clamps to allowed ranges and enforces <= 6 breaths per minute by lengthening the exhale. */
+    /** Clamps each value to its own range; the ranges already give <= 6 breaths per minute. */
     FreeRhythm.prototype.normalized = function () {
         var inhale = Math.round(clamp(this.inhaleSec, FreeRhythm.INHALE_MIN, FreeRhythm.INHALE_MAX));
         var exhale = Math.round(clamp(this.exhaleSec, FreeRhythm.EXHALE_MIN, FreeRhythm.EXHALE_MAX));
-        if (inhale + exhale < FreeRhythm.MIN_CYCLE_SEC) {
-            exhale = FreeRhythm.MIN_CYCLE_SEC - inhale;
-        }
         return new FreeRhythm(inhale, exhale);
     };
-    FreeRhythm.INHALE_MIN = 3;
+    FreeRhythm.INHALE_MIN = 4;
     FreeRhythm.INHALE_MAX = 8;
-    FreeRhythm.EXHALE_MIN = 4;
+    FreeRhythm.EXHALE_MIN = 6;
     FreeRhythm.EXHALE_MAX = 12;
     FreeRhythm.DEFAULT_INHALE = 4;
     FreeRhythm.DEFAULT_EXHALE = 6;
-    /** Stress-reduction rule: not more than ~6 breaths/min => cycle >= 10 s. */
+    /**
+     * Stress-reduction rule: not more than ~6 breaths/min => cycle >= 10 s. The ranges keep it
+     * (INHALE_MIN + EXHALE_MIN), so inhale and exhale are set independently: AppGallery review
+     * rejected 1.0.0 because lowering the inhale raised the exhale.
+     */
     FreeRhythm.MIN_CYCLE_SEC = 10;
     return FreeRhythm;
 }());

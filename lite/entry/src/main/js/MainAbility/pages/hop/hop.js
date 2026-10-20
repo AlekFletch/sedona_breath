@@ -9,7 +9,7 @@ import router from '@system.router';
  * the background is static in hop.hml.
  */
 var PASSED = ['launch', 'lang', 'notNow', 'durationMin', 'mode', 'patternId', 'vibration', 'freeIn', 'freeEx',
-  'emotion', 'intensity'];
+  'emotion', 'intensity', 'round'];
 
 export default {
   data: {
@@ -24,7 +24,8 @@ export default {
     freeIn: '',
     freeEx: '',
     emotion: '',
-    intensity: ''
+    intensity: '',
+    round: ''
   },
   onShow() {
     var to = this.to === 'prompt' ? 'prompt' : 'session';

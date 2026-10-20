@@ -78,9 +78,14 @@ Store.prototype.loadSettings = function (cb) {
   });
 };
 
-Store.prototype.saveSettings = function (cb) {
+/** Normalizes the edited settings and applies the language in memory; nothing is written. */
+Store.prototype.applySettings = function () {
   this.settings = mergeSettings(this.settings);
   this.applyLanguage();
+};
+
+Store.prototype.saveSettings = function (cb) {
+  this.applySettings();
   this.files.write(SETTINGS_FILE, this.settings, cb);
 };
 

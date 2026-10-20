@@ -3,8 +3,8 @@
     "bundleName": "com.alekfletch.sedonabreath.lite",
     "vendor": "alekfletch",
     "version": {
-      "code": 1000000,
-      "name": "1.0.0"
+      "code": 1000001,
+      "name": "1.0.1"
     }
   },
   "deviceConfig": {},
@@ -16,13 +16,16 @@
       "screenShape": {
         "policy": "include",
         "value": [
-          "rect"
+          "rect",
+          "circle"
         ]
       },
       "screenWindow": {
         "policy": "include",
         "value": [
-          "408*480"
+          "408*480",
+          "454*454",
+          "466*466"
         ]
       }
     },

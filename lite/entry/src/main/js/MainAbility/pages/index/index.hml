@@ -20,6 +20,7 @@
         <div class="btn" onclick="openSettings"><text class="btn-text">{{ s.btn_settings }}</text></div>
       </list-item>
       <list-item class="li-gap"></list-item>
+      <list-item class="li-round" if="{{ round === '1' }}"></list-item>
     </list>
   </div>
 </stack>

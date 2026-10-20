@@ -15,6 +15,7 @@ var LAST_STEP = 3;
  */
 export default {
   data: {
+    round: '',
     bg: '',
     readOnly: false,
     head: '',
@@ -22,7 +23,8 @@ export default {
     h1: 34,
     t2: '',
     h2: 34,
-    buttonText: ''
+    buttonText: '',
+    btnW: 330
   },
   onInit() {
     useBackground(this);
@@ -45,6 +47,11 @@ export default {
       t1 = store.t('onb_safety');
     } else if (!this.readOnly) {
       t1 = store.t('onb_consent');
+    }
+    if (this.round === '1') {
+      // A round screen has no room for a title above a long text: the button would leave the circle.
+      head = '';
+      this.btnW = 290;
     }
     this.head = head;
     t1 = wrap(t1, false);

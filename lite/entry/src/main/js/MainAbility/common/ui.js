@@ -39,13 +39,20 @@ export function refocusList(vm) {
   }, 0);
 }
 
+/*
+ * Screen shape, router param `round` of every page: '1' round (WATCH GT: 454x454, 466x466), '0'
+ * rectangular, '' not known yet (the home page asks once, see readRound in pages/index). go() passes
+ * it on.
+ */
+export function isRound(vm) {
+  return vm.round === '1';
+}
+
 /** Leaves the page: releases the crown focus, then replaces the page. */
 export function go(vm, page, params) {
   focusList(vm, false);
-  var options = { uri: 'pages/' + page + '/' + page };
-  if (params) {
-    options.params = params;
-  }
+  var options = { uri: 'pages/' + page + '/' + page, params: params || {} };
+  options.params.round = vm.round || '';
   router.replace(options);
 }
 

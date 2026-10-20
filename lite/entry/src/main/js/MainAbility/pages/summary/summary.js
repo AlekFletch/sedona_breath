@@ -20,6 +20,7 @@ var saving = false;
  */
 export default {
   data: {
+    round: '',
     lang: 'ru',
     bg: '',
     s: {},

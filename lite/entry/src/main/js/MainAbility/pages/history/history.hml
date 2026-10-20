@@ -3,6 +3,7 @@
   <image class="bg" src="{{ bg }}"></image>
   <div class="frame">
     <list class="list" ref="list">
+      <list-item class="li-round" if="{{ round === '1' }}"></list-item>
       <list-item class="li-title"><text class="title">{{ s.history_title }}</text></list-item>
       <list-item class="li-line" if="{{ items.length === 0 }}"><text class="small">{{ s.history_empty }}</text></list-item>
       <list-item class="li-entry" for="{{ items }}">
@@ -18,6 +19,7 @@
         <div class="btn" onclick="back"><text class="btn-text">{{ s.btn_back }}</text></div>
       </list-item>
       <list-item class="li-gap"></list-item>
+      <list-item class="li-round" if="{{ round === '1' }}"></list-item>
     </list>
   </div>
 </stack>

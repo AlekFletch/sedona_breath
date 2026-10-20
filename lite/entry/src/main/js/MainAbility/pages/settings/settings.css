@@ -50,6 +50,12 @@
   align-items: center;
   background-color: transparent;
 }
+/* Round screens (454 / 466 px): the first and last rows of a list scroll into the full-width band. */
+.li-round {
+  width: 360px;
+  height: 72px;
+  background-color: transparent;
+}
 .li-gap {
   width: 360px;
   height: 60px;
@@ -100,6 +106,23 @@
   width: 300px;
   height: 36px;
   font-size: 30px;
+  text-align: center;
+  color: #F2A48C;
+  text-overflow: ellipsis;
+}
+/* Long button labels ("End and save"): 30 px does not fit 300 px in Russian. */
+.btn-text-sm {
+  width: 300px;
+  height: 32px;
+  font-size: 24px;
+  text-align: center;
+  color: #F2EEDD;
+  text-overflow: ellipsis;
+}
+.btn-text-danger-sm {
+  width: 300px;
+  height: 32px;
+  font-size: 24px;
   text-align: center;
   color: #F2A48C;
   text-overflow: ellipsis;

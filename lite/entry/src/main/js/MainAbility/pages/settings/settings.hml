@@ -3,6 +3,7 @@
   <image class="bg" src="{{ bg }}"></image>
   <div class="frame">
     <list class="list" ref="list" if="{{ !confirmDelete }}">
+      <list-item class="li-round" if="{{ round === '1' }}"></list-item>
       <list-item class="li-title"><text class="title">{{ s.settings_title }}</text></list-item>
       <list-item class="li-card">
         <div class="card" onclick="nextLanguage">
@@ -32,9 +33,9 @@
         <div class="card">
           <text class="label">{{ s.settings_free_inhale }}</text>
           <div class="stepper">
-            <div class="step" onclick="inhaleMinus"><text class="step-text">-</text></div>
+            <div class="step" onclick="inhaleMinus"><text class="step-text" style="color: {{ inMinus }};">-</text></div>
             <text class="step-value">{{ inhaleText }}</text>
-            <div class="step" onclick="inhalePlus"><text class="step-text">+</text></div>
+            <div class="step" onclick="inhalePlus"><text class="step-text" style="color: {{ inPlus }};">+</text></div>
           </div>
         </div>
       </list-item>
@@ -42,24 +43,26 @@
         <div class="card">
           <text class="label">{{ s.settings_free_exhale }}</text>
           <div class="stepper">
-            <div class="step" onclick="exhaleMinus"><text class="step-text">-</text></div>
+            <div class="step" onclick="exhaleMinus"><text class="step-text" style="color: {{ exMinus }};">-</text></div>
             <text class="step-value">{{ exhaleText }}</text>
-            <div class="step" onclick="exhalePlus"><text class="step-text">+</text></div>
+            <div class="step" onclick="exhalePlus"><text class="step-text" style="color: {{ exPlus }};">+</text></div>
           </div>
         </div>
       </list-item>
       <list-item class="li">
-        <div class="btn" onclick="openTerms"><text class="btn-text">{{ s.settings_terms }}</text></div>
+        <div class="btn" onclick="openTerms"><text class="btn-text-sm">{{ s.settings_terms }}</text></div>
       </list-item>
       <list-item class="li">
-        <div class="btn" onclick="askDelete"><text class="btn-text-danger">{{ s.settings_delete_history }}</text></div>
+        <div class="btn" onclick="askDelete"><text class="btn-text-danger-sm">{{ s.settings_delete_history }}</text></div>
       </list-item>
       <list-item class="li">
         <div class="btn" onclick="back"><text class="btn-text">{{ s.btn_back }}</text></div>
       </list-item>
       <list-item class="li-gap"></list-item>
+      <list-item class="li-round" if="{{ round === '1' }}"></list-item>
     </list>
     <list class="list" ref="list" if="{{ confirmDelete }}">
+      <list-item class="li-round" if="{{ round === '1' }}"></list-item>
       <list-item class="li-title"><text class="title">{{ s.delete_confirm_title }}</text></list-item>
       <list-item class="li-line"><text class="small">{{ s.delete_confirm_body }}</text></list-item>
       <list-item class="li">
@@ -69,6 +72,7 @@
         <div class="btn-primary" onclick="cancelDelete"><text class="btn-text-primary">{{ s.btn_cancel }}</text></div>
       </list-item>
       <list-item class="li-gap"></list-item>
+      <list-item class="li-round" if="{{ round === '1' }}"></list-item>
     </list>
   </div>
 </stack>

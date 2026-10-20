@@ -13,6 +13,8 @@ export function Strings(templateKeys, translate) {
   this.templateKeys = templateKeys || [];
   this.translate = translate;
   this.lang = 'ru';
+  // $t reads the i18n file on the watch: each path is looked up once per page.
+  this.cache = {};
 }
 
 /** Texts for the page template: { key: text } for the keys the template uses. */
@@ -35,9 +37,14 @@ Strings.prototype.t = function (key) {
 
 Strings.prototype.lookup = function (lang, key) {
   var path = lang + '.' + key;
+  if (this.cache.hasOwnProperty(path)) {
+    return this.cache[path];
+  }
   var v = this.translate(path);
   // $t returns the path itself for a missing key.
-  return typeof v === 'string' && v !== path ? v : null;
+  v = typeof v === 'string' && v !== path ? v : null;
+  this.cache[path] = v;
+  return v;
 };
 
 Strings.prototype.fmt = function (key) {

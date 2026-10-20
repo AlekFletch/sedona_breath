@@ -8,6 +8,6 @@
     <text class="title" if="{{ head !== '' }}">{{ head }}</text>
     <text class="body dlg-gap" style="height: {{ h1 }}px;" if="{{ t1 !== '' }}">{{ t1 }}</text>
     <text class="body dlg-gap" style="height: {{ h2 }}px;" if="{{ t2 !== '' }}">{{ t2 }}</text>
-    <div class="btn-primary dlg-gap" onclick="next"><text class="btn-text-primary">{{ buttonText }}</text></div>
+    <div class="btn-primary dlg-gap" style="width: {{ btnW }}px;" onclick="next"><text class="btn-text-primary">{{ buttonText }}</text></div>
   </div>
 </stack>

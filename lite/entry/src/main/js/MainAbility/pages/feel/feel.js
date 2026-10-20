@@ -16,6 +16,7 @@ var emotion = '';
  */
 export default {
   data: {
+    round: '',
     bg: '',
     s: {},
     lang: 'ru',

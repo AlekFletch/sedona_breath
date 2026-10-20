@@ -3,6 +3,7 @@
   <image class="bg" src="{{ bg }}"></image>
   <div class="frame">
     <list class="list" ref="list">
+      <list-item class="li-round" if="{{ round === '1' }}"></list-item>
       <list-item class="li-title"><text class="title">{{ s.summary_title }}</text></list-item>
       <list-item class="li-card" for="{{ lines }}">
         <div class="card">
@@ -15,6 +16,7 @@
       </list-item>
       <list-item class="li-line" if="{{ status !== '' }}"><text class="warn">{{ status }}</text></list-item>
       <list-item class="li-gap"></list-item>
+      <list-item class="li-round" if="{{ round === '1' }}"></list-item>
     </list>
   </div>
 </stack>

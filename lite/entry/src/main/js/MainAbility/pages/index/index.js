@@ -1,4 +1,5 @@
 import app from '@system.app';
+import device from '@system.device';
 import { DEFAULT_DURATION_MIN } from '../../core/SessionTypes.js';
 import { Store } from '../../common/store.js';
 import { appendRecord } from '../../common/history.js';
@@ -11,7 +12,13 @@ var store = null;
 /** 'summary' | 'session' | 'prompt' | '' — the page "Continue" reopens. */
 var unfinishedKind = '';
 
+/** Settings read and the onboarding done: the page can be drawn once the screen shape is known. */
+var loaded = false;
+/** The onboarding is due: it opens once the screen shape is known too. */
+var onboarding = false;
 var SCREEN_H = 480; // Watch Fit screen height, px
+var ROUND_H = 466;  // WATCH GT round screen, px
+var ROUND_TOP = 72; // li-round: rows above it are cut by the circle
 
 /*
  * Screen 1: "Practice" (the emotion and its intensity on pages/feel, then the session with the mode,
@@ -25,20 +32,38 @@ export default {
     ready: false,
     unfinished: false,
     mainText: '',
-    topGap: 0
+    topGap: 0,
+    round: ''
   },
   onInit() {
     useBackground(this);
     store = new Store(storeSystem(), templateKeys, (path) => this.$t(path));
     this.s = store.strings();
     unfinishedKind = '';
+    loaded = false;
+    onboarding = false;
+    if (this.round === '') {
+      // First page of the app: ask the shape once, then every page gets it in the router params.
+      readRound((r) => {
+        this.round = r;
+        if (onboarding) {
+          go(this, 'onboarding');
+        } else if (loaded) {
+          this.paint();
+        }
+      });
+    }
     store.loadSettings((settings) => {
       if (!settings.onboardingAccepted) {
-        // Navigate after the current lifecycle callback has returned.
-        setTimeout(() => go(this, 'onboarding'), 0);
+        onboarding = true;
+        if (this.round !== '') {
+          // Navigate after the current lifecycle callback has returned.
+          setTimeout(() => go(this, 'onboarding'), 0);
+        }
         return;
       }
       this.s = store.strings();
+      loaded = true;
       this.paint();
       // An interrupted session saved with "End and save" goes to history here, not on the session page:
       // reading the history there would not fit next to the running session in the JS heap.
@@ -75,7 +100,11 @@ export default {
     this.mainText = store.t(this.unfinished ? 'btn_resume' : 'btn_practice');
     // Title (64) and buttons (76 each), plus the warning line (46) and "Finish" when unfinished.
     var h = 64 + 3 * 76 + (this.unfinished ? 46 + 76 : 0);
-    this.topGap = Math.floor((SCREEN_H - h) / 2);
+    if (this.round === '') {
+      return; // the shape is not known yet: nothing is drawn before the right layout
+    }
+    var round = this.round === '1';
+    this.topGap = Math.max(round ? ROUND_TOP : 0, Math.floor(((round ? ROUND_H : SCREEN_H) - h) / 2));
     if (!this.ready) {
       // The list appears now: give it the crown (onShow found no list yet).
       this.ready = true;
@@ -115,3 +144,28 @@ export default {
     }
   }
 };
+
+/** cb('1' | '0'). The simulator reports 'rect' for any shape, so a square screen of 440+ px is round. */
+function readRound(cb) {
+  var done = false;
+  function once(v) {
+    if (!done) {
+      done = true;
+      cb(v);
+    }
+  }
+  try {
+    device.getInfo({
+      success: function (info) {
+        var w = info.windowWidth || 0;
+        var h = info.windowHeight || 0;
+        once(info.screenShape === 'circle' || (w === h && w >= 440) ? '1' : '0');
+      },
+      fail: function () {
+        once('0');
+      }
+    });
+  } catch (e) {
+    once('0');
+  }
+}

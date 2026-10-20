@@ -44,9 +44,48 @@ var LOW_BATTERY = 0.10;
 export var current = {
   strings: null,
   files: null,
+  sink: null,
   c: null
 };
 var timer = null;
+/*
+ * Snapshot sink of the controller. A tap answers first and writes later: while the page ticks, a
+ * snapshot waits for the next tick (100 ms, after the screen has been redrawn), only the latest
+ * one is written. Without the ticker (paused page, leaving) it writes at once. The 1.0.0 review
+ * found taps on the question screens answering after ~3 s on the watch.
+ */
+function LaterSink(files) {
+  this.files = files;
+  this.pending = null;
+  this.live = false;
+}
+
+LaterSink.prototype.save = function (snapshot, cb) {
+  if (this.live && !cb) {
+    this.pending = snapshot;
+    return;
+  }
+  this.pending = null;
+  this.files.save(snapshot, cb);
+};
+
+LaterSink.prototype.clear = function () {
+  this.pending = null;
+  this.files.clear();
+};
+
+LaterSink.prototype.flush = function () {
+  if (this.pending !== null) {
+    var snapshot = this.pending;
+    this.pending = null;
+    this.files.save(snapshot);
+  }
+};
+
+LaterSink.prototype.drop = function () {
+  this.pending = null;
+};
+
 /* Clock and scheduler of the controller: its tasks run from tick(), not from their own timers (see LiteTime). */
 var time = null;
 var ticks = 0;
@@ -91,6 +130,7 @@ export function sessionPage(page) {
   var data = {
     launch: '',
     lang: 'ru',
+    round: '',
     durationMin: '',
     mode: '',
     patternId: '',
@@ -122,6 +162,7 @@ export function sessionPage(page) {
       var files = new SessionFiles(new JsonFiles(file));
       current.strings = strings;
       current.files = files;
+      current.sink = new LaterSink(files);
       current.c = null;
       timer = null;
       ticks = 0;
@@ -144,14 +185,14 @@ export function sessionPage(page) {
         });
         return;
       }
-      var c = page.core.create(this, time, haptics, files, wallClock);
+      var c = page.core.create(this, time, haptics, current.sink, wallClock);
       c.setMessageSeed(Math.floor(Date.now() / 1000));
       this.attach(c, false);
       c.start();
     },
 
     restore(snap, haptics) {
-      var restored = page.core.Flow.fromSnapshot(snap, time, time, haptics, current.files, wallClock);
+      var restored = page.core.Flow.fromSnapshot(snap, time, time, haptics, current.sink, wallClock);
       if (restored === null) {
         // pages/prompt without the plan file: pages/session restores the session and writes it.
         this.go('hop', { to: 'session', launch: 'resume' });
@@ -185,6 +226,7 @@ export function sessionPage(page) {
         keepScreenOn(true);
       }
       timer = setInterval(() => this.tick(), TICK_MS);
+      current.sink.live = true;
       refocusList(this);
     },
 
@@ -212,6 +254,7 @@ export function sessionPage(page) {
       this.screen = '';
       var snap = c.snapshot();
       c.shutdown();
+      current.sink.drop();
       current.files.save(snap, () => {
         this.go('hop', { to: target, launch: 'handoff', notNow: notNow ? '1' : '' });
       });
@@ -243,6 +286,10 @@ export function sessionPage(page) {
     },
 
     stopTimer() {
+      if (current.sink) {
+        current.sink.live = false;
+        current.sink.flush();
+      }
       if (timer !== null) {
         clearInterval(timer);
         timer = null;
@@ -258,6 +305,8 @@ export function sessionPage(page) {
         return;
       }
       ticks++;
+      // The snapshot of the last tap: the screen has been redrawn since.
+      current.sink.flush();
       // Phase ends, vibration ticks and intro slides of the controller.
       time.poll();
       if (current.c === null || c.isEnded() || leaving) {
@@ -314,6 +363,7 @@ export function sessionPage(page) {
         return;
       }
       c.interrupt();
+      current.sink.flush();
       keepScreenOn(false);
       this.showModal(kind);
     },
@@ -324,6 +374,10 @@ export function sessionPage(page) {
      */
     go(target, params) {
       leaving = true;
+      // Every way out has written or cleared the snapshot itself (handoff, finish, end now).
+      if (current.sink) {
+        current.sink.drop();
+      }
       this.stopTimer();
       focusList(this, false);
       var lang = current.strings !== null ? current.strings.lang : 'ru';
@@ -333,11 +387,13 @@ export function sessionPage(page) {
       current.c = null;
       current.strings = null;
       current.files = null;
+      current.sink = null;
       // Screen first: with modal = 0 first, the screen behind the dialog would be rebuilt.
       this.screen = '';
       this.modal = 0;
       var options = { uri: 'pages/' + target + '/' + target, params: params || {} };
       options.params.lang = lang;
+      options.params.round = this.round;
       router.replace(options);
     },
 
@@ -401,6 +457,7 @@ export function sessionPage(page) {
       var files = current.files;
       leaving = true;
       c.shutdown();
+      current.sink.drop();
       files.writePending(c.buildRecord(status), () => {
         files.clear();
         this.leave(target);

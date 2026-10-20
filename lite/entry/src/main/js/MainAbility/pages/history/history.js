@@ -21,6 +21,7 @@ function dateText(ms) {
 /* Screen 9: date, duration, mode, status Completed / Interrupted, before / after. */
 export default {
   data: {
+    round: '',
     bg: '',
     s: {},
     items: []

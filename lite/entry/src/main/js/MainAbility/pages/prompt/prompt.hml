@@ -40,6 +40,7 @@
         <div class="btn" onclick="tapLast"><text class="btn-text">{{ lastText }}</text></div>
       </list-item>
       <list-item class="li-gap"></list-item>
+      <list-item class="li-round" if="{{ round === '1' }}"></list-item>
     </list>
   </div>
   <!-- Dialog last: when `modal` changes, the screen above is removed before the dialog is built,

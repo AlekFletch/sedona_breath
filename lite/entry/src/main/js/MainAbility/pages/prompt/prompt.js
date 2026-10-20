@@ -12,6 +12,8 @@ import templateKeys from '../../common/keys/prompt.js';
  * each screen fills what it needs.
  */
 var SCREEN_H = 480; // Watch Fit screen height, px
+var ROUND_H = 466;  // WATCH GT round screen, px
+var ROUND_TOP = 72; // rows above it are cut by the circle
 var firstAction = '';
 var lastAction = '';
 
@@ -106,7 +108,10 @@ export default sessionPage({
     // Rows as the list draws them (li 76, li-line 46): a short screen goes to the middle.
     var h = (counter !== '' ? 46 : 0) + (head !== '' ? this.headR : 0) + (body !== '' ? this.bodyR : 0) +
       (first !== '' ? 76 : 0) + options.length * 76 + (scale ? 76 + 46 : 0) + (last !== '' ? 76 : 0);
-    this.topGap = h < SCREEN_H ? Math.floor((SCREEN_H - h) / 2) : 0;
+    var round = this.round === '1';
+    var screenH = round ? ROUND_H : SCREEN_H;
+    var minTop = round ? ROUND_TOP : 0;
+    this.topGap = h + 2 * minTop < screenH ? Math.floor((screenH - h) / 2) : minTop;
   },
   methods: {
     tapFirst() {
