@@ -160,3 +160,5 @@ Es una app de autoayuda, no un dispositivo médico. No diagnostica ni trata y no
 
 Задержку видно только на часах: в симуляторе нажатие занимает около 10 мс. Перед отправкой нужно проверить на часах `lite/out/SedonaBreathLite-1.0.1-debug.hap`. Скриншоты для проверки на круглом экране снимаются так: `tools/dev/sim.py --size 466x466`.
 
+
+**20.10.2026 — 1.0.1 отправлена на проверку** (статус «На предварительной проверке»). Пакет `SedonaBreathLite-1.0.1-release.app` проверен на Watch Fit 4 Pro, примечание для модератора перечисляет исправления.
